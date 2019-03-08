@@ -9,7 +9,7 @@ CREATE TABLE subworkflows (
 	CONSTRAINT "PK_subworkflows" PRIMARY KEY (tenant_id,id),
 	CONSTRAINT "UN_subworkflows" UNIQUE (tenant_id,workflow_id, index),
 	CONSTRAINT "FK_subworkflows_1" FOREIGN KEY (tenant_id, workflow_id) REFERENCES workflows(tenant_id, id) ON DELETE CASCADE,
-	CONSTRAINT "FK_subworkflows_2" FOREIGN KEY (tenant_id, created_by) REFERENCES accounts(tenant_id, id) ON DELETE SET NULL		
+	CONSTRAINT "FK_subworkflows_2" FOREIGN KEY (created_by) REFERENCES members(id) ON DELETE SET NULL		
 )
 WITH (
 	OIDS=FALSE

@@ -1,15 +1,15 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/go-chi/render"
 	"github.com/pkg/errors"
-	"net/http"
 
 	"github.com/go-chi/chi"
 )
 
-func userApi(r chi.Router) {
-
+func usersAPI(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Route("/",
 			func(r chi.Router) {
@@ -27,15 +27,16 @@ func UsersLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s := GetEnv(r).Service
 	// Check email and password
-	acc, err := GetEnv(r).Service.Login(data.Email, data.Password)
+	acc, err := s.Login(data.Email, data.Password)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.New("email or password is incorrect")))
 		return
 	}
 
 	// Return token
-	token := GetEnv(r).Service.Token(acc)
+	token := s.Token(acc.ID)
 
 	render.Status(r, http.StatusOK)
 	_ = render.Render(w, r, &TokenResponse{Token: token})
@@ -49,13 +50,15 @@ func UsersSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc, err := GetEnv(r).Service.Register(data.Email, data.Password)
+	s := GetEnv(r).Service
+
+	_, acc, _, err := s.Register(data.Email, data.Password, data.Name)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.Wrap(err, "could not register user")))
 		return
 	}
 
-	token := GetEnv(r).Service.Token(acc)
+	token := s.Token(acc.ID)
 	render.Status(r, http.StatusOK)
 	_ = render.Render(w, r, &TokenResponse{Token: token})
 }
@@ -75,6 +78,7 @@ func (p *LoginRequest) Bind(r *http.Request) error {
 type SignupRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Name     string `json:"name"`
 }
 
 // Bind ...

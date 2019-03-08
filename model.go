@@ -11,11 +11,17 @@ type Tenant struct {
 
 // Account ...
 type Account struct {
-	TenantID  string    `db:"tenant_id" json:"tenantId"`
 	ID        string    `db:"id" json:"id"`
 	Email     string    `db:"email" json:"email"`
 	Password  string    `db:"password" json:"password"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+}
+
+// Member ...
+type Member struct {
+	ID        string `db:"id" json:"id"`
+	TenantID  string `db:"tenant_id" json:"tenantId"`
+	AccountID string `db:"account_id" json:"accountId"`
 }
 
 // Project ...

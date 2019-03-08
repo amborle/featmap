@@ -70,8 +70,8 @@ func main() {
 		w.Write([]byte("Featmap"))
 	})
 
-	r.Route("/api", api)
-	r.Route("/user-api", userApi)
+	r.Route("/v1/users", usersAPI)
+	r.Route("/v1/", api)
 
 	fmt.Println("Serving on port 3000")
 	_ = http.ListenAndServe(":3000", r)

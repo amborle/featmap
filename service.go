@@ -7,23 +7,33 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Service ...
 type Service interface {
-	AddAccount(acc *Account)
-	Register(email string, password string) (*Account, error)
-	Login(email string, password string) (*Account, error)
-	Token(account *Account) string
-	GetAccount(tenantID string, accountID string) (*Account, error)
+	GetMemberObject() *Member
+	SetMemberObject(m *Member)
 
-	GetProjects() []*Project
+	GetAccountObject() *Account
+	SetAccountObject(a *Account)
+
+	Register(email string, password string, name string) (*Tenant, *Account, *Member, error)
+	Login(email string, password string) (*Account, error)
+	Token(accountID string) string
+	GetTenant(id string) (*Tenant, error)
+	GetAccount(accountID string) (*Account, error)
+
+	GetMember(accountID string, tenantID string) (*Member, error)
+
+	GetProject(id string) *Project
 	CreateProject(title string) (*Project, error)
 	DeleteProject(id string) error
+	GetProjects() []*Project
 
 	CreateMilestoneWithID(id string, projectID string, title string) (*Milestone, error)
+	GetMilestonesByProject(id string) []*Milestone
 	DeleteMilestone(id string) error
 
 	CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error)
@@ -37,72 +47,109 @@ type Service interface {
 }
 
 type service struct {
-	acc  *Account
-	r    Repository
-	auth *jwtauth.JWTAuth
+	Acc    *Account
+	Member *Member
+	r      Repository
+	auth   *jwtauth.JWTAuth
 }
 
 // NewFeatmapService ...
-func NewFeatmapService(account *Account, repo Repository, auth *jwtauth.JWTAuth) Service {
+func NewFeatmapService(account *Account, member *Member, repo Repository, auth *jwtauth.JWTAuth) Service {
 	return &service{
-		acc:  account,
-		r:    repo,
-		auth: auth,
+		Acc:    account,
+		Member: member,
+		r:      repo,
+		auth:   auth,
 	}
 }
 
-func (s *service) AddAccount(acc *Account) {
-	s.acc = acc
+func (s *service) GetMemberObject() *Member {
+	return s.Member
 }
 
-func (s *service) Register(email string, password string) (*Account, error) {
+func (s *service) SetMemberObject(m *Member) {
+	s.Member = m
+}
+
+func (s *service) GetAccountObject() *Account {
+	return s.Acc
+}
+
+func (s *service) SetAccountObject(a *Account) {
+	s.Acc = a
+}
+
+func (s *service) Register(email string, password string, name string) (*Tenant, *Account, *Member, error) {
 
 	email = govalidator.Trim(email, "")
 
 	if !govalidator.IsEmail(email) {
-		return nil, errors.New("email is invalid")
+		return nil, nil, nil, errors.New("email is invalid")
+	}
+
+	if len(name) < 3 {
+		return nil, nil, nil, errors.New("name too short")
 	}
 
 	if len(password) < 8 {
-		return nil, errors.New("password too short")
+		return nil, nil, nil, errors.New("password too short")
 	}
 
 	if len(password) > 200 {
-		return nil, errors.New("password too long")
+		return nil, nil, nil, errors.New("password too long")
 	}
 
 	// First check if email is not already taken!
 	dupacc, err := s.r.FindAccountByEmail(email)
 	if dupacc != nil {
-		return nil, errors.New("email already taken")
+		return nil, nil, nil, errors.New("email already registrered")
 	}
 
-	// Create a blag tenant
-	t, err := s.r.StoreTenant(&Tenant{ID: ""})
+	duptenant, err := s.r.FindTenantByName(name)
+	if duptenant != nil {
+		return nil, nil, nil, errors.New("name already registrered")
+	}
+
+	// Save tenant
+	tenant := &Tenant{
+		ID:        uuid.Must(uuid.NewV4(), nil).String(),
+		Name:      name,
+		CreatedAt: time.Now(),
+	}
+
+	t, err := s.r.SaveTenant(tenant)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	// Create a blag password hash
+	// Save account
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.Wrap(err, "hash could not be created when registering blag account")
+		return nil, nil, nil, errors.Wrap(err, "hash could not be created when registering blag account")
 	}
-
 	usr := &Account{
-		TenantID: t.ID,
-		ID:       uuid.Must(uuid.NewV4(), nil).String(),
-		Email:    email,
-		Password: string(hash),
+		ID:        uuid.Must(uuid.NewV4(), nil).String(),
+		Email:     email,
+		Password:  string(hash),
+		CreatedAt: time.Now(),
 	}
-
-	// Create a blag account for the newly created tenant
-	account, err := s.r.StoreAccount(usr)
+	account, err := s.r.SaveAccount(usr)
 	if err != nil {
-		return nil, errors.Wrap(err, "account could note be stored")
+		return nil, nil, nil, errors.Wrap(err, "account could note be saved")
 	}
 
-	return account, nil
+	// Save member
+	member := &Member{
+		ID:        uuid.Must(uuid.NewV4(), nil).String(),
+		TenantID:  t.ID,
+		AccountID: account.ID,
+	}
+	_, err = s.r.SaveMember(member)
+	if err != nil {
+		return nil, nil, nil, errors.Wrap(err, "member could not be saved")
+	}
+
+	return tenant, account, member, nil
 }
 
 func (s *service) Login(email string, password string) (*Account, error) {
@@ -119,25 +166,51 @@ func (s *service) Login(email string, password string) (*Account, error) {
 	return acc, nil
 }
 
-func (s *service) Token(account *Account) string {
+func (s *service) Token(accountID string) string {
 
-	_, tokenString, _ := s.auth.Encode(jwtauth.Claims{"tenantId": account.TenantID, "accountId": account.ID, "email": account.Email})
+	_, tokenString, _ := s.auth.Encode(jwtauth.Claims{"id": accountID})
 
 	return tokenString
 }
 
-func (s *service) GetAccount(tid string, accid string) (*Account, error) {
+func (s *service) GetAccount(id string) (*Account, error) {
 
-	account, err := s.r.FindAccount(tid, accid)
+	account, err := s.r.FindAccount(id)
 	if account == nil {
 		return nil, errors.Wrap(err, "account not found")
 	}
 	return account, nil
 }
 
+func (s *service) GetTenant(id string) (*Tenant, error) {
+
+	tenant, err := s.r.FindTenant(id)
+	if tenant == nil {
+		return nil, errors.Wrap(err, "tenant not found")
+	}
+	return tenant, nil
+}
+
+func (s *service) GetMember(accountID string, tenantID string) (*Member, error) {
+
+	member, err := s.r.FindMemberByAccountAndTenant(accountID, tenantID)
+	if member == nil {
+		return nil, errors.Wrap(err, "member not found")
+	}
+	return member, nil
+}
+
 // const datelayout = "2006-01-02"
 
 // Projects
+
+func (s *service) GetProject(id string) *Project {
+	pp, err := s.r.FindProject(s.Member.TenantID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
+}
 
 func (s *service) CreateProject(title string) (*Project, error) {
 
@@ -151,10 +224,10 @@ func (s *service) CreateProject(title string) (*Project, error) {
 	}
 
 	p := &Project{
-		TenantID:  s.acc.TenantID,
+		TenantID:  s.Member.TenantID,
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Title:     title,
-		CreatedBy: s.acc.ID,
+		CreatedBy: s.Member.ID,
 		CreatedAt: time.Now()}
 
 	p, err := s.r.StoreProject(p)
@@ -166,11 +239,11 @@ func (s *service) CreateProject(title string) (*Project, error) {
 }
 
 func (s *service) DeleteProject(id string) error {
-	return s.r.DeleteProject(s.acc.TenantID, id)
+	return s.r.DeleteProject(s.Member.TenantID, id)
 }
 
 func (s *service) GetProjects() []*Project {
-	pp, err := s.r.FindProjectsByTenant(s.acc.TenantID)
+	pp, err := s.r.FindProjectsByTenant(s.Member.TenantID)
 	if err != nil {
 		log.Println(err)
 	}
@@ -191,12 +264,12 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 	}
 
 	p := &Milestone{
-		TenantID:  s.acc.TenantID,
+		TenantID:  s.Member.TenantID,
 		ProjectID: projectID,
 		ID:        id,
 		Title:     title,
 		Index:     1000,
-		CreatedBy: s.acc.ID,
+		CreatedBy: s.Member.ID,
 		CreatedAt: time.Now()}
 
 	p, err := s.r.StoreMilestone(p)
@@ -208,7 +281,15 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 }
 
 func (s *service) DeleteMilestone(id string) error {
-	return s.r.DeleteMilestone(s.acc.TenantID, id)
+	return s.r.DeleteMilestone(s.Member.TenantID, id)
+}
+
+func (s *service) GetMilestonesByProject(id string) []*Milestone {
+	pp, err := s.r.FindMilestonesByProject(s.Member.TenantID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
 }
 
 // Workflow
@@ -225,12 +306,12 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	}
 
 	p := &Workflow{
-		TenantID:  s.acc.TenantID,
+		TenantID:  s.Member.TenantID,
 		ProjectID: projectID,
 		ID:        id,
 		Title:     title,
 		Index:     1000,
-		CreatedBy: s.acc.ID,
+		CreatedBy: s.Member.ID,
 		CreatedAt: time.Now()}
 
 	p, err := s.r.StoreWorkflow(p)
@@ -242,7 +323,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 }
 
 func (s *service) DeleteWorkflow(id string) error {
-	return s.r.DeleteWorkflow(s.acc.TenantID, id)
+	return s.r.DeleteWorkflow(s.Member.TenantID, id)
 }
 
 // SubWorkflow
@@ -258,12 +339,12 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 	}
 
 	p := &SubWorkflow{
-		TenantID:   s.acc.TenantID,
+		TenantID:   s.Member.TenantID,
 		WorkflowID: workflowID,
 		ID:         id,
 		Title:      title,
 		Index:      1000,
-		CreatedBy:  s.acc.ID,
+		CreatedBy:  s.Member.ID,
 		CreatedAt:  time.Now()}
 
 	p, err := s.r.StoreSubWorkflow(p)
@@ -275,7 +356,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 }
 
 func (s *service) DeleteSubWorkflow(id string) error {
-	return s.r.DeleteSubWorkflow(s.acc.TenantID, id)
+	return s.r.DeleteSubWorkflow(s.Member.TenantID, id)
 }
 
 // Features
@@ -292,13 +373,13 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 	}
 
 	p := &Feature{
-		TenantID:      s.acc.TenantID,
+		TenantID:      s.Member.TenantID,
 		MilestoneID:   milestoneID,
 		SubWorkflowID: subWorkflowID,
 		ID:            id,
 		Title:         title,
 		Index:         1000,
-		CreatedBy:     s.acc.ID,
+		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now()}
 
 	p, err := s.r.StoreFeature(p)
@@ -310,5 +391,5 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 }
 
 func (s *service) DeleteFeature(id string) error {
-	return s.r.DeleteFeature(s.acc.TenantID, id)
+	return s.r.DeleteFeature(s.Member.TenantID, id)
 }

@@ -1,19 +1,26 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Repository ...
 type Repository interface {
-	StoreTenant(x *Tenant) (*Tenant, error)
+	SaveTenant(x *Tenant) (*Tenant, error)
 	FindTenant(tenantID string) (*Tenant, error)
+	FindTenantByName(name string) (*Tenant, error)
 
-	FindAccount(tenantID string, userID string) (*Account, error)
+	FindAccount(id string) (*Account, error)
 	FindAccountByEmail(email string) (*Account, error)
-	StoreAccount(x *Account) (*Account, error)
+	SaveAccount(x *Account) (*Account, error)
+
+	SaveMember(x *Member) (*Member, error)
+
+	FindMemberByAccountAndTenant(accountID string, tenantID string) (*Member, error)
 
 	FindProject(tenantID string, projectID string) (*Project, error)
 	FindProjectsByTenant(tenantID string) ([]*Project, error)
@@ -52,22 +59,31 @@ func NewFeatmapRepository(db *sqlx.DB) Repository {
 
 // Tentants
 
-func (a *repo) FindTenant(tenantID string) (*Tenant, error) {
+func (a *repo) FindTenant(id string) (*Tenant, error) {
 	tenant := &Tenant{}
-	if err := a.db.Get(tenant, "SELECT * FROM tenants WHERE id = $1", tenantID); err != nil {
+	if err := a.db.Get(tenant, "SELECT * FROM tenants WHERE id = $1", id); err != nil {
 		return nil, errors.Wrap(err, "tenant not found")
 	}
 	return tenant, nil
 }
 
-func (a *repo) StoreTenant(x *Tenant) (*Tenant, error) {
+func (a *repo) FindTenantByName(name string) (*Tenant, error) {
+	tenant := &Tenant{}
+	if err := a.db.Get(tenant, "SELECT * FROM tenants WHERE name = $1", name); err != nil {
+		return nil, errors.Wrap(err, "tenant not found")
+	}
+	return tenant, nil
+}
+
+func (a *repo) SaveTenant(x *Tenant) (*Tenant, error) {
 
 	if x.ID == "" {
 		x.ID = uuid.Must(uuid.NewV4(), nil).String()
 	}
 
-	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO tenants (tenant_id, name, created_at) VALUES ($1,$2,$3)", x.ID, x.Name, x.CreatedAt); err != nil {
+	fmt.Println(x)
+
+	if _, err := a.db.Exec("INSERT INTO tenants (id, name, created_at) VALUES ($1,$2,$3)", x.ID, x.Name, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing tenant")
 	}
 
@@ -76,10 +92,10 @@ func (a *repo) StoreTenant(x *Tenant) (*Tenant, error) {
 
 // Accounts
 
-func (a *repo) FindAccount(tenantID string, accountID string) (*Account, error) {
+func (a *repo) FindAccount(id string) (*Account, error) {
 
 	acc := &Account{}
-	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE tenant_id = $1 AND id = $2", tenantID, accountID); err != nil {
+	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE id = $1", id); err != nil {
 		return nil, errors.Wrap(err, "account not found")
 	}
 
@@ -94,18 +110,40 @@ func (a *repo) FindAccountByEmail(email string) (*Account, error) {
 	return acc, nil
 }
 
-func (a *repo) StoreAccount(x *Account) (*Account, error) {
+func (a *repo) SaveAccount(x *Account) (*Account, error) {
 
 	if x.ID == "" {
 		x.ID = uuid.Must(uuid.NewV4(), nil).String()
 	}
 
-	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO accounts (tenant_id, id, email, password) VALUES ($1,$2,$3,$4)", x.TenantID, x.ID, x.Email, x.Password); err != nil {
+	if _, err := a.db.Exec("INSERT INTO accounts (id, email, password, created_at) VALUES ($1,$2,$3,$4)", x.ID, x.Email, x.Password, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing account")
 	}
 
 	return x, nil
+}
+
+// Members
+
+func (a *repo) SaveMember(x *Member) (*Member, error) {
+
+	if x.ID == "" {
+		x.ID = uuid.Must(uuid.NewV4(), nil).String()
+	}
+
+	if _, err := a.db.Exec("INSERT INTO members (id, tenant_id, account_id) VALUES ($1,$2,$3)", x.ID, x.TenantID, x.AccountID); err != nil {
+		return nil, errors.Wrap(err, "something went wrong when storing member")
+	}
+
+	return x, nil
+}
+
+func (a *repo) FindMemberByAccountAndTenant(accountID string, tenantID string) (*Member, error) {
+	member := &Member{}
+	if err := a.db.Get(member, "SELECT * FROM members WHERE account_id = $1 AND tenant_id = $2", accountID, tenantID); err != nil {
+		return nil, errors.Wrap(err, "member not found")
+	}
+	return member, nil
 }
 
 // Projects
@@ -129,12 +167,8 @@ func (a *repo) FindProjectsByTenant(tenantID string) ([]*Project, error) {
 
 func (a *repo) StoreProject(x *Project) (*Project, error) {
 
-	if x.ID == "" {
-		x.ID = uuid.Must(uuid.NewV4(), nil).String()
-	}
-
 	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO projects (tenant_id, id, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5)", x.TenantID, x.ID, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO projects (tenant_id, id, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5)", x.TenantID, x.ID, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
@@ -168,13 +202,8 @@ func (a *repo) FindMilestonesByProject(tenantID string, projectID string) ([]*Mi
 }
 
 func (a *repo) StoreMilestone(x *Milestone) (*Milestone, error) {
-
-	if x.ID == "" {
-		x.ID = uuid.Must(uuid.NewV4(), nil).String()
-	}
-
 	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO milestone (tenant_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6)", x.TenantID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO milestones (tenant_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.TenantID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
@@ -214,7 +243,7 @@ func (a *repo) StoreWorkflow(x *Workflow) (*Workflow, error) {
 	}
 
 	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO workflows (tenant_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6)", x.TenantID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO workflows (tenant_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.TenantID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 

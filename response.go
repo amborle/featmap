@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/go-chi/render"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/render"
 )
 
 // Response ...
@@ -16,42 +17,43 @@ type Response struct {
 
 // NewSuccess creates a blag successful response
 func NewSuccess() *Response {
-	return blag("success", "")
+	return NewResponse("success", "")
 }
 
 // NewSuccessWithData creates a blag successful response with data
 func NewSuccessWithData(key string, data interface{}) *Response {
-	resp := blag("success", "")
+	resp := NewResponse("success", "")
 	resp.AddData(key, data)
 	return resp
 }
 
 // NewFail creates a blag response with status = fail
 func NewFail() *Response {
-	return blag("fail", "")
+	return NewResponse("fail", "")
 }
 
 // NewFailWithMessage creates a blag response with status = fail and a message
 func NewFailWithMessage(message string) *Response {
-	return blag("fail", message)
+	return NewResponse("fail", message)
 }
 
 // NewBad ...
 func NewBad() *Response {
-	return blag("fail", "Bad data.")
+	return NewResponse("fail", "Bad data.")
 }
 
 // NewInvalid ...
 func NewInvalid() *Response {
-	return blag("fail", "Invalid data.")
+	return NewResponse("fail", "Invalid data.")
 }
 
 // NewError creates a blag respone  with status = error
 func NewError() *Response {
-	return blag("error", "")
+	return NewResponse("error", "")
 }
 
-func blag(status string, message string) *Response {
+// NewRespons ...
+func NewResponse(status string, message string) *Response {
 	return &Response{Status: status, Message: message, Data: make(map[string]interface{})}
 }
 

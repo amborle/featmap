@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/jwtauth"
@@ -16,44 +17,59 @@ type Env struct {
 // GetEnv ...
 func GetEnv(r *http.Request) *Env {
 	ctx := r.Context()
-	env, _ := ctx.Value("env").(*Env)
+	env, _ := ctx.Value(contextKey).(*Env)
 
 	return env
 }
+
+type key int
+
+const contextKey key = 0
 
 // AddService ...
 func AddService(db *sqlx.DB, auth *jwtauth.JWTAuth) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
-			s := NewFeatmapService(nil, NewFeatmapRepository(db), auth)
+			s := NewFeatmapService(nil, nil, NewFeatmapRepository(db), auth)
 
 			_, claims, _ := jwtauth.FromContext(r.Context())
-			tenantID, tok := claims.Get("tenantId")
-			accountID, aok := claims.Get("accountId")
+			accountID, aok := claims.Get("id")
 
 			var acc *Account
-			if tok && aok {
-				acc, _ = s.GetAccount(tenantID.(string), accountID.(string))
+			if aok {
+				acc, _ = s.GetAccount(accountID.(string))
 			}
+			s.SetAccountObject(acc)
 
 			if acc != nil {
-				s.AddAccount(acc)
+
+				if val, ok := r.Header["Workspace"]; ok {
+
+					member, err := s.GetMember(acc.ID, val[0])
+					if err != nil {
+						log.Println(err)
+					}
+					s.SetMemberObject(member)
+				}
 			}
 
-			env := &Env{Service: s}
-			ctx := context.WithValue(r.Context(), "env", env)
+			ctx := context.WithValue(r.Context(), contextKey, &Env{Service: s})
 			next.ServeHTTP(w, r.WithContext(ctx))
+		}
+		return http.HandlerFunc(fn)
+	}
+}
 
-			// if acc == nil {
-			// 	http.Error(w, http.StatusText(401), 401)
-			// 	return
-			// }
-
-			// if !tok || !aok {
-			// 	http.Error(w, http.StatusText(401), 401)
-			// 	return
-			// }
+// RequireMember ...
+func RequireMember() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			if GetEnv(r).Service.GetMemberObject() == nil {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
+			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
 	}

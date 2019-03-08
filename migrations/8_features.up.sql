@@ -12,7 +12,7 @@ CREATE TABLE features (
 	CONSTRAINT "UN_features" UNIQUE (tenant_id,subworkflow_id,milestone_id, index),
 	CONSTRAINT "FK_features_1" FOREIGN KEY (tenant_id, subworkflow_id) REFERENCES subworkflows(tenant_id, id) ON DELETE CASCADE,
 	CONSTRAINT "FK_features_2" FOREIGN KEY (tenant_id, milestone_id) REFERENCES milestones(tenant_id, id) ON DELETE CASCADE,
-	CONSTRAINT "FK_features_3" FOREIGN KEY (tenant_id, created_by) REFERENCES accounts(tenant_id, id) ON DELETE SET NULL		
+	CONSTRAINT "FK_features_3" FOREIGN KEY (created_by) REFERENCES members(id) ON DELETE SET NULL		
 )
 WITH (
 	OIDS=FALSE
