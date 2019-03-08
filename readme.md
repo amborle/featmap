@@ -1,0 +1,1 @@
+migrate -source file://migrations  -database postgresql://featmap:featmap@localhost:5432/featmap?sslmode=disable up
