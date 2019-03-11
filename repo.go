@@ -325,7 +325,7 @@ func (a *repo) StoreFeature(x *Feature) (*Feature, error) {
 	}
 
 	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,index = $5, title = $6 ", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,index = $5, title = $6 ", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
