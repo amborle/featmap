@@ -1,8 +1,8 @@
 CREATE TABLE projects (
-	tenant_id varchar NOT NULL,
-	id varchar NOT NULL,
+	tenant_id uuid NOT NULL,
+	id uuid NOT NULL,
 	title varchar NOT NULL,
-	created_by varchar,
+	created_by uuid,
 	created_at TIMESTAMP WITH TIME ZONE not null,			
 	CONSTRAINT "PK_projects_1" PRIMARY KEY (tenant_id,id),
 	CONSTRAINT "FK_projects_1" FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,

@@ -1,5 +1,5 @@
 CREATE TABLE accounts (
-	id varchar NOT NULL,
+	id uuid NOT NULL,
 	email varchar NOT NULL,
 	password varchar NOT NULL,
 	created_at TIMESTAMP WITH TIME ZONE not null,
