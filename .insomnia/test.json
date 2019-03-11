@@ -1,0 +1,557 @@
+{
+	"_type": "export",
+	"__export_format": 3,
+	"__export_date": "2019-03-11T14:32:36.372Z",
+	"__export_source": "insomnia.desktop.app:v6.3.2",
+	"resources": [
+		{
+			"_id": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"created": 1551955365399,
+			"description": "",
+			"modified": 1551955365399,
+			"name": "Insomnia",
+			"parentId": null,
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_0a1eac1ab8214ba8b6c9bbb44cdb57d1",
+			"color": null,
+			"created": 1551955365432,
+			"data": {},
+			"isPrivate": false,
+			"metaSortKey": 1551955365432,
+			"modified": 1551955365432,
+			"name": "New Environment",
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"_type": "environment"
+		},
+		{
+			"_id": "jar_88ee350245834d02a4f263551509d207",
+			"cookies": [],
+			"created": 1551955365435,
+			"modified": 1551955365435,
+			"name": "Default Jar",
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"_type": "cookie_jar"
+		},
+		{
+			"_id": "fld_7e94602a3660457aa411fa17580c0199",
+			"created": 1552303314134,
+			"description": "",
+			"environment": {},
+			"metaSortKey": -1552303314134,
+			"modified": 1552303314134,
+			"name": "Projects",
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"_type": "request_group"
+		},
+		{
+			"_id": "fld_8d56655563124602a29ba3e8c9f36e23",
+			"created": 1552303389671,
+			"description": "",
+			"environment": {},
+			"metaSortKey": -1552303389671,
+			"modified": 1552304910407,
+			"name": "Milestones",
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_85df37b83fa54ba2bb54d8f41aaa03a1",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"test@test.com\",\n\t\"password\": \"testtest\",\n\t\"name\": \"test\"\n}\n"
+			},
+			"created": 1551955558328,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_47f77226a4264ce5a60d9613ec297328",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552047488812,
+			"method": "POST",
+			"modified": 1552287658488,
+			"name": "register",
+			"parameters": [],
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/users/signup",
+			"_type": "request"
+		},
+		{
+			"_id": "req_d64c563ea92344438221ddfb7bdcfb33",
+			"authentication": {
+				"token": "",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"test@test.com\",\n\t\"password\": \"testtest\"\t\n}\n"
+			},
+			"created": 1552044250167,
+			"description": "",
+			"headers": [
+				{
+					"id": "pair_47f77226a4264ce5a60d9613ec297328",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1551955558278,
+			"method": "POST",
+			"modified": 1552055522548,
+			"name": "login",
+			"parameters": [],
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/users/login",
+			"_type": "request"
+		},
+		{
+			"_id": "req_5a0adce354d94144b8d00c6da8ca64d7",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {},
+			"created": 1552047488762,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552047488762,
+			"method": "GET",
+			"modified": 1552055483698,
+			"name": "access",
+			"parameters": [],
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/",
+			"_type": "request"
+		},
+		{
+			"_id": "req_3662fe234f8d4f53abe7e63146a56028",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"id\" : \"beabc8b6-108f-4f94-9727-a881139a9c97\",\n\t\"projectId\": \"{{ project  }}\",\n\t\"title\": \"test workflow\"\n}"
+			},
+			"created": 1552057771338,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				},
+				{
+					"id": "pair_312925ec56294877ac634a20b575ef81",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552012362323,
+			"method": "POST",
+			"modified": 1552291539782,
+			"name": "create workflow",
+			"parameters": [],
+			"parentId": "wrk_c5524c7a4dd444ebb227c9581a7e17d1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/workflows",
+			"_type": "request"
+		},
+		{
+			"_id": "env_d74301a3ff164a599507446f072154ee",
+			"color": null,
+			"created": 1552055275647,
+			"data": {
+				"milestone": "a67b698e-c529-40fa-98da-f78425eb47c3",
+				"project": "06af8287-9536-4cd9-b931-768a4c4f8529",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgwMTIzNjdiLTI0YzMtNGFhOC04ZGZmLWY3OWZmZTE5Yzc0MCJ9.ql_zlq3aZCVaCeKUp5HwFPhn4_emS-nX_U8PoFrudAY",
+				"workspace": "3bf08c5a-976b-4a19-b0a6-1f17284c1b67"
+			},
+			"isPrivate": false,
+			"metaSortKey": 1552055275647,
+			"modified": 1552299471238,
+			"name": "Development",
+			"parentId": "env_0a1eac1ab8214ba8b6c9bbb44cdb57d1",
+			"_type": "environment"
+		},
+		{
+			"_id": "req_e21bed9d0cb14e2f97e7718d1da9263f",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"id\": \"{{ project  }}\",\n\t\"title\": \"test project\"\n}\n"
+			},
+			"created": 1552050701521,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				},
+				{
+					"id": "pair_06e8f4fd4ef843d48655b0bea1d99af8",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552175401473,
+			"method": "POST",
+			"modified": 1552308272488,
+			"name": "create project",
+			"parameters": [],
+			"parentId": "fld_7e94602a3660457aa411fa17580c0199",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/projects",
+			"_type": "request"
+		},
+		{
+			"_id": "req_9b5a9e9b24bf408c981a30135f0d6e80",
+			"authentication": {
+				"prefix": "",
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {},
+			"created": 1552054294574,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552175401323,
+			"method": "GET",
+			"modified": 1552304950538,
+			"name": "get projects",
+			"parameters": [],
+			"parentId": "fld_7e94602a3660457aa411fa17580c0199",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/projects",
+			"_type": "request"
+		},
+		{
+			"_id": "req_4d51e81f888c43899ec10ff387f96e83",
+			"authentication": {
+				"prefix": "",
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {},
+			"created": 1552055545279,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552175401348,
+			"method": "GET",
+			"modified": 1552304941978,
+			"name": "get project",
+			"parameters": [],
+			"parentId": "fld_7e94602a3660457aa411fa17580c0199",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/projects/34b4f9a9-bea8-4561-89da-3285d7972646",
+			"_type": "request"
+		},
+		{
+			"_id": "req_3b1eb198bc374a16acbe74129ffabb32",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\t\n\t\"title\": \"test project b\"\n}"
+			},
+			"created": 1552303211467,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				},
+				{
+					"id": "pair_312925ec56294877ac634a20b575ef81",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552175401423,
+			"method": "PUT",
+			"modified": 1552308282749,
+			"name": "rename project",
+			"parameters": [],
+			"parentId": "fld_7e94602a3660457aa411fa17580c0199",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/projects/{{ project  }}",
+			"_type": "request"
+		},
+		{
+			"_id": "req_b40e75e705f84f55a2acb4c1d89e35d8",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {},
+			"created": 1552303301696,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552175401373,
+			"method": "DELETE",
+			"modified": 1552303614537,
+			"name": "delete project",
+			"parameters": [],
+			"parentId": "fld_7e94602a3660457aa411fa17580c0199",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/projects/{{ project  }}",
+			"_type": "request"
+		},
+		{
+			"_id": "req_a2c062d1b47946aa99c77587e1156bb1",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"id\" : \"a67b698e-c529-40fa-98da-f78425eb47c3\",\n\t\"projectId\": \"{{ project  }}\",\n\t\"title\": \"test milestone\"\n}"
+			},
+			"created": 1552056419748,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				},
+				{
+					"id": "pair_312925ec56294877ac634a20b575ef81",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552023723122,
+			"method": "POST",
+			"modified": 1552304886890,
+			"name": "create milestone",
+			"parameters": [],
+			"parentId": "fld_8d56655563124602a29ba3e8c9f36e23",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/milestones",
+			"_type": "request"
+		},
+		{
+			"_id": "req_31f7c61298464befad6e954d76917460",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\t\n\t\"title\": \"test milestone b\"\n}"
+			},
+			"created": 1552299418554,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				},
+				{
+					"id": "pair_312925ec56294877ac634a20b575ef81",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552023723022,
+			"method": "PUT",
+			"modified": 1552304883830,
+			"name": "rename milestone",
+			"parameters": [],
+			"parentId": "fld_8d56655563124602a29ba3e8c9f36e23",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/milestones/{{ milestone  }}",
+			"_type": "request"
+		},
+		{
+			"_id": "req_fe19499987884b03b40b05da0c763742",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"id\" : \"e67b698e-c529-40fa-98da-f78425eb47c4\",\n\t\"projectId\": \"{{ project  }}\",\n\t\"title\": \"test milestone\"\n}"
+			},
+			"created": 1552302152821,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				},
+				{
+					"id": "pair_312925ec56294877ac634a20b575ef81",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552023723072,
+			"method": "POST",
+			"modified": 1552303397691,
+			"name": "create milestone 2",
+			"parameters": [],
+			"parentId": "fld_8d56655563124602a29ba3e8c9f36e23",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/milestones",
+			"_type": "request"
+		},
+		{
+			"_id": "req_4ad1cae5f38b49bfb7d1ce580a69a797",
+			"authentication": {
+				"token": "{{ token  }}",
+				"type": "bearer"
+			},
+			"body": {},
+			"created": 1552302328613,
+			"description": "",
+			"headers": [
+				{
+					"disabled": false,
+					"id": "pair_751742f2d06044b688ff6fad2399d971",
+					"name": "Workspace",
+					"value": "{{ workspace  }}"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1552023722972,
+			"method": "DELETE",
+			"modified": 1552303409446,
+			"name": "delete milestone",
+			"parameters": [],
+			"parentId": "fld_8d56655563124602a29ba3e8c9f36e23",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingMaxTimelineDataSize": 1000,
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "localhost:3000/v1/milestones/{{ milestone  }}",
+			"_type": "request"
+		}
+	]
+}
