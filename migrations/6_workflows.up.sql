@@ -2,7 +2,7 @@ CREATE TABLE workflows (
 	tenant_id varchar NOT NULL,
 	project_id varchar NOT NULL,
 	id varchar NOT NULL,	
-	index bigint not null,	
+	index varchar not null,	
 	title varchar NOT NULL,	
 	created_by varchar,
 	created_at TIMESTAMP WITH TIME ZONE not null,			

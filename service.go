@@ -268,7 +268,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		ProjectID: projectID,
 		ID:        id,
 		Title:     title,
-		Index:     1000,
+		Index:     "a",
 		CreatedBy: s.Member.ID,
 		CreatedAt: time.Now()}
 
@@ -310,7 +310,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		ProjectID: projectID,
 		ID:        id,
 		Title:     title,
-		Index:     1000,
+		Index:     "a",
 		CreatedBy: s.Member.ID,
 		CreatedAt: time.Now()}
 
@@ -343,7 +343,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		WorkflowID: workflowID,
 		ID:         id,
 		Title:      title,
-		Index:      1000,
+		Index:      "a",
 		CreatedBy:  s.Member.ID,
 		CreatedAt:  time.Now()}
 
@@ -378,7 +378,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		SubWorkflowID: subWorkflowID,
 		ID:            id,
 		Title:         title,
-		Index:         1000,
+		Index:         "a",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now()}
 

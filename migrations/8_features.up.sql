@@ -3,7 +3,7 @@ CREATE TABLE features (
 	subworkflow_id varchar NOT NULL, 
 	milestone_id varchar NOT NULL, 
 	id varchar NOT NULL,	
-	index bigint not null,	
+	index varchar not null,	
 	title varchar,	
 	"description" varchar,	
 	created_by varchar,
