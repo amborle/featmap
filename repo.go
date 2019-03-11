@@ -10,9 +10,9 @@ import (
 
 // Repository ...
 type Repository interface {
-	SaveTenant(x *Tenant) (*Tenant, error)
-	FindTenant(tenantID string) (*Tenant, error)
-	FindTenantByName(name string) (*Tenant, error)
+	SaveWorkspace(x *Workspace) (*Workspace, error)
+	FindWorkspace(workspaceID string) (*Workspace, error)
+	FindWorkspaceByName(name string) (*Workspace, error)
 
 	FindAccount(id string) (*Account, error)
 	FindAccountByEmail(email string) (*Account, error)
@@ -20,32 +20,32 @@ type Repository interface {
 
 	SaveMember(x *Member) (*Member, error)
 
-	FindMemberByAccountAndTenant(accountID string, tenantID string) (*Member, error)
+	FindMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
 
-	FindProject(tenantID string, projectID string) (*Project, error)
-	FindProjectsByTenant(tenantID string) ([]*Project, error)
+	FindProject(workspaceID string, projectID string) (*Project, error)
+	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
 	StoreProject(x *Project) (*Project, error)
-	DeleteProject(tenantID string, projectID string) error
+	DeleteProject(workspaceID string, projectID string) error
 
-	FindMilestone(tenantID string, milestoneID string) (*Milestone, error)
-	FindMilestonesByProject(tenantID string, projectID string) ([]*Milestone, error)
+	FindMilestone(workspaceID string, milestoneID string) (*Milestone, error)
+	FindMilestonesByProject(workspaceID string, projectID string) ([]*Milestone, error)
 	StoreMilestone(x *Milestone) (*Milestone, error)
-	DeleteMilestone(tenantID string, milestoneID string) error
+	DeleteMilestone(workspaceID string, milestoneID string) error
 
-	FindWorkflow(tenantID string, workflowID string) (*Workflow, error)
-	FindWorkflowsByProject(tenantID string, projectID string) ([]*Workflow, error)
+	FindWorkflow(workspaceID string, workflowID string) (*Workflow, error)
+	FindWorkflowsByProject(workspaceID string, projectID string) ([]*Workflow, error)
 	StoreWorkflow(x *Workflow) (*Workflow, error)
-	DeleteWorkflow(tenantID string, workflowID string) error
+	DeleteWorkflow(workspaceID string, workflowID string) error
 
-	FindSubWorkflow(tenantID string, subWorkflowID string) (*SubWorkflow, error)
-	FindSubWorkflowsByProject(tenantID string, projectID string) ([]*SubWorkflow, error)
+	FindSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error)
+	FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error)
 	StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error)
-	DeleteSubWorkflow(tenantID string, workflowID string) error
+	DeleteSubWorkflow(workspaceID string, workflowID string) error
 
-	FindFeature(tenantID string, featureID string) (*Feature, error)
-	FindFeaturesByProject(tenantID string, featureID string) ([]*Feature, error)
+	FindFeature(workspaceID string, featureID string) (*Feature, error)
+	FindFeaturesByProject(workspaceID string, featureID string) ([]*Feature, error)
 	StoreFeature(x *Feature) (*Feature, error)
-	DeleteFeature(tenantID string, workflowID string) error
+	DeleteFeature(workspaceID string, workflowID string) error
 }
 
 type repo struct {
@@ -59,23 +59,23 @@ func NewFeatmapRepository(db *sqlx.DB) Repository {
 
 // Tentants
 
-func (a *repo) FindTenant(id string) (*Tenant, error) {
-	tenant := &Tenant{}
-	if err := a.db.Get(tenant, "SELECT * FROM tenants WHERE id = $1", id); err != nil {
-		return nil, errors.Wrap(err, "tenant not found")
+func (a *repo) FindWorkspace(id string) (*Workspace, error) {
+	workspace := &Workspace{}
+	if err := a.db.Get(workspace, "SELECT * FROM workspaces WHERE id = $1", id); err != nil {
+		return nil, errors.Wrap(err, "workspace not found")
 	}
-	return tenant, nil
+	return workspace, nil
 }
 
-func (a *repo) FindTenantByName(name string) (*Tenant, error) {
-	tenant := &Tenant{}
-	if err := a.db.Get(tenant, "SELECT * FROM tenants WHERE name = $1", name); err != nil {
-		return nil, errors.Wrap(err, "tenant not found")
+func (a *repo) FindWorkspaceByName(name string) (*Workspace, error) {
+	workspace := &Workspace{}
+	if err := a.db.Get(workspace, "SELECT * FROM workspaces WHERE name = $1", name); err != nil {
+		return nil, errors.Wrap(err, "workspace not found")
 	}
-	return tenant, nil
+	return workspace, nil
 }
 
-func (a *repo) SaveTenant(x *Tenant) (*Tenant, error) {
+func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
 
 	if x.ID == "" {
 		x.ID = uuid.Must(uuid.NewV4(), nil).String()
@@ -83,8 +83,8 @@ func (a *repo) SaveTenant(x *Tenant) (*Tenant, error) {
 
 	fmt.Println(x)
 
-	if _, err := a.db.Exec("INSERT INTO tenants (id, name, created_at) VALUES ($1,$2,$3)", x.ID, x.Name, x.CreatedAt); err != nil {
-		return nil, errors.Wrap(err, "something went wrong when storing tenant")
+	if _, err := a.db.Exec("INSERT INTO workspaces (id, name, created_at) VALUES ($1,$2,$3)", x.ID, x.Name, x.CreatedAt); err != nil {
+		return nil, errors.Wrap(err, "something went wrong when storing workspace")
 	}
 
 	return x, nil
@@ -131,16 +131,16 @@ func (a *repo) SaveMember(x *Member) (*Member, error) {
 		x.ID = uuid.Must(uuid.NewV4(), nil).String()
 	}
 
-	if _, err := a.db.Exec("INSERT INTO members (id, tenant_id, account_id) VALUES ($1,$2,$3)", x.ID, x.TenantID, x.AccountID); err != nil {
+	if _, err := a.db.Exec("INSERT INTO members (id, workspace_id, account_id) VALUES ($1,$2,$3)", x.ID, x.WorkspaceID, x.AccountID); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing member")
 	}
 
 	return x, nil
 }
 
-func (a *repo) FindMemberByAccountAndTenant(accountID string, tenantID string) (*Member, error) {
+func (a *repo) FindMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error) {
 	member := &Member{}
-	if err := a.db.Get(member, "SELECT * FROM members WHERE account_id = $1 AND tenant_id = $2", accountID, tenantID); err != nil {
+	if err := a.db.Get(member, "SELECT * FROM members WHERE account_id = $1 AND workspace_id = $2", accountID, workspaceID); err != nil {
 		return nil, errors.Wrap(err, "member not found")
 	}
 	return member, nil
@@ -148,17 +148,17 @@ func (a *repo) FindMemberByAccountAndTenant(accountID string, tenantID string) (
 
 // Projects
 
-func (a *repo) FindProject(tenantID string, projectID string) (*Project, error) {
+func (a *repo) FindProject(workspaceID string, projectID string) (*Project, error) {
 	x := &Project{}
-	if err := a.db.Get(x, "SELECT * FROM projects WHERE tenant_id = $1 AND id = $2", tenantID, projectID); err != nil {
+	if err := a.db.Get(x, "SELECT * FROM projects WHERE workspace_id = $1 AND id = $2", workspaceID, projectID); err != nil {
 		return nil, errors.Wrap(err, "project not found")
 	}
 	return x, nil
 }
 
-func (a *repo) FindProjectsByTenant(tenantID string) ([]*Project, error) {
+func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
 	var x []*Project
-	err := a.db.Select(&x, "SELECT * FROM projects WHERE tenant_id = $1", tenantID)
+	err := a.db.Select(&x, "SELECT * FROM projects WHERE workspace_id = $1", workspaceID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no projects found")
 	}
@@ -168,15 +168,15 @@ func (a *repo) FindProjectsByTenant(tenantID string) ([]*Project, error) {
 func (a *repo) StoreProject(x *Project) (*Project, error) {
 
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO projects (tenant_id, id, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5)", x.TenantID, x.ID, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO projects (workspace_id, id, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5)", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
 	return x, nil
 }
 
-func (a *repo) DeleteProject(tenantID string, projectID string) error {
-	if _, err := a.db.Exec("DELETE FROM projects WHERE tenant_id=$1 AND id=$2", tenantID, projectID); err != nil {
+func (a *repo) DeleteProject(workspaceID string, projectID string) error {
+	if _, err := a.db.Exec("DELETE FROM projects WHERE workspace_id=$1 AND id=$2", workspaceID, projectID); err != nil {
 		return errors.Wrap(err, "error when deleting ")
 	}
 	return nil
@@ -184,17 +184,17 @@ func (a *repo) DeleteProject(tenantID string, projectID string) error {
 
 // Milestones
 
-func (a *repo) FindMilestone(tenantID string, milestoneID string) (*Milestone, error) {
+func (a *repo) FindMilestone(workspaceID string, milestoneID string) (*Milestone, error) {
 	x := &Milestone{}
-	if err := a.db.Get(x, "SELECT * FROM milestones WHERE tenant_id = $1 AND id = $2", tenantID, milestoneID); err != nil {
+	if err := a.db.Get(x, "SELECT * FROM milestones WHERE workspace_id = $1 AND id = $2", workspaceID, milestoneID); err != nil {
 		return nil, errors.Wrap(err, "project not found")
 	}
 	return x, nil
 }
 
-func (a *repo) FindMilestonesByProject(tenantID string, projectID string) ([]*Milestone, error) {
+func (a *repo) FindMilestonesByProject(workspaceID string, projectID string) ([]*Milestone, error) {
 	var x []*Milestone
-	err := a.db.Select(&x, "SELECT * FROM milestones WHERE tenant_id = $1 AND project_id = $2", tenantID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM milestones WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
@@ -203,15 +203,15 @@ func (a *repo) FindMilestonesByProject(tenantID string, projectID string) ([]*Mi
 
 func (a *repo) StoreMilestone(x *Milestone) (*Milestone, error) {
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO milestones (tenant_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.TenantID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO milestones (workspace_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.WorkspaceID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
 	return x, nil
 }
 
-func (a *repo) DeleteMilestone(tenantID string, milestoneID string) error {
-	if _, err := a.db.Exec("DELETE FROM milestones WHERE tenant_id=$1 AND id=$2", tenantID, milestoneID); err != nil {
+func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) error {
+	if _, err := a.db.Exec("DELETE FROM milestones WHERE workspace_id=$1 AND id=$2", workspaceID, milestoneID); err != nil {
 		return errors.Wrap(err, "error when deleting ")
 	}
 	return nil
@@ -219,17 +219,17 @@ func (a *repo) DeleteMilestone(tenantID string, milestoneID string) error {
 
 // Workflows
 
-func (a *repo) FindWorkflow(tenantID string, workflowID string) (*Workflow, error) {
+func (a *repo) FindWorkflow(workspaceID string, workflowID string) (*Workflow, error) {
 	x := &Workflow{}
-	if err := a.db.Get(x, "SELECT * FROM workflows WHERE tenant_id = $1 AND id = $2", tenantID, workflowID); err != nil {
+	if err := a.db.Get(x, "SELECT * FROM workflows WHERE workspace_id = $1 AND id = $2", workspaceID, workflowID); err != nil {
 		return nil, errors.Wrap(err, "not found")
 	}
 	return x, nil
 }
 
-func (a *repo) FindWorkflowsByProject(tenantID string, projectID string) ([]*Workflow, error) {
+func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*Workflow, error) {
 	var x []*Workflow
-	err := a.db.Select(&x, "SELECT * FROM milestones WHERE tenant_id = $1 AND project_id = $2", tenantID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM milestones WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
@@ -243,15 +243,15 @@ func (a *repo) StoreWorkflow(x *Workflow) (*Workflow, error) {
 	}
 
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO workflows (tenant_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.TenantID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO workflows (workspace_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.WorkspaceID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
 	return x, nil
 }
 
-func (a *repo) DeleteWorkflow(tenantID string, workflowID string) error {
-	if _, err := a.db.Exec("DELETE FROM workflows WHERE tenant_id=$1 AND id=$2", tenantID, workflowID); err != nil {
+func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) error {
+	if _, err := a.db.Exec("DELETE FROM workflows WHERE workspace_id=$1 AND id=$2", workspaceID, workflowID); err != nil {
 		return errors.Wrap(err, "error when deleting ")
 	}
 	return nil
@@ -259,18 +259,18 @@ func (a *repo) DeleteWorkflow(tenantID string, workflowID string) error {
 
 // SubWorkflows
 
-func (a *repo) FindSubWorkflow(tenantID string, subWorkflowID string) (*SubWorkflow, error) {
+func (a *repo) FindSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error) {
 	x := &SubWorkflow{}
-	if err := a.db.Get(x, "SELECT * FROM subworkflows WHERE tenant_id = $1 AND id = $2", tenantID, subWorkflowID); err != nil {
+	if err := a.db.Get(x, "SELECT * FROM subworkflows WHERE workspace_id = $1 AND id = $2", workspaceID, subWorkflowID); err != nil {
 		return nil, errors.Wrap(err, "not found")
 	}
 	return x, nil
 }
 
 // TODO: fix select
-func (a *repo) FindSubWorkflowsByProject(tenantID string, projectID string) ([]*SubWorkflow, error) {
+func (a *repo) FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error) {
 	var x []*SubWorkflow
-	err := a.db.Select(&x, "SELECT * FROM subworkflows WHERE tenant_id = $1 AND project_id = $2", tenantID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM subworkflows WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
@@ -284,15 +284,15 @@ func (a *repo) StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error) {
 	}
 
 	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO subworkflows (tenant_id, workflow_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.TenantID, x.WorkflowID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("UPSERT INTO subworkflows (workspace_id, workflow_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)", x.WorkspaceID, x.WorkflowID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
 	return x, nil
 }
 
-func (a *repo) DeleteSubWorkflow(tenantID string, subWorkflowID string) error {
-	if _, err := a.db.Exec("DELETE FROM subworkflows WHERE tenant_id=$1 AND id=$2", tenantID, subWorkflowID); err != nil {
+func (a *repo) DeleteSubWorkflow(workspaceID string, subWorkflowID string) error {
+	if _, err := a.db.Exec("DELETE FROM subworkflows WHERE workspace_id=$1 AND id=$2", workspaceID, subWorkflowID); err != nil {
 		return errors.Wrap(err, "error when deleting ")
 	}
 	return nil
@@ -300,18 +300,18 @@ func (a *repo) DeleteSubWorkflow(tenantID string, subWorkflowID string) error {
 
 // Features
 
-func (a *repo) FindFeature(tenantID string, featureID string) (*Feature, error) {
+func (a *repo) FindFeature(workspaceID string, featureID string) (*Feature, error) {
 	x := &Feature{}
-	if err := a.db.Get(x, "SELECT * FROM features WHERE tenant_id = $1 AND id = $2", tenantID, featureID); err != nil {
+	if err := a.db.Get(x, "SELECT * FROM features WHERE workspace_id = $1 AND id = $2", workspaceID, featureID); err != nil {
 		return nil, errors.Wrap(err, "not found")
 	}
 	return x, nil
 }
 
 // TODO: Fix select
-func (a *repo) FindFeaturesByProject(tenantID string, projectID string) ([]*Feature, error) {
+func (a *repo) FindFeaturesByProject(workspaceID string, projectID string) ([]*Feature, error) {
 	var x []*Feature
-	err := a.db.Select(&x, "SELECT * FROM features WHERE tenant_id = $1 AND project_id = $2", tenantID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM features WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
@@ -325,15 +325,15 @@ func (a *repo) StoreFeature(x *Feature) (*Feature, error) {
 	}
 
 	if //noinspection ALL
-	_, err := a.db.Exec("UPSERT INTO features (tenant_id, subworkflow_id, milestone_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)", x.TenantID, x.SubWorkflowID, x.MilestoneID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("UPSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
 	return x, nil
 }
 
-func (a *repo) DeleteFeature(tenantID string, featureID string) error {
-	if _, err := a.db.Exec("DELETE FROM features WHERE tenant_id=$1 AND id=$2", tenantID, featureID); err != nil {
+func (a *repo) DeleteFeature(workspaceID string, featureID string) error {
+	if _, err := a.db.Exec("DELETE FROM features WHERE workspace_id=$1 AND id=$2", workspaceID, featureID); err != nil {
 		return errors.Wrap(err, "error when deleting ")
 	}
 	return nil

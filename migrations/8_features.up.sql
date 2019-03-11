@@ -1,5 +1,5 @@
 CREATE TABLE features (
-	tenant_id uuid NOT NULL,
+	workspace_id uuid NOT NULL,
 	subworkflow_id uuid NOT NULL, 
 	milestone_id uuid NOT NULL, 
 	id uuid NOT NULL,	
@@ -8,11 +8,11 @@ CREATE TABLE features (
 	"description" varchar,	
 	created_by uuid,
 	created_at TIMESTAMP WITH TIME ZONE not null,			
-	CONSTRAINT "PK_features" PRIMARY KEY (tenant_id,id),
-	CONSTRAINT "UN_features" UNIQUE (tenant_id,subworkflow_id,milestone_id, index),
-	CONSTRAINT "FK_features_1" FOREIGN KEY (tenant_id, subworkflow_id) REFERENCES subworkflows(tenant_id, id) ON DELETE CASCADE,
-	CONSTRAINT "FK_features_2" FOREIGN KEY (tenant_id, milestone_id) REFERENCES milestones(tenant_id, id) ON DELETE CASCADE,
-	CONSTRAINT "FK_features_3" FOREIGN KEY (created_by) REFERENCES members(id) ON DELETE SET NULL		
+	CONSTRAINT "PK_features" PRIMARY KEY (workspace_id,id),
+	CONSTRAINT "FK_features_1" FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,
+	CONSTRAINT "FK_features_2" FOREIGN KEY (workspace_id, subworkflow_id) REFERENCES subworkflows(workspace_id, id) ON DELETE CASCADE,
+	CONSTRAINT "FK_features_3" FOREIGN KEY (workspace_id, milestone_id) REFERENCES milestones(workspace_id, id) ON DELETE CASCADE,	
+	CONSTRAINT "FK_features_4" FOREIGN KEY (workspace_id,created_by) REFERENCES members(workspace_id, id) ON DELETE SET NULL	
 )
 WITH (
 	OIDS=FALSE

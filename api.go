@@ -26,6 +26,7 @@ func api(r chi.Router) {
 				})
 
 				r.Post("/milestones", createMilestone)
+				r.Post("/milestones", createMilestone)
 				r.Post("/workflows", createWorkflow)
 			})
 	})

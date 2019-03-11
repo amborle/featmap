@@ -19,13 +19,13 @@ type Service interface {
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
 
-	Register(email string, password string, name string) (*Tenant, *Account, *Member, error)
+	Register(email string, password string, name string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
-	GetTenant(id string) (*Tenant, error)
+	GetWorkspace(id string) (*Workspace, error)
 	GetAccount(accountID string) (*Account, error)
 
-	GetMember(accountID string, tenantID string) (*Member, error)
+	GetMember(accountID string, workspaceID string) (*Member, error)
 
 	GetProject(id string) *Project
 	CreateProject(title string) (*Project, error)
@@ -79,7 +79,7 @@ func (s *service) SetAccountObject(a *Account) {
 	s.Acc = a
 }
 
-func (s *service) Register(email string, password string, name string) (*Tenant, *Account, *Member, error) {
+func (s *service) Register(email string, password string, name string) (*Workspace, *Account, *Member, error) {
 
 	email = govalidator.Trim(email, "")
 
@@ -105,19 +105,19 @@ func (s *service) Register(email string, password string, name string) (*Tenant,
 		return nil, nil, nil, errors.New("email already registrered")
 	}
 
-	duptenant, err := s.r.FindTenantByName(name)
-	if duptenant != nil {
+	dupworkspace, err := s.r.FindWorkspaceByName(name)
+	if dupworkspace != nil {
 		return nil, nil, nil, errors.New("name already registrered")
 	}
 
-	// Save tenant
-	tenant := &Tenant{
+	// Save workspace
+	workspace := &Workspace{
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      name,
 		CreatedAt: time.Now(),
 	}
 
-	t, err := s.r.SaveTenant(tenant)
+	t, err := s.r.SaveWorkspace(workspace)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -140,16 +140,16 @@ func (s *service) Register(email string, password string, name string) (*Tenant,
 
 	// Save member
 	member := &Member{
-		ID:        uuid.Must(uuid.NewV4(), nil).String(),
-		TenantID:  t.ID,
-		AccountID: account.ID,
+		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID: t.ID,
+		AccountID:   account.ID,
 	}
 	_, err = s.r.SaveMember(member)
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "member could not be saved")
 	}
 
-	return tenant, account, member, nil
+	return workspace, account, member, nil
 }
 
 func (s *service) Login(email string, password string) (*Account, error) {
@@ -182,18 +182,18 @@ func (s *service) GetAccount(id string) (*Account, error) {
 	return account, nil
 }
 
-func (s *service) GetTenant(id string) (*Tenant, error) {
+func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
-	tenant, err := s.r.FindTenant(id)
-	if tenant == nil {
-		return nil, errors.Wrap(err, "tenant not found")
+	workspace, err := s.r.FindWorkspace(id)
+	if workspace == nil {
+		return nil, errors.Wrap(err, "workspace not found")
 	}
-	return tenant, nil
+	return workspace, nil
 }
 
-func (s *service) GetMember(accountID string, tenantID string) (*Member, error) {
+func (s *service) GetMember(accountID string, workspaceID string) (*Member, error) {
 
-	member, err := s.r.FindMemberByAccountAndTenant(accountID, tenantID)
+	member, err := s.r.FindMemberByAccountAndWorkspace(accountID, workspaceID)
 	if member == nil {
 		return nil, errors.Wrap(err, "member not found")
 	}
@@ -205,7 +205,7 @@ func (s *service) GetMember(accountID string, tenantID string) (*Member, error) 
 // Projects
 
 func (s *service) GetProject(id string) *Project {
-	pp, err := s.r.FindProject(s.Member.TenantID, id)
+	pp, err := s.r.FindProject(s.Member.WorkspaceID, id)
 	if err != nil {
 		log.Println(err)
 	}
@@ -224,11 +224,11 @@ func (s *service) CreateProject(title string) (*Project, error) {
 	}
 
 	p := &Project{
-		TenantID:  s.Member.TenantID,
-		ID:        uuid.Must(uuid.NewV4(), nil).String(),
-		Title:     title,
-		CreatedBy: s.Member.ID,
-		CreatedAt: time.Now()}
+		WorkspaceID: s.Member.WorkspaceID,
+		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		Title:       title,
+		CreatedBy:   s.Member.ID,
+		CreatedAt:   time.Now()}
 
 	p, err := s.r.StoreProject(p)
 	if err != nil {
@@ -239,11 +239,11 @@ func (s *service) CreateProject(title string) (*Project, error) {
 }
 
 func (s *service) DeleteProject(id string) error {
-	return s.r.DeleteProject(s.Member.TenantID, id)
+	return s.r.DeleteProject(s.Member.WorkspaceID, id)
 }
 
 func (s *service) GetProjects() []*Project {
-	pp, err := s.r.FindProjectsByTenant(s.Member.TenantID)
+	pp, err := s.r.FindProjectsByWorkspace(s.Member.WorkspaceID)
 	if err != nil {
 		log.Println(err)
 	}
@@ -264,13 +264,13 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 	}
 
 	p := &Milestone{
-		TenantID:  s.Member.TenantID,
-		ProjectID: projectID,
-		ID:        id,
-		Title:     title,
-		Index:     "a",
-		CreatedBy: s.Member.ID,
-		CreatedAt: time.Now()}
+		WorkspaceID: s.Member.WorkspaceID,
+		ProjectID:   projectID,
+		ID:          id,
+		Title:       title,
+		Index:       "a",
+		CreatedBy:   s.Member.ID,
+		CreatedAt:   time.Now()}
 
 	p, err := s.r.StoreMilestone(p)
 	if err != nil {
@@ -281,11 +281,11 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 }
 
 func (s *service) DeleteMilestone(id string) error {
-	return s.r.DeleteMilestone(s.Member.TenantID, id)
+	return s.r.DeleteMilestone(s.Member.WorkspaceID, id)
 }
 
 func (s *service) GetMilestonesByProject(id string) []*Milestone {
-	pp, err := s.r.FindMilestonesByProject(s.Member.TenantID, id)
+	pp, err := s.r.FindMilestonesByProject(s.Member.WorkspaceID, id)
 	if err != nil {
 		log.Println(err)
 	}
@@ -306,13 +306,13 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	}
 
 	p := &Workflow{
-		TenantID:  s.Member.TenantID,
-		ProjectID: projectID,
-		ID:        id,
-		Title:     title,
-		Index:     "a",
-		CreatedBy: s.Member.ID,
-		CreatedAt: time.Now()}
+		WorkspaceID: s.Member.WorkspaceID,
+		ProjectID:   projectID,
+		ID:          id,
+		Title:       title,
+		Index:       "a",
+		CreatedBy:   s.Member.ID,
+		CreatedAt:   time.Now()}
 
 	p, err := s.r.StoreWorkflow(p)
 	if err != nil {
@@ -323,7 +323,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 }
 
 func (s *service) DeleteWorkflow(id string) error {
-	return s.r.DeleteWorkflow(s.Member.TenantID, id)
+	return s.r.DeleteWorkflow(s.Member.WorkspaceID, id)
 }
 
 // SubWorkflow
@@ -339,13 +339,13 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 	}
 
 	p := &SubWorkflow{
-		TenantID:   s.Member.TenantID,
-		WorkflowID: workflowID,
-		ID:         id,
-		Title:      title,
-		Index:      "a",
-		CreatedBy:  s.Member.ID,
-		CreatedAt:  time.Now()}
+		WorkspaceID: s.Member.WorkspaceID,
+		WorkflowID:  workflowID,
+		ID:          id,
+		Title:       title,
+		Index:       "a",
+		CreatedBy:   s.Member.ID,
+		CreatedAt:   time.Now()}
 
 	p, err := s.r.StoreSubWorkflow(p)
 	if err != nil {
@@ -356,7 +356,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 }
 
 func (s *service) DeleteSubWorkflow(id string) error {
-	return s.r.DeleteSubWorkflow(s.Member.TenantID, id)
+	return s.r.DeleteSubWorkflow(s.Member.WorkspaceID, id)
 }
 
 // Features
@@ -373,7 +373,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 	}
 
 	p := &Feature{
-		TenantID:      s.Member.TenantID,
+		WorkspaceID:   s.Member.WorkspaceID,
 		MilestoneID:   milestoneID,
 		SubWorkflowID: subWorkflowID,
 		ID:            id,
@@ -391,5 +391,5 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 }
 
 func (s *service) DeleteFeature(id string) error {
-	return s.r.DeleteFeature(s.Member.TenantID, id)
+	return s.r.DeleteFeature(s.Member.WorkspaceID, id)
 }
