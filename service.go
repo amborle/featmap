@@ -28,21 +28,26 @@ type Service interface {
 	GetMember(accountID string, workspaceID string) (*Member, error)
 
 	GetProject(id string) *Project
-	CreateProject(title string) (*Project, error)
+	CreateProjectWithID(id string, title string) (*Project, error)
+	RenameProject(id string, title string) (*Project, error)
 	DeleteProject(id string) error
 	GetProjects() []*Project
 
 	CreateMilestoneWithID(id string, projectID string, title string) (*Milestone, error)
+	RenameMilestone(id string, title string) (*Milestone, error)
 	GetMilestonesByProject(id string) []*Milestone
 	DeleteMilestone(id string) error
 
 	CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error)
+	RenameWorkflow(id string, title string) (*Workflow, error)
 	DeleteWorkflow(id string) error
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
+	RenameSubWorkflow(id string, title string) (*SubWorkflow, error)
 	DeleteSubWorkflow(id string) error
 
 	CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error)
+	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
 }
 
@@ -212,27 +217,43 @@ func (s *service) GetProject(id string) *Project {
 	return pp
 }
 
-func (s *service) CreateProject(title string) (*Project, error) {
+func (s *service) CreateProjectWithID(id string, title string) (*Project, error) {
 
-	title = govalidator.Trim(title, "")
-	if len(title) > 50 {
-		return nil, errors.New("title too long")
-	}
-
-	if len(title) < 1 {
-		return nil, errors.New("title too short")
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
 	}
 
 	p := &Project{
 		WorkspaceID: s.Member.WorkspaceID,
-		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		ID:          id,
 		Title:       title,
 		CreatedBy:   s.Member.ID,
 		CreatedAt:   time.Now()}
 
-	p, err := s.r.StoreProject(p)
+	p, err = s.r.StoreProject(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
+	}
+
+	return p, nil
+}
+
+func (s *service) RenameProject(id string, title string) (*Project, error) {
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := s.r.FindProject(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Title = title
+	p, err = s.r.StoreProject(p)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
 	}
 
 	return p, nil
@@ -253,14 +274,14 @@ func (s *service) GetProjects() []*Project {
 // Milestones
 
 func (s *service) CreateMilestoneWithID(id string, projectID string, title string) (*Milestone, error) {
-
-	title = govalidator.Trim(title, "")
-	if len(title) > 50 {
-		return nil, errors.New("title too long")
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(title) < 1 {
-		return nil, errors.New("title too short")
+	mm, _ := s.r.FindMilestone(s.Member.WorkspaceID, id)
+	if mm != nil {
+		return nil, errors.New("already exists")
 	}
 
 	p := &Milestone{
@@ -272,9 +293,30 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		CreatedBy:   s.Member.ID,
 		CreatedAt:   time.Now()}
 
-	p, err := s.r.StoreMilestone(p)
+	p, err = s.r.StoreMilestone(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
+	}
+
+	return p, nil
+}
+
+func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
+
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := s.r.FindMilestone(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Title = title
+	p, err = s.r.StoreMilestone(p)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
 	}
 
 	return p, nil
@@ -296,13 +338,9 @@ func (s *service) GetMilestonesByProject(id string) []*Milestone {
 
 func (s *service) CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error) {
 
-	title = govalidator.Trim(title, "")
-	if len(title) > 50 {
-		return nil, errors.New("title too long")
-	}
-
-	if len(title) < 1 {
-		return nil, errors.New("title too short")
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
 	}
 
 	p := &Workflow{
@@ -314,9 +352,30 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		CreatedBy:   s.Member.ID,
 		CreatedAt:   time.Now()}
 
-	p, err := s.r.StoreWorkflow(p)
+	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
+	}
+
+	return p, nil
+}
+
+func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
+
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := s.r.FindWorkflow(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Title = title
+	p, err = s.r.StoreWorkflow(p)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
 	}
 
 	return p, nil
@@ -329,13 +388,9 @@ func (s *service) DeleteWorkflow(id string) error {
 // SubWorkflow
 func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error) {
 
-	title = govalidator.Trim(title, "")
-	if len(title) > 50 {
-		return nil, errors.New("title too long")
-	}
-
-	if len(title) < 1 {
-		return nil, errors.New("title too short")
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
 	}
 
 	p := &SubWorkflow{
@@ -347,9 +402,30 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		CreatedBy:   s.Member.ID,
 		CreatedAt:   time.Now()}
 
-	p, err := s.r.StoreSubWorkflow(p)
+	p, err = s.r.StoreSubWorkflow(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
+	}
+
+	return p, nil
+}
+
+func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, error) {
+
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := s.r.FindSubWorkflow(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Title = title
+	p, err = s.r.StoreSubWorkflow(p)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
 	}
 
 	return p, nil
@@ -363,13 +439,9 @@ func (s *service) DeleteSubWorkflow(id string) error {
 
 func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error) {
 
-	title = govalidator.Trim(title, "")
-	if len(title) > 50 {
-		return nil, errors.New("title too long")
-	}
-
-	if len(title) < 1 {
-		return nil, errors.New("title too short")
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
 	}
 
 	p := &Feature{
@@ -382,7 +454,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now()}
 
-	p, err := s.r.StoreFeature(p)
+	p, err = s.r.StoreFeature(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
 	}
@@ -392,4 +464,37 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 
 func (s *service) DeleteFeature(id string) error {
 	return s.r.DeleteFeature(s.Member.WorkspaceID, id)
+}
+
+func (s *service) RenameFeature(id string, title string) (*Feature, error) {
+
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := s.r.FindFeature(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Title = title
+	p, err = s.r.StoreFeature(p)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
+	}
+
+	return p, nil
+}
+
+func validateTitle(title string) (string, error) {
+	title = govalidator.Trim(title, "")
+	if len(title) < 1 {
+		return title, errors.New("title too short")
+	}
+	if len(title) > 50 {
+		return title, errors.New("title too long")
+	}
+
+	return title, nil
 }
