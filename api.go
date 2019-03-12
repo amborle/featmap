@@ -11,6 +11,7 @@ import (
 func api(r chi.Router) {
 	r.Use(RequireMember())
 
+	// test
 	r.Group(func(r chi.Router) {
 		r.Route("/",
 
