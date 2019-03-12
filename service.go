@@ -38,6 +38,7 @@ type Service interface {
 	GetMilestonesByProject(id string) []*Milestone
 	DeleteMilestone(id string) error
 
+	GetWorkflowsByProject(id string) []*Workflow
 	CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error)
 	RenameWorkflow(id string, title string) (*Workflow, error)
 	DeleteWorkflow(id string) error
@@ -343,6 +344,11 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		return nil, err
 	}
 
+	a, _ := s.r.FindWorkflow(s.Member.WorkspaceID, id)
+	if a != nil {
+		return nil, errors.New("already exists")
+	}
+
 	p := &Workflow{
 		WorkspaceID: s.Member.WorkspaceID,
 		ProjectID:   projectID,
@@ -385,12 +391,25 @@ func (s *service) DeleteWorkflow(id string) error {
 	return s.r.DeleteWorkflow(s.Member.WorkspaceID, id)
 }
 
+func (s *service) GetWorkflowsByProject(id string) []*Workflow {
+	pp, err := s.r.FindWorkflowsByProject(s.Member.WorkspaceID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
+}
+
 // SubWorkflow
 func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error) {
 
 	title, err := validateTitle(title)
 	if err != nil {
 		return nil, err
+	}
+
+	a, _ := s.r.FindSubWorkflow(s.Member.WorkspaceID, id)
+	if a != nil {
+		return nil, errors.New("already exists")
 	}
 
 	p := &SubWorkflow{
@@ -451,6 +470,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		ID:            id,
 		Title:         title,
 		Index:         "a",
+		Description:   "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now()}
 
