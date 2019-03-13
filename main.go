@@ -20,6 +20,7 @@ import (
 type Configuration struct {
 	DbConnectionString string
 	JWTSecret          string
+	Port               string
 }
 
 func main() {
@@ -73,8 +74,8 @@ func main() {
 	r.Route("/v1/users", usersAPI)
 	r.Route("/v1/", api)
 
-	fmt.Println("Serving on port 3000")
-	_ = http.ListenAndServe(":3000", r)
+	fmt.Println("Serving on port " + config.Port)
+	_ = http.ListenAndServe(":"+config.Port, r)
 }
 
 func readConfiguration() (Configuration, error) {

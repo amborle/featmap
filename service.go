@@ -225,6 +225,11 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		return nil, err
 	}
 
+	pp, _ := s.r.FindProject(s.Member.WorkspaceID, id)
+	if pp != nil {
+		return nil, errors.New("already exist")
+	}
+
 	p := &Project{
 		WorkspaceID: s.Member.WorkspaceID,
 		ID:          id,
@@ -463,6 +468,12 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		return nil, err
 	}
 
+	pp, _ := s.r.FindFeature(s.Member.WorkspaceID, id)
+
+	if pp != nil {
+		return nil, errors.New("already exists")
+	}
+
 	p := &Feature{
 		WorkspaceID:   s.Member.WorkspaceID,
 		MilestoneID:   milestoneID,
@@ -493,9 +504,9 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 		return nil, err
 	}
 
-	p, err := s.r.FindFeature(s.Member.WorkspaceID, id)
-	if err != nil {
-		return nil, err
+	p, _ := s.r.FindFeature(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, errors.Wrap(err, "could not find")
 	}
 
 	p.Title = title

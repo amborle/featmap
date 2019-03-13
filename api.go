@@ -19,32 +19,32 @@ func api(r chi.Router) {
 
 				r.Get("/projects", getProjects)
 				r.Route("/projects/{ID}", func(r chi.Router) {
-					r.Post("/projects", createProject)
+					r.Post("/", createProject)
 					r.Get("/", getProjectExtended)
-					r.Put("/rename", renameProject)
 					r.Delete("/", deleteProject)
+					r.Put("/rename", renameProject)
 				})
 
-				r.Post("/milestones", createMilestone)
 				r.Route("/milestones/{ID}", func(r chi.Router) {
-					r.Put("/rename", renameMilestone)
+					r.Post("/", createMilestone)
 					r.Delete("/", deleteMilestone)
+					r.Put("/rename", renameMilestone)
 				})
 
-				r.Post("/workflows", createWorkflow)
 				r.Route("/workflows/{ID}", func(r chi.Router) {
-					r.Put("/rename", renameWorkflow)
+					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
+					r.Put("/rename", renameWorkflow)
 				})
 
-				r.Post("/subworkflows", createSubWorkflow)
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
+					r.Post("/", createSubWorkflow)
 					r.Put("/rename", renameSubWorkflow)
 					r.Delete("/", deleteSubWorkflow)
 				})
 
-				r.Post("/features", createFeature)
 				r.Route("/features/{ID}", func(r chi.Router) {
+					r.Post("/", createFeature)
 					r.Put("/rename", renameFeature)
 					r.Delete("/", deleteFeature)
 				})
@@ -133,7 +133,6 @@ func deleteProject(w http.ResponseWriter, r *http.Request) {
 // Milestones
 
 type createMilestoneRequest struct {
-	ID        string `json:"id"`
 	ProjectID string `json:"projectId"`
 	Title     string `json:"title"`
 }
@@ -148,8 +147,9 @@ func createMilestone(w http.ResponseWriter, r *http.Request) {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
+	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.CreateMilestoneWithID(data.ID, data.ProjectID, data.Title); err != nil {
+	if _, err := GetEnv(r).Service.CreateMilestoneWithID(id, data.ProjectID, data.Title); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
@@ -184,7 +184,6 @@ func deleteMilestone(w http.ResponseWriter, r *http.Request) {
 // Workflows
 
 type createWorkflowRequest struct {
-	ID        string `json:"id"`
 	ProjectID string `json:"projectId"`
 	Title     string `json:"title"`
 }
@@ -199,8 +198,8 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-
-	if _, err := GetEnv(r).Service.CreateWorkflowWithID(data.ID, data.ProjectID, data.Title); err != nil {
+	id := chi.URLParam(r, "ID")
+	if _, err := GetEnv(r).Service.CreateWorkflowWithID(id, data.ProjectID, data.Title); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
@@ -235,7 +234,6 @@ func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
 // SubWorkflows
 
 type createSubWorkflowRequest struct {
-	ID         string `json:"id"`
 	WorkflowID string `json:"workflowId"`
 	Title      string `json:"title"`
 }
@@ -251,7 +249,8 @@ func createSubWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := GetEnv(r).Service.CreateSubWorkflowWithID(data.ID, data.WorkflowID, data.Title); err != nil {
+	id := chi.URLParam(r, "ID")
+	if _, err := GetEnv(r).Service.CreateSubWorkflowWithID(id, data.WorkflowID, data.Title); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
@@ -286,7 +285,6 @@ func deleteSubWorkflow(w http.ResponseWriter, r *http.Request) {
 // Features
 
 type createFeatureRequest struct {
-	ID            string `json:"id"`
 	SubWorkflowID string `json:"subWorkflowId"`
 	MilestoneID   string `json:"milestoneId"`
 	Title         string `json:"title"`
@@ -303,7 +301,8 @@ func createFeature(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := GetEnv(r).Service.CreateFeatureWithID(data.ID, data.SubWorkflowID, data.MilestoneID, data.Title); err != nil {
+	id := chi.URLParam(r, "ID")
+	if _, err := GetEnv(r).Service.CreateFeatureWithID(id, data.SubWorkflowID, data.MilestoneID, data.Title); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
