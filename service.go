@@ -106,12 +106,12 @@ func (s *service) Register(email string, password string, name string) (*Workspa
 	}
 
 	// First check if email is not already taken!
-	dupacc, err := s.r.FindAccountByEmail(email)
+	dupacc, err := s.r.GetAccountByEmail(email)
 	if dupacc != nil {
 		return nil, nil, nil, errors.New("email already registrered")
 	}
 
-	dupworkspace, err := s.r.FindWorkspaceByName(name)
+	dupworkspace, err := s.r.GetWorkspaceByName(name)
 	if dupworkspace != nil {
 		return nil, nil, nil, errors.New("name already registrered")
 	}
@@ -160,7 +160,7 @@ func (s *service) Register(email string, password string, name string) (*Workspa
 
 func (s *service) Login(email string, password string) (*Account, error) {
 
-	acc, err := s.r.FindAccountByEmail(email)
+	acc, err := s.r.GetAccountByEmail(email)
 	if acc == nil {
 		return nil, errors.Wrap(err, "email not found")
 	}
@@ -181,7 +181,7 @@ func (s *service) Token(accountID string) string {
 
 func (s *service) GetAccount(id string) (*Account, error) {
 
-	account, err := s.r.FindAccount(id)
+	account, err := s.r.GetAccount(id)
 	if account == nil {
 		return nil, errors.Wrap(err, "account not found")
 	}
@@ -190,7 +190,7 @@ func (s *service) GetAccount(id string) (*Account, error) {
 
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
-	workspace, err := s.r.FindWorkspace(id)
+	workspace, err := s.r.GetWorkspace(id)
 	if workspace == nil {
 		return nil, errors.Wrap(err, "workspace not found")
 	}
@@ -199,7 +199,7 @@ func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
 func (s *service) GetMember(accountID string, workspaceID string) (*Member, error) {
 
-	member, err := s.r.FindMemberByAccountAndWorkspace(accountID, workspaceID)
+	member, err := s.r.GetMemberByAccountAndWorkspace(accountID, workspaceID)
 	if member == nil {
 		return nil, errors.Wrap(err, "member not found")
 	}
@@ -211,7 +211,7 @@ func (s *service) GetMember(accountID string, workspaceID string) (*Member, erro
 // Projects
 
 func (s *service) GetProject(id string) *Project {
-	pp, err := s.r.FindProject(s.Member.WorkspaceID, id)
+	pp, err := s.r.GetProject(s.Member.WorkspaceID, id)
 	if err != nil {
 		log.Println(err)
 	}
@@ -225,7 +225,7 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		return nil, err
 	}
 
-	pp, _ := s.r.FindProject(s.Member.WorkspaceID, id)
+	pp, _ := s.r.GetProject(s.Member.WorkspaceID, id)
 	if pp != nil {
 		return nil, errors.New("already exist")
 	}
@@ -251,7 +251,7 @@ func (s *service) RenameProject(id string, title string) (*Project, error) {
 		return nil, err
 	}
 
-	p, err := s.r.FindProject(s.Member.WorkspaceID, id)
+	p, err := s.r.GetProject(s.Member.WorkspaceID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		return nil, err
 	}
 
-	mm, _ := s.r.FindMilestone(s.Member.WorkspaceID, id)
+	mm, _ := s.r.GetMilestone(s.Member.WorkspaceID, id)
 	if mm != nil {
 		return nil, errors.New("already exists")
 	}
@@ -314,7 +314,7 @@ func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
 		return nil, err
 	}
 
-	p, err := s.r.FindMilestone(s.Member.WorkspaceID, id)
+	p, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -349,7 +349,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		return nil, err
 	}
 
-	a, _ := s.r.FindWorkflow(s.Member.WorkspaceID, id)
+	a, _ := s.r.GetWorkflow(s.Member.WorkspaceID, id)
 	if a != nil {
 		return nil, errors.New("already exists")
 	}
@@ -378,7 +378,7 @@ func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
 		return nil, err
 	}
 
-	p, err := s.r.FindWorkflow(s.Member.WorkspaceID, id)
+	p, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -412,7 +412,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		return nil, err
 	}
 
-	a, _ := s.r.FindSubWorkflow(s.Member.WorkspaceID, id)
+	a, _ := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
 	if a != nil {
 		return nil, errors.New("already exists")
 	}
@@ -441,7 +441,7 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 		return nil, err
 	}
 
-	p, err := s.r.FindSubWorkflow(s.Member.WorkspaceID, id)
+	p, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -468,7 +468,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		return nil, err
 	}
 
-	pp, _ := s.r.FindFeature(s.Member.WorkspaceID, id)
+	pp, _ := s.r.GetFeature(s.Member.WorkspaceID, id)
 
 	if pp != nil {
 		return nil, errors.New("already exists")
@@ -504,7 +504,7 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 		return nil, err
 	}
 
-	p, _ := s.r.FindFeature(s.Member.WorkspaceID, id)
+	p, _ := s.r.GetFeature(s.Member.WorkspaceID, id)
 	if p == nil {
 		return nil, errors.Wrap(err, "could not find")
 	}

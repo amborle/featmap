@@ -10,38 +10,38 @@ import (
 // Repository ...
 type Repository interface {
 	SaveWorkspace(x *Workspace) (*Workspace, error)
-	FindWorkspace(workspaceID string) (*Workspace, error)
-	FindWorkspaceByName(name string) (*Workspace, error)
+	GetWorkspace(workspaceID string) (*Workspace, error)
+	GetWorkspaceByName(name string) (*Workspace, error)
 
-	FindAccount(id string) (*Account, error)
-	FindAccountByEmail(email string) (*Account, error)
+	GetAccount(id string) (*Account, error)
+	GetAccountByEmail(email string) (*Account, error)
 	SaveAccount(x *Account) (*Account, error)
 
 	SaveMember(x *Member) (*Member, error)
 
-	FindMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
+	GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
 
-	FindProject(workspaceID string, projectID string) (*Project, error)
+	GetProject(workspaceID string, projectID string) (*Project, error)
 	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
 	StoreProject(x *Project) (*Project, error)
 	DeleteProject(workspaceID string, projectID string) error
 
-	FindMilestone(workspaceID string, milestoneID string) (*Milestone, error)
+	GetMilestone(workspaceID string, milestoneID string) (*Milestone, error)
 	FindMilestonesByProject(workspaceID string, projectID string) ([]*Milestone, error)
 	StoreMilestone(x *Milestone) (*Milestone, error)
 	DeleteMilestone(workspaceID string, milestoneID string) error
 
-	FindWorkflow(workspaceID string, workflowID string) (*Workflow, error)
+	GetWorkflow(workspaceID string, workflowID string) (*Workflow, error)
 	FindWorkflowsByProject(workspaceID string, projectID string) ([]*Workflow, error)
 	StoreWorkflow(x *Workflow) (*Workflow, error)
 	DeleteWorkflow(workspaceID string, workflowID string) error
 
-	FindSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error)
+	GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error)
 	FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error)
 	StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error)
 	DeleteSubWorkflow(workspaceID string, workflowID string) error
 
-	FindFeature(workspaceID string, featureID string) (*Feature, error)
+	GetFeature(workspaceID string, featureID string) (*Feature, error)
 	FindFeaturesByProject(workspaceID string, featureID string) ([]*Feature, error)
 	StoreFeature(x *Feature) (*Feature, error)
 	DeleteFeature(workspaceID string, workflowID string) error
@@ -58,7 +58,7 @@ func NewFeatmapRepository(db *sqlx.DB) Repository {
 
 // Tentants
 
-func (a *repo) FindWorkspace(id string) (*Workspace, error) {
+func (a *repo) GetWorkspace(id string) (*Workspace, error) {
 	workspace := &Workspace{}
 	if err := a.db.Get(workspace, "SELECT * FROM workspaces WHERE id = $1", id); err != nil {
 		return nil, errors.Wrap(err, "workspace not found")
@@ -66,7 +66,7 @@ func (a *repo) FindWorkspace(id string) (*Workspace, error) {
 	return workspace, nil
 }
 
-func (a *repo) FindWorkspaceByName(name string) (*Workspace, error) {
+func (a *repo) GetWorkspaceByName(name string) (*Workspace, error) {
 	workspace := &Workspace{}
 	if err := a.db.Get(workspace, "SELECT * FROM workspaces WHERE name = $1", name); err != nil {
 		return nil, errors.Wrap(err, "workspace not found")
@@ -87,7 +87,7 @@ func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
 
 // Accounts
 
-func (a *repo) FindAccount(id string) (*Account, error) {
+func (a *repo) GetAccount(id string) (*Account, error) {
 
 	acc := &Account{}
 	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE id = $1", id); err != nil {
@@ -97,7 +97,7 @@ func (a *repo) FindAccount(id string) (*Account, error) {
 	return acc, nil
 }
 
-func (a *repo) FindAccountByEmail(email string) (*Account, error) {
+func (a *repo) GetAccountByEmail(email string) (*Account, error) {
 	acc := &Account{}
 	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE email = $1", email); err != nil {
 		return nil, errors.Wrap(err, "account not found")
@@ -124,7 +124,7 @@ func (a *repo) SaveMember(x *Member) (*Member, error) {
 	return x, nil
 }
 
-func (a *repo) FindMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error) {
+func (a *repo) GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error) {
 	member := &Member{}
 	if err := a.db.Get(member, "SELECT * FROM members WHERE account_id = $1 AND workspace_id = $2", accountID, workspaceID); err != nil {
 		return nil, errors.Wrap(err, "member not found")
@@ -134,7 +134,7 @@ func (a *repo) FindMemberByAccountAndWorkspace(accountID string, workspaceID str
 
 // Projects
 
-func (a *repo) FindProject(workspaceID string, projectID string) (*Project, error) {
+func (a *repo) GetProject(workspaceID string, projectID string) (*Project, error) {
 	x := &Project{}
 	if err := a.db.Get(x, "SELECT * FROM projects WHERE workspace_id = $1 AND id = $2", workspaceID, projectID); err != nil {
 		return nil, errors.Wrap(err, "project not found")
@@ -170,7 +170,7 @@ func (a *repo) DeleteProject(workspaceID string, projectID string) error {
 
 // Milestones
 
-func (a *repo) FindMilestone(workspaceID string, milestoneID string) (*Milestone, error) {
+func (a *repo) GetMilestone(workspaceID string, milestoneID string) (*Milestone, error) {
 	x := &Milestone{}
 	if err := a.db.Get(x, "SELECT * FROM milestones WHERE workspace_id = $1 AND id = $2", workspaceID, milestoneID); err != nil {
 		return nil, errors.Wrap(err, "milestone not found")
@@ -205,7 +205,7 @@ func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) error {
 
 // Workflows
 
-func (a *repo) FindWorkflow(workspaceID string, workflowID string) (*Workflow, error) {
+func (a *repo) GetWorkflow(workspaceID string, workflowID string) (*Workflow, error) {
 	x := &Workflow{}
 	if err := a.db.Get(x, "SELECT * FROM workflows WHERE workspace_id = $1 AND id = $2", workspaceID, workflowID); err != nil {
 		return nil, errors.Wrap(err, "not found")
@@ -241,7 +241,7 @@ func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) error {
 
 // SubWorkflows
 
-func (a *repo) FindSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error) {
+func (a *repo) GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error) {
 	x := &SubWorkflow{}
 	if err := a.db.Get(x, "SELECT * FROM subworkflows WHERE workspace_id = $1 AND id = $2", workspaceID, subWorkflowID); err != nil {
 		return nil, errors.Wrap(err, "not found")
@@ -278,7 +278,7 @@ func (a *repo) DeleteSubWorkflow(workspaceID string, subWorkflowID string) error
 
 // Features
 
-func (a *repo) FindFeature(workspaceID string, featureID string) (*Feature, error) {
+func (a *repo) GetFeature(workspaceID string, featureID string) (*Feature, error) {
 	x := &Feature{}
 	if err := a.db.Get(x, "SELECT * FROM features WHERE workspace_id = $1 AND id = $2", workspaceID, featureID); err != nil {
 		return nil, errors.Wrap(err, "not found")
