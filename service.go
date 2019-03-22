@@ -6,6 +6,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
+	"github.com/mailgun/mailgun-go/v3"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -15,17 +16,25 @@ import (
 type Service interface {
 	GetMemberObject() *Member
 	SetMemberObject(m *Member)
+	SendEmail(recipient string, subject string, body string) error
 
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
 
-	Register(email string, password string, name string) (*Workspace, *Account, *Member, error)
+	Register(workspaceName string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
 	GetWorkspace(id string) (*Workspace, error)
+	GetWorkspaces() []*Workspace
 	GetAccount(accountID string) (*Account, error)
+	ConfirmEmail(key string) error
+	UpdateEmail(email string) error
+	ResendEmail() error
+	SendResetEmail(email string) error
+	SetPassword(password string, key string) error
 
 	GetMember(accountID string, workspaceID string) (*Member, error)
+	GetMembers() []*Member
 
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
@@ -53,19 +62,23 @@ type Service interface {
 }
 
 type service struct {
-	Acc    *Account
-	Member *Member
-	r      Repository
-	auth   *jwtauth.JWTAuth
+	appSiteURL string
+	Acc        *Account
+	Member     *Member
+	r          Repository
+	auth       *jwtauth.JWTAuth
+	mg         *mailgun.MailgunImpl
 }
 
 // NewFeatmapService ...
-func NewFeatmapService(account *Account, member *Member, repo Repository, auth *jwtauth.JWTAuth) Service {
+func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo Repository, auth *jwtauth.JWTAuth, mg *mailgun.MailgunImpl) Service {
 	return &service{
-		Acc:    account,
-		Member: member,
-		r:      repo,
-		auth:   auth,
+		appSiteURL: appSiteURL,
+		Acc:        account,
+		Member:     member,
+		r:          repo,
+		auth:       auth,
+		mg:         mg,
 	}
 }
 
@@ -85,41 +98,37 @@ func (s *service) SetAccountObject(a *Account) {
 	s.Acc = a
 }
 
-func (s *service) Register(email string, password string, name string) (*Workspace, *Account, *Member, error) {
+func (s *service) Register(workspaceName string, email string, password string) (*Workspace, *Account, *Member, error) {
 
 	email = govalidator.Trim(email, "")
 
 	if !govalidator.IsEmail(email) {
-		return nil, nil, nil, errors.New("email is invalid")
+		return nil, nil, nil, errors.New("email_invalid")
 	}
 
-	if len(name) < 3 {
-		return nil, nil, nil, errors.New("name too short")
+	if len(workspaceName) < 3 || len(workspaceName) > 200 || !govalidator.IsAlphanumeric(workspaceName) || workspaceName == "account" {
+		return nil, nil, nil, errors.New("workspace_invalid")
 	}
 
-	if len(password) < 8 {
-		return nil, nil, nil, errors.New("password too short")
-	}
-
-	if len(password) > 200 {
-		return nil, nil, nil, errors.New("password too long")
+	if len(password) < 6 || len(password) > 200 {
+		return nil, nil, nil, errors.New("password_invalid")
 	}
 
 	// First check if email is not already taken!
 	dupacc, err := s.r.GetAccountByEmail(email)
 	if dupacc != nil {
-		return nil, nil, nil, errors.New("email already registrered")
+		return nil, nil, nil, errors.New("email_taken")
 	}
 
-	dupworkspace, err := s.r.GetWorkspaceByName(name)
+	dupworkspace, err := s.r.GetWorkspaceByName(workspaceName)
 	if dupworkspace != nil {
-		return nil, nil, nil, errors.New("name already registrered")
+		return nil, nil, nil, errors.New("workspace_taken")
 	}
 
 	// Save workspace
 	workspace := &Workspace{
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
-		Name:      name,
+		Name:      workspaceName,
 		CreatedAt: time.Now(),
 	}
 
@@ -131,17 +140,22 @@ func (s *service) Register(email string, password string, name string) (*Workspa
 	// Save account
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "hash could not be created when registering blag account")
+		return nil, nil, nil, err
 	}
 	usr := &Account{
-		ID:        uuid.Must(uuid.NewV4(), nil).String(),
-		Email:     email,
-		Password:  string(hash),
-		CreatedAt: time.Now(),
+		ID:                       uuid.Must(uuid.NewV4(), nil).String(),
+		Email:                    email,
+		Password:                 string(hash),
+		CreatedAt:                time.Now(),
+		EmailConfirmationSentTo:  email,
+		EmailConfirmed:           false,
+		EmailConfirmationKey:     uuid.Must(uuid.NewV4(), nil).String(),
+		EmailConfirmationPending: true,
+		PasswordResetKey:         uuid.Must(uuid.NewV4(), nil).String(),
 	}
 	account, err := s.r.SaveAccount(usr)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "account could note be saved")
+		return nil, nil, nil, err
 	}
 
 	// Save member
@@ -152,7 +166,17 @@ func (s *service) Register(email string, password string, name string) (*Workspa
 	}
 	_, err = s.r.SaveMember(member)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "member could not be saved")
+		return nil, nil, nil, err
+	}
+
+	body, err := WelcomeBody(welcome{s.appSiteURL, usr.EmailConfirmationSentTo, workspace.Name, usr.EmailConfirmationKey})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	err = s.SendEmail(usr.EmailConfirmationSentTo, "Welcome to Featmap!", body)
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
 	return workspace, account, member, nil
@@ -181,11 +205,11 @@ func (s *service) Token(accountID string) string {
 
 func (s *service) GetAccount(id string) (*Account, error) {
 
-	account, err := s.r.GetAccount(id)
-	if account == nil {
+	acc, err := s.r.GetAccount(id)
+	if acc == nil {
 		return nil, errors.Wrap(err, "account not found")
 	}
-	return account, nil
+	return acc, nil
 }
 
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
@@ -197,6 +221,16 @@ func (s *service) GetWorkspace(id string) (*Workspace, error) {
 	return workspace, nil
 }
 
+func (s *service) GetWorkspaces() []*Workspace {
+
+	workspace, err := s.r.GetWorkspacesByAccount(s.Acc.ID)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return workspace
+}
+
 func (s *service) GetMember(accountID string, workspaceID string) (*Member, error) {
 
 	member, err := s.r.GetMemberByAccountAndWorkspace(accountID, workspaceID)
@@ -204,6 +238,16 @@ func (s *service) GetMember(accountID string, workspaceID string) (*Member, erro
 		return nil, errors.Wrap(err, "member not found")
 	}
 	return member, nil
+}
+
+func (s *service) GetMembers() []*Member {
+
+	members, err := s.r.GetMembersByAccount(s.Acc.ID)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return members
 }
 
 // const datelayout = "2006-01-02"
@@ -528,4 +572,117 @@ func validateTitle(title string) (string, error) {
 	}
 
 	return title, nil
+}
+
+func (s *service) ConfirmEmail(key string) error {
+
+	a, err := s.r.GetAccountByConfirmationKey(key)
+	if err != nil {
+		return err
+	}
+
+	if !a.EmailConfirmationPending {
+		return nil
+	}
+
+	dupacc, _ := s.r.GetAccountByEmail(a.EmailConfirmationSentTo)
+	if dupacc != nil && dupacc.ID != a.ID {
+		return errors.New("email_taken")
+	}
+
+	a.EmailConfirmed = true
+	a.Email = a.EmailConfirmationSentTo
+	a.EmailConfirmationPending = false
+
+	_, err = s.r.SaveAccount(a)
+	if err != nil {
+		return errors.New("save_error")
+	}
+
+	return nil
+}
+
+func (s *service) UpdateEmail(email string) error {
+	dupacc, _ := s.r.GetAccountByEmail(email)
+	if dupacc != nil {
+		return errors.New("email_taken")
+	}
+
+	a := s.Acc
+
+	a.EmailConfirmationSentTo = email
+	a.EmailConfirmationKey = uuid.Must(uuid.NewV4(), nil).String()
+	a.EmailConfirmationPending = true
+
+	_, err := s.r.SaveAccount(a)
+	if err != nil {
+		return errors.New("save_error")
+	}
+
+	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
+
+	err = s.SendEmail(email, "FeatMap: confirm your email adress", body)
+	if err != nil {
+		return errors.New("send_error")
+	}
+	return nil
+}
+
+func (s *service) ResendEmail() error {
+
+	a := s.Acc
+
+	if !a.EmailConfirmationPending {
+		return errors.New("already confirmed")
+	}
+
+	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
+
+	err := s.SendEmail(a.EmailConfirmationSentTo, "Featmap: confirm your email adress", body)
+	if err != nil {
+		return errors.New("send_error")
+	}
+	return nil
+}
+
+func (s *service) SendResetEmail(email string) error {
+
+	a, err := s.r.GetAccountByEmail(email)
+	if err != nil {
+		return errors.New("email_not_found")
+	}
+
+	body, _ := ResetPasswordBody(resetPasswordBody{s.appSiteURL, email, a.PasswordResetKey})
+
+	err = s.SendEmail(email, "Featmap: request to reset password", body)
+
+	if err != nil {
+		return errors.New("send_error")
+	}
+	return nil
+}
+
+func (s *service) SetPassword(password string, key string) error {
+
+	if len(password) < 6 || len(password) > 200 {
+		return errors.New("password_invalid")
+	}
+
+	a, err := s.r.GetAccountByPasswordKey(key)
+	if err != nil {
+		return err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	a.Password = string(hash)
+	if err != nil {
+		return errors.New("encrypt_password")
+	}
+
+	_, err = s.r.SaveAccount(a)
+	if err != nil {
+		return errors.New("save_error")
+	}
+
+	return nil
 }

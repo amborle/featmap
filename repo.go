@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -11,15 +12,19 @@ import (
 type Repository interface {
 	SaveWorkspace(x *Workspace) (*Workspace, error)
 	GetWorkspace(workspaceID string) (*Workspace, error)
+	GetWorkspacesByAccount(id string) ([]*Workspace, error)
 	GetWorkspaceByName(name string) (*Workspace, error)
 
 	GetAccount(id string) (*Account, error)
 	GetAccountByEmail(email string) (*Account, error)
+	GetAccountByConfirmationKey(key string) (*Account, error)
+	GetAccountByPasswordKey(key string) (*Account, error)
 	SaveAccount(x *Account) (*Account, error)
 
 	SaveMember(x *Member) (*Member, error)
 
 	GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
+	GetMembersByAccount(id string) ([]*Member, error)
 
 	GetProject(workspaceID string, projectID string) (*Project, error)
 	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
@@ -74,6 +79,14 @@ func (a *repo) GetWorkspaceByName(name string) (*Workspace, error) {
 	return workspace, nil
 }
 
+func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
+	var workspaces []*Workspace
+	if err := a.db.Select(&workspaces, "SELECT * FROM workspaces w where id in (select m.workspace_id from members m where m.account_id = $1)", id); err != nil {
+		return nil, err
+	}
+	return workspaces, nil
+}
+
 func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
 
 	fmt.Println(x)
@@ -105,10 +118,28 @@ func (a *repo) GetAccountByEmail(email string) (*Account, error) {
 	return acc, nil
 }
 
+func (a *repo) GetAccountByConfirmationKey(key string) (*Account, error) {
+	acc := &Account{}
+	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE email_confirmation_key = $1", key); err != nil {
+		return nil, errors.Wrap(err, "account not found")
+	}
+	return acc, nil
+}
+
+func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
+	acc := &Account{}
+	log.Println("KEY")
+	log.Println(key)
+	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE password_reset_key = $1", key); err != nil {
+		return nil, errors.Wrap(err, "account not found")
+	}
+	return acc, nil
+}
+
 func (a *repo) SaveAccount(x *Account) (*Account, error) {
 
-	if _, err := a.db.Exec("INSERT INTO accounts (id, email, password, created_at) VALUES ($1,$2,$3,$4)", x.ID, x.Email, x.Password, x.CreatedAt); err != nil {
-		return nil, errors.Wrap(err, "something went wrong when storing account")
+	if _, err := a.db.Exec("INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9", x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey); err != nil {
+		return nil, errors.Wrap(err, "something went wrong when saving account")
 	}
 
 	return x, nil
@@ -130,6 +161,14 @@ func (a *repo) GetMemberByAccountAndWorkspace(accountID string, workspaceID stri
 		return nil, errors.Wrap(err, "member not found")
 	}
 	return member, nil
+}
+
+func (a *repo) GetMembersByAccount(id string) ([]*Member, error) {
+	var members []*Member
+	if err := a.db.Select(&members, "SELECT * FROM members WHERE account_id = $1", id); err != nil {
+		return nil, err
+	}
+	return members, nil
 }
 
 // Projects

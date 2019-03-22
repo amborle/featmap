@@ -4,17 +4,22 @@ import "time"
 
 // Workspace ...
 type Workspace struct {
-	ID        string    `db:"id" json:"workspace"`
+	ID        string    `db:"id" json:"id"`
 	Name      string    `db:"name" json:"name"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 }
 
 // Account ...
 type Account struct {
-	ID        string    `db:"id" json:"id"`
-	Email     string    `db:"email" json:"email"`
-	Password  string    `db:"password" json:"password"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	ID                       string    `db:"id" json:"id"`
+	Email                    string    `db:"email" json:"email"`
+	Password                 string    `db:"password" json:"-"`
+	CreatedAt                time.Time `db:"created_at" json:"createdAt"`
+	EmailConfirmed           bool      `db:"email_confirmed" json:"emailConfirmed"`
+	EmailConfirmationSentTo  string    `db:"email_confirmation_sent_to" json:"emailConfirmationSentTo"`
+	EmailConfirmationKey     string    `db:"email_confirmation_key" json:"-"`
+	EmailConfirmationPending bool      `db:"email_confirmation_pending" json:"emailConfirmationPending"`
+	PasswordResetKey         string    `db:"password_reset_key" json:"-"`
 }
 
 // Member ...
@@ -70,7 +75,7 @@ type SubWorkflow struct {
 type Feature struct {
 	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
 	SubWorkflowID string    `db:"subworkflow_id" json:"subWorkflowId"`
-	MilestoneID   string    `db:"milestone_id" json:"mileStoneId"`
+	MilestoneID   string    `db:"milestone_id" json:"milestoneId"`
 	ID            string    `db:"id" json:"id"`
 	Title         string    `db:"title" json:"title"`
 	Index         string    `db:"index" json:"index"`

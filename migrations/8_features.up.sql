@@ -6,7 +6,7 @@ CREATE TABLE features (
 	index varchar not null,	
 	title varchar not null,	
 	"description" varchar not null,	
-	created_by,
+	created_by uuid,
 	created_at TIMESTAMP WITH TIME ZONE not null,			
 	CONSTRAINT "PK_features" PRIMARY KEY (workspace_id,id),
 	CONSTRAINT "FK_features_1" FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,

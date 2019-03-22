@@ -14,13 +14,17 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/mailgun/mailgun-go/v3"
 )
 
 // Configuration ...
 type Configuration struct {
+	AppSiteURL         string
 	DbConnectionString string
 	JWTSecret          string
 	Port               string
+	MailServer         string
+	MailAPIKey         string
 }
 
 func main() {
@@ -38,7 +42,7 @@ func main() {
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
+		ExposedHeaders:   []string{""},
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	})
@@ -55,11 +59,13 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	mg := mailgun.NewMailgun(config.MailServer, config.MailAPIKey)
+
 	// Create JWTAuth object
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	r.Use(jwtauth.Verifier(auth))
-	r.Use(AddService(db, auth))
+	r.Use(AddService(config.AppSiteURL, db, auth, mg))
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
@@ -71,6 +77,7 @@ func main() {
 		w.Write([]byte("Featmap"))
 	})
 
+	r.Route("/v1/account", accountAPI)
 	r.Route("/v1/users", usersAPI)
 	r.Route("/v1/", api)
 

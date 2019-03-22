@@ -12,10 +12,16 @@ require (
 	github.com/go-chi/render v1.0.1
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.0.0
+	github.com/mailgun/mailgun-go/v3 v3.3.1
 	github.com/pkg/errors v0.8.1
+	github.com/saibing/bingo v0.0.0-20190319122204-65a1d721deb1 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24
+	github.com/sourcegraph/jsonrpc2 v0.0.0-20190106185902-35a74f039c6a // indirect
 	gitlab.com/amborle/geldhem v0.0.0-20180410195930-afa102113c8c
 
-	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25
+	golang.org/x/crypto v0.0.0-20190320223903-b7391e95e576
+	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53 // indirect
+	golang.org/x/sys v0.0.0-20190322080309-f49334f85ddc // indirect
+	golang.org/x/tools v0.0.0-20190321232350-e250d351ecad // indirect
 )

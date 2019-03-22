@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
+	"github.com/mailgun/mailgun-go/v3"
 )
 
 // Env ...
@@ -27,20 +28,21 @@ type key int
 const contextKey key = 0
 
 // AddService ...
-func AddService(db *sqlx.DB, auth *jwtauth.JWTAuth) func(next http.Handler) http.Handler {
+func AddService(appSiteURL string, db *sqlx.DB, auth *jwtauth.JWTAuth, mg *mailgun.MailgunImpl) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
-			s := NewFeatmapService(nil, nil, NewFeatmapRepository(db), auth)
+			s := NewFeatmapService(appSiteURL, nil, nil, NewFeatmapRepository(db), auth, mg)
 
 			_, claims, _ := jwtauth.FromContext(r.Context())
+
 			accountID, aok := claims.Get("id")
 
 			var acc *Account
 			if aok {
 				acc, _ = s.GetAccount(accountID.(string))
+				s.SetAccountObject(acc)
 			}
-			s.SetAccountObject(acc)
 
 			if acc != nil {
 
@@ -65,7 +67,23 @@ func AddService(db *sqlx.DB, auth *jwtauth.JWTAuth) func(next http.Handler) http
 func RequireMember() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
+
 			if GetEnv(r).Service.GetMemberObject() == nil {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// RequireAccount ...
+func RequireAccount() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			if GetEnv(r).Service.GetAccountObject() == nil {
 				http.Error(w, http.StatusText(401), 401)
 				return
 			}

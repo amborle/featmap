@@ -52,7 +52,7 @@ func NewError() *Response {
 	return NewResponse("error", "")
 }
 
-// NewRespons ...
+// NewResponse ...
 func NewResponse(status string, message string) *Response {
 	return &Response{Status: status, Message: message, Data: make(map[string]interface{})}
 }

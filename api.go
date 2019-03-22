@@ -9,14 +9,14 @@ import (
 )
 
 func api(r chi.Router) {
-	r.Use(RequireMember())
 
-	// test
+	r.Use(RequireAccount())
+	r.Get("/workspaces", getWorkspaces)
+
 	r.Group(func(r chi.Router) {
+		r.Use(RequireMember())
 		r.Route("/",
-
 			func(r chi.Router) {
-
 				r.Get("/projects", getProjects)
 				r.Route("/projects/{ID}", func(r chi.Router) {
 					r.Post("/", createProject)
@@ -49,6 +49,22 @@ func api(r chi.Router) {
 					r.Delete("/", deleteFeature)
 				})
 			})
+	})
+}
+
+// Workspaces
+func getWorkspaces(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		Account     *Account     `json:"account"`
+		Workspaces  []*Workspace `json:"workspaces"`
+		Memberships []*Member    `json:"memberships"`
+	}
+
+	s := GetEnv(r).Service
+	render.JSON(w, r, response{
+		Account:     s.GetAccountObject(),
+		Workspaces:  s.GetWorkspaces(),
+		Memberships: s.GetMembers(),
 	})
 }
 
