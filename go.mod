@@ -20,8 +20,8 @@ require (
 	github.com/sourcegraph/jsonrpc2 v0.0.0-20190106185902-35a74f039c6a // indirect
 	gitlab.com/amborle/geldhem v0.0.0-20180410195930-afa102113c8c
 
-	golang.org/x/crypto v0.0.0-20190320223903-b7391e95e576
-	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53 // indirect
+	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
+	golang.org/x/net v0.0.0-20190327025741-74e053c68e29 // indirect
 	golang.org/x/sys v0.0.0-20190322080309-f49334f85ddc // indirect
-	golang.org/x/tools v0.0.0-20190321232350-e250d351ecad // indirect
+	golang.org/x/tools v0.0.0-20190327011446-79af862e6737 // indirect
 )

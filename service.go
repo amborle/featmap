@@ -25,6 +25,7 @@ type Service interface {
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
 	GetWorkspace(id string) (*Workspace, error)
+	GetWorkspaceByContext() *Workspace
 	GetWorkspaces() []*Workspace
 	GetAccount(accountID string) (*Account, error)
 	ConfirmEmail(key string) error
@@ -53,6 +54,7 @@ type Service interface {
 	DeleteWorkflow(id string) error
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
+	GetSubWorkflowsByProject(id string) []*SubWorkflow
 	RenameSubWorkflow(id string, title string) (*SubWorkflow, error)
 	DeleteSubWorkflow(id string) error
 
@@ -215,10 +217,19 @@ func (s *service) GetAccount(id string) (*Account, error) {
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
 	workspace, err := s.r.GetWorkspace(id)
-	if workspace == nil {
+	if err != nil {
 		return nil, errors.Wrap(err, "workspace not found")
 	}
 	return workspace, nil
+}
+
+func (s *service) GetWorkspaceByContext() *Workspace {
+
+	workspace, err := s.GetWorkspace(s.Member.WorkspaceID)
+	if err != nil {
+		log.Println(err)
+	}
+	return workspace
 }
 
 func (s *service) GetWorkspaces() []*Workspace {
@@ -318,6 +329,11 @@ func (s *service) GetProjects() []*Project {
 	if err != nil {
 		log.Println(err)
 	}
+
+	// if pp == nil {
+	// 	pp = []*Project{}
+	// }
+
 	return pp
 }
 
@@ -501,6 +517,14 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 
 func (s *service) DeleteSubWorkflow(id string) error {
 	return s.r.DeleteSubWorkflow(s.Member.WorkspaceID, id)
+}
+
+func (s *service) GetSubWorkflowsByProject(id string) []*SubWorkflow {
+	pp, err := s.r.FindSubWorkflowsByProject(s.Member.WorkspaceID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
 }
 
 // Features

@@ -11,12 +11,13 @@ import (
 func api(r chi.Router) {
 
 	r.Use(RequireAccount())
-	r.Get("/workspaces", getWorkspaces)
+	r.Get("/app", getApp)
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireMember())
 		r.Route("/",
 			func(r chi.Router) {
+
 				r.Get("/projects", getProjects)
 				r.Route("/projects/{ID}", func(r chi.Router) {
 					r.Post("/", createProject)
@@ -53,7 +54,7 @@ func api(r chi.Router) {
 }
 
 // Workspaces
-func getWorkspaces(w http.ResponseWriter, r *http.Request) {
+func getApp(w http.ResponseWriter, r *http.Request) {
 	type response struct {
 		Account     *Account     `json:"account"`
 		Workspaces  []*Workspace `json:"workspaces"`
@@ -65,6 +66,19 @@ func getWorkspaces(w http.ResponseWriter, r *http.Request) {
 		Account:     s.GetAccountObject(),
 		Workspaces:  s.GetWorkspaces(),
 		Memberships: s.GetMembers(),
+	})
+}
+
+func getWorkspaceExtended(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		Workspace *Workspace `json:"workspace"`
+		Projects  []*Project `json:"projects"`
+	}
+
+	s := GetEnv(r).Service
+	render.JSON(w, r, response{
+		Workspace: s.GetWorkspaceByContext(),
+		Projects:  s.GetProjects(),
 	})
 }
 
@@ -85,11 +99,12 @@ func createProject(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "ID")
 	s := GetEnv(r).Service
-	if _, err := s.CreateProjectWithID(id, data.Title); err != nil {
+	p, err := s.CreateProjectWithID(id, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, p)
 }
 
 func getProjectExtended(w http.ResponseWriter, r *http.Request) {
@@ -107,10 +122,12 @@ func getProjectExtended(w http.ResponseWriter, r *http.Request) {
 	project := s.GetProject(id)
 	milestones := s.GetMilestonesByProject(id)
 	workflows := s.GetWorkflowsByProject(id)
+	subworkflows := s.GetSubWorkflowsByProject(id)
 	oo := response{
-		Project:    project,
-		Milestones: milestones,
-		Workflows:  workflows,
+		Project:      project,
+		Milestones:   milestones,
+		Workflows:    workflows,
+		SubWorkflows: subworkflows,
 	}
 
 	render.JSON(w, r, oo)

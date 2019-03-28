@@ -182,7 +182,7 @@ func (a *repo) GetProject(workspaceID string, projectID string) (*Project, error
 }
 
 func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
-	var x []*Project
+	x := []*Project{}
 	err := a.db.Select(&x, "SELECT * FROM projects WHERE workspace_id = $1", workspaceID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no projects found")
@@ -288,10 +288,9 @@ func (a *repo) GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWor
 	return x, nil
 }
 
-// TODO: fix select
 func (a *repo) FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error) {
 	var x []*SubWorkflow
-	err := a.db.Select(&x, "SELECT * FROM subworkflows WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM subworkflows s WHERE s.workspace_id = $1 AND s.workflow_id in (select w.id from workflows w where w.workspace_id = $1 and w.project_id = $2)", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
@@ -328,7 +327,7 @@ func (a *repo) GetFeature(workspaceID string, featureID string) (*Feature, error
 // TODO: Fix select
 func (a *repo) FindFeaturesByProject(workspaceID string, projectID string) ([]*Feature, error) {
 	var x []*Feature
-	err := a.db.Select(&x, "SELECT * FROM features WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM features f WHERE f.workspace_id = $1 AND f.milestone_id IN (select m.id from milestones m when m.workspace_id = $1 and m.project_id = $2 ", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
