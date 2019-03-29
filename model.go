@@ -46,7 +46,7 @@ type Milestone struct {
 	ProjectID     string    `db:"project_id" json:"projectId"`
 	ID            string    `db:"id" json:"id"`
 	Title         string    `db:"title" json:"title"`
-	Index         string    `db:"index" json:"index"`
+	Rank          string    `db:"rank" json:"rank"`
 	CreatedBy     string    `db:"created_by" json:"createdBy"`
 	CreatedByName string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
@@ -58,7 +58,7 @@ type Workflow struct {
 	ProjectID     string    `db:"project_id" json:"projectId"`
 	ID            string    `db:"id" json:"id"`
 	Title         string    `db:"title" json:"title"`
-	Index         string    `db:"index" json:"index"`
+	Rank          string    `db:"rank" json:"rank"`
 	CreatedBy     string    `db:"created_by" json:"createdBy"`
 	CreatedByName string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
@@ -70,7 +70,7 @@ type SubWorkflow struct {
 	WorkflowID    string    `db:"workflow_id" json:"workflowId"`
 	ID            string    `db:"id" json:"id"`
 	Title         string    `db:"title" json:"title"`
-	Index         string    `db:"index" json:"index"`
+	Rank          string    `db:"rank" json:"rank"`
 	CreatedBy     string    `db:"created_by" json:"createdBy"`
 	CreatedByName string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
@@ -83,7 +83,7 @@ type Feature struct {
 	MilestoneID   string    `db:"milestone_id" json:"milestoneId"`
 	ID            string    `db:"id" json:"id"`
 	Title         string    `db:"title" json:"title"`
-	Index         string    `db:"index" json:"index"`
+	Rank          string    `db:"rank" json:"rank"`
 	Description   string    `db:"description" json:"description"`
 	CreatedBy     string    `db:"created_by" json:"createdBy"`
 	CreatedByName string    `db:"created_by_name" json:"createdByName"`

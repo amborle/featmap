@@ -2,7 +2,7 @@ CREATE TABLE workflows (
 	workspace_id uuid NOT NULL,
 	project_id uuid NOT NULL,
 	id uuid NOT NULL,	
-	index varchar not null,	
+	rank varchar not null,	
 	title varchar NOT NULL,	
 	created_by uuid,
 	created_by_name varchar NOT NULL,	

@@ -3,7 +3,7 @@ CREATE TABLE features (
 	subworkflow_id uuid NOT NULL, 
 	milestone_id uuid NOT NULL, 
 	id uuid NOT NULL,	
-	index varchar not null,	
+	rank varchar not null,	
 	title varchar not null,	
 	"description" varchar not null,	
 	created_by uuid,

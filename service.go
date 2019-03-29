@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/amborle/featmap/lexorank"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
 	"github.com/mailgun/mailgun-go/v3"
@@ -45,6 +47,7 @@ type Service interface {
 	GetProjects() []*Project
 
 	CreateMilestoneWithID(id string, projectID string, title string) (*Milestone, error)
+	MoveMilestone(id string, index int) (*Milestone, error)
 	RenameMilestone(id string, title string) (*Milestone, error)
 	GetMilestonesByProject(id string) []*Milestone
 	DeleteMilestone(id string) error
@@ -356,20 +359,26 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		return nil, err
 	}
 
-	mm, _ := s.r.GetMilestone(s.Member.WorkspaceID, id)
-	if mm != nil {
-		return nil, errors.New("already exists")
-	}
+	mm, _ := s.r.FindMilestonesByProject(s.Member.WorkspaceID, projectID)
 
 	p := &Milestone{
 		WorkspaceID:   s.Member.WorkspaceID,
 		ProjectID:     projectID,
 		ID:            id,
 		Title:         title,
-		Index:         "a",
+		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
 		CreatedByName: s.Acc.Name}
+
+	n := len(mm)
+	if n == 0 {
+		rank, _ := lexorank.Rank("", "")
+		p.Rank = rank
+	} else {
+		rank, _ := lexorank.Rank(mm[n-1].Rank, "")
+		p.Rank = rank
+	}
 
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
@@ -377,6 +386,55 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 	}
 
 	return p, nil
+}
+
+func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
+
+	if index < 0 || index > 1000 {
+		return nil, errors.New("index invalid")
+	}
+
+	m, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	mm, _ := s.r.FindMilestonesByProject(s.Member.WorkspaceID, m.ProjectID)
+
+	// Remove the item we are moving
+	mmf := []*Milestone{}
+	for _, x := range mm {
+		if x.ID != id {
+			mmf = append(mmf, x)
+		}
+	}
+
+	var prevRank, nextRank string
+	length := len(mmf)
+
+	if length != 0 {
+		if (index - 1) >= 0 {
+			prevRank = mmf[index-1].Rank
+		}
+
+		if index < length {
+			nextRank = mmf[index].Rank
+		}
+	}
+	log.Println("XXX")
+	log.Println(length)
+	log.Println(prevRank, nextRank)
+
+	rank, _ := lexorank.Rank(prevRank, nextRank)
+
+	m.Rank = rank
+
+	m, err = s.r.StoreMilestone(m)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
+	}
+
+	return m, nil
 }
 
 func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
@@ -431,7 +489,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		ProjectID:     projectID,
 		ID:            id,
 		Title:         title,
-		Index:         "a",
+		Rank:          "a",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
 		CreatedByName: s.Acc.Name}
@@ -495,7 +553,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		WorkflowID:    workflowID,
 		ID:            id,
 		Title:         title,
-		Index:         "a",
+		Rank:          "a",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
 		CreatedByName: s.Acc.Name}
@@ -562,7 +620,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		SubWorkflowID: subWorkflowID,
 		ID:            id,
 		Title:         title,
-		Index:         "a",
+		Rank:          "a",
 		Description:   "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),

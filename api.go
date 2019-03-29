@@ -32,6 +32,10 @@ func api(r chi.Router) {
 					r.Put("/rename", renameMilestone)
 				})
 
+				r.Route("/milestones/{ID}/move", func(r chi.Router) {
+					r.Post("/", moveMilestone)
+				})
+
 				r.Route("/workflows/{ID}", func(r chi.Router) {
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
@@ -98,6 +102,7 @@ func createProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "ID")
+
 	s := GetEnv(r).Service
 	p, err := s.CreateProjectWithID(id, data.Title)
 	if err != nil {
@@ -177,6 +182,7 @@ func (p *createMilestoneRequest) Bind(r *http.Request) error {
 }
 
 func createMilestone(w http.ResponseWriter, r *http.Request) {
+
 	data := &createMilestoneRequest{}
 	if err := render.Bind(r, data); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
@@ -184,11 +190,37 @@ func createMilestone(w http.ResponseWriter, r *http.Request) {
 	}
 	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.CreateMilestoneWithID(id, data.ProjectID, data.Title); err != nil {
+	m, err := GetEnv(r).Service.CreateMilestoneWithID(id, data.ProjectID, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, m)
+}
+
+type moveMilestoneRequest struct {
+	Index int `json:"index"`
+}
+
+func (p *moveMilestoneRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func moveMilestone(w http.ResponseWriter, r *http.Request) {
+
+	data := &moveMilestoneRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.MoveMilestone(id, data.Index)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 func renameMilestone(w http.ResponseWriter, r *http.Request) {
