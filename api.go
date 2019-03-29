@@ -123,11 +123,13 @@ func getProjectExtended(w http.ResponseWriter, r *http.Request) {
 	milestones := s.GetMilestonesByProject(id)
 	workflows := s.GetWorkflowsByProject(id)
 	subworkflows := s.GetSubWorkflowsByProject(id)
+	features := s.GetFeaturesByProject(id)
 	oo := response{
 		Project:      project,
 		Milestones:   milestones,
 		Workflows:    workflows,
 		SubWorkflows: subworkflows,
+		Features:     features,
 	}
 
 	render.JSON(w, r, oo)

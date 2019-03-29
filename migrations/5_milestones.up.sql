@@ -5,6 +5,7 @@ CREATE TABLE milestones (
 	index varchar not null,	
 	title varchar NOT NULL,	
 	created_by uuid,
+	created_by_name varchar NOT NULL,	
 	created_at TIMESTAMP WITH TIME ZONE not null,			
 	CONSTRAINT "PK_milestones" PRIMARY KEY (workspace_id,id),
 	CONSTRAINT "FK_milestones_1" FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,

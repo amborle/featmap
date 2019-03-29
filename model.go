@@ -12,6 +12,7 @@ type Workspace struct {
 // Account ...
 type Account struct {
 	ID                       string    `db:"id" json:"id"`
+	Name                     string    `db:"name" json:"name"`
 	Email                    string    `db:"email" json:"email"`
 	Password                 string    `db:"password" json:"-"`
 	CreatedAt                time.Time `db:"created_at" json:"createdAt"`
@@ -31,44 +32,48 @@ type Member struct {
 
 // Project ...
 type Project struct {
-	WorkspaceID string    `db:"workspace_id" json:"workspaceId"`
-	ID          string    `db:"id" json:"id"`
-	Title       string    `db:"title" json:"title"`
-	CreatedBy   string    `db:"created_by" json:"createdBy"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
+	ID            string    `db:"id" json:"id"`
+	Title         string    `db:"title" json:"title"`
+	CreatedBy     string    `db:"created_by" json:"createdBy"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
 }
 
 // Milestone ...
 type Milestone struct {
-	WorkspaceID string    `db:"workspace_id" json:"workspaceId"`
-	ProjectID   string    `db:"project_id" json:"projectId"`
-	ID          string    `db:"id" json:"id"`
-	Title       string    `db:"title" json:"title"`
-	Index       string    `db:"index" json:"index"`
-	CreatedBy   string    `db:"created_by" json:"createdBy"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
+	ProjectID     string    `db:"project_id" json:"projectId"`
+	ID            string    `db:"id" json:"id"`
+	Title         string    `db:"title" json:"title"`
+	Index         string    `db:"index" json:"index"`
+	CreatedBy     string    `db:"created_by" json:"createdBy"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
 }
 
 // Workflow ...
 type Workflow struct {
-	WorkspaceID string    `db:"workspace_id" json:"workspaceId"`
-	ProjectID   string    `db:"project_id" json:"projectId"`
-	ID          string    `db:"id" json:"id"`
-	Title       string    `db:"title" json:"title"`
-	Index       string    `db:"index" json:"index"`
-	CreatedBy   string    `db:"created_by" json:"createdBy"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
+	ProjectID     string    `db:"project_id" json:"projectId"`
+	ID            string    `db:"id" json:"id"`
+	Title         string    `db:"title" json:"title"`
+	Index         string    `db:"index" json:"index"`
+	CreatedBy     string    `db:"created_by" json:"createdBy"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
 }
 
 // SubWorkflow ...
 type SubWorkflow struct {
-	WorkspaceID string    `db:"workspace_id" json:"workspaceId"`
-	WorkflowID  string    `db:"workflow_id" json:"workflowId"`
-	ID          string    `db:"id" json:"id"`
-	Title       string    `db:"title" json:"title"`
-	Index       string    `db:"index" json:"index"`
-	CreatedBy   string    `db:"created_by" json:"createdBy"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
+	WorkflowID    string    `db:"workflow_id" json:"workflowId"`
+	ID            string    `db:"id" json:"id"`
+	Title         string    `db:"title" json:"title"`
+	Index         string    `db:"index" json:"index"`
+	CreatedBy     string    `db:"created_by" json:"createdBy"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
 }
 
 // Feature ...
@@ -81,5 +86,6 @@ type Feature struct {
 	Index         string    `db:"index" json:"index"`
 	Description   string    `db:"description" json:"description"`
 	CreatedBy     string    `db:"created_by" json:"createdBy"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
 }

@@ -75,7 +75,7 @@ func UsersSignup(w http.ResponseWriter, r *http.Request) {
 
 	s := GetEnv(r).Service
 
-	_, acc, _, err := s.Register(data.WorkspaceName, data.Email, data.Password)
+	_, acc, _, err := s.Register(data.WorkspaceName, data.Name, data.Email, data.Password)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
@@ -102,6 +102,7 @@ func (p *LoginRequest) Bind(r *http.Request) error {
 // SignupRequest ...
 type SignupRequest struct {
 	WorkspaceName string `json:"workspaceName"`
+	Name          string `json:"name"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
 }

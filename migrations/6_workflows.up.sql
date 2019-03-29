@@ -5,6 +5,7 @@ CREATE TABLE workflows (
 	index varchar not null,	
 	title varchar NOT NULL,	
 	created_by uuid,
+	created_by_name varchar NOT NULL,	
 	created_at TIMESTAMP WITH TIME ZONE not null,			
 	CONSTRAINT "PK_workflows" PRIMARY KEY (workspace_id,id),
 	CONSTRAINT "FK_workflows_1" FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,

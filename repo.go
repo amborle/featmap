@@ -138,7 +138,7 @@ func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
 
 func (a *repo) SaveAccount(x *Account) (*Account, error) {
 
-	if _, err := a.db.Exec("INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9", x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey); err != nil {
+	if _, err := a.db.Exec("INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10", x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when saving account")
 	}
 
@@ -193,7 +193,7 @@ func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
 func (a *repo) StoreProject(x *Project) (*Project, error) {
 
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO projects (workspace_id, id, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO projects (workspace_id, id, title, created_by, created_at,created_by_name) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
@@ -218,7 +218,7 @@ func (a *repo) GetMilestone(workspaceID string, milestoneID string) (*Milestone,
 }
 
 func (a *repo) FindMilestonesByProject(workspaceID string, projectID string) ([]*Milestone, error) {
-	var x []*Milestone
+	x := []*Milestone{}
 	err := a.db.Select(&x, "SELECT * FROM milestones WHERE workspace_id = $1 AND project_id = $2", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
@@ -228,7 +228,7 @@ func (a *repo) FindMilestonesByProject(workspaceID string, projectID string) ([]
 
 func (a *repo) StoreMilestone(x *Milestone) (*Milestone, error) {
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO milestones (workspace_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (workspace_id, id) DO UPDATE SET index = $4, title = $5", x.WorkspaceID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO milestones (workspace_id, project_id, id, index, title, created_by, created_at,created_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (workspace_id, id) DO UPDATE SET index = $4, title = $5", x.WorkspaceID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
@@ -253,7 +253,7 @@ func (a *repo) GetWorkflow(workspaceID string, workflowID string) (*Workflow, er
 }
 
 func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*Workflow, error) {
-	var x []*Workflow
+	x := []*Workflow{}
 	err := a.db.Select(&x, "SELECT * FROM workflows WHERE workspace_id = $1 and project_id = $2", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "none found")
@@ -264,7 +264,7 @@ func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*
 func (a *repo) StoreWorkflow(x *Workflow) (*Workflow, error) {
 
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO workflows (workspace_id, project_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (workspace_id, id) DO UPDATE SET index = $4, title = $5", x.WorkspaceID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO workflows (workspace_id, project_id, id, index, title, created_by, created_at, created_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (workspace_id, id) DO UPDATE SET index = $4, title = $5", x.WorkspaceID, x.ProjectID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
@@ -289,7 +289,7 @@ func (a *repo) GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWor
 }
 
 func (a *repo) FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error) {
-	var x []*SubWorkflow
+	x := []*SubWorkflow{}
 	err := a.db.Select(&x, "SELECT * FROM subworkflows s WHERE s.workspace_id = $1 AND s.workflow_id in (select w.id from workflows w where w.workspace_id = $1 and w.project_id = $2)", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
@@ -300,7 +300,7 @@ func (a *repo) FindSubWorkflowsByProject(workspaceID string, projectID string) (
 func (a *repo) StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error) {
 
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO subworkflows (workspace_id, workflow_id, id, index, title, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,index = $4, title = $5", x.WorkspaceID, x.WorkflowID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt); err != nil {
+	_, err := a.db.Exec("INSERT INTO subworkflows (workspace_id, workflow_id, id, index, title, created_by, created_at,created_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,index = $4, title = $5", x.WorkspaceID, x.WorkflowID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
@@ -324,11 +324,12 @@ func (a *repo) GetFeature(workspaceID string, featureID string) (*Feature, error
 	return x, nil
 }
 
-// TODO: Fix select
 func (a *repo) FindFeaturesByProject(workspaceID string, projectID string) ([]*Feature, error) {
-	var x []*Feature
-	err := a.db.Select(&x, "SELECT * FROM features f WHERE f.workspace_id = $1 AND f.milestone_id IN (select m.id from milestones m when m.workspace_id = $1 and m.project_id = $2 ", workspaceID, projectID)
+	x := []*Feature{}
+	err := a.db.Select(&x, "SELECT * FROM features f WHERE f.workspace_id = $1 AND f.milestone_id IN (select m.id from milestones m where m.workspace_id = $1 and m.project_id = $2) ", workspaceID, projectID)
 	if err != nil {
+		log.Println(err)
+
 		return nil, errors.Wrap(err, "no found")
 	}
 	return x, nil
@@ -336,7 +337,7 @@ func (a *repo) FindFeaturesByProject(workspaceID string, projectID string) ([]*F
 
 func (a *repo) StoreFeature(x *Feature) (*Feature, error) {
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, index, title, created_by, created_at, description) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,index = $5, title = $6,  description = $9 ", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt, x.Description); err != nil {
+	_, err := a.db.Exec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, index, title, created_by, created_at, description, created_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, $10) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,index = $5, title = $6,  description = $9 ", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Index, x.Title, x.CreatedBy, x.CreatedAt, x.Description, x.CreatedByName); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 

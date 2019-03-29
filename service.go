@@ -21,7 +21,7 @@ type Service interface {
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
 
-	Register(workspaceName string, email string, password string) (*Workspace, *Account, *Member, error)
+	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
 	GetWorkspace(id string) (*Workspace, error)
@@ -30,6 +30,7 @@ type Service interface {
 	GetAccount(accountID string) (*Account, error)
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
+	UpdateName(name string) error
 	ResendEmail() error
 	SendResetEmail(email string) error
 	SetPassword(password string, key string) error
@@ -58,6 +59,7 @@ type Service interface {
 	RenameSubWorkflow(id string, title string) (*SubWorkflow, error)
 	DeleteSubWorkflow(id string) error
 
+	GetFeaturesByProject(id string) []*Feature
 	CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error)
 	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
@@ -100,16 +102,22 @@ func (s *service) SetAccountObject(a *Account) {
 	s.Acc = a
 }
 
-func (s *service) Register(workspaceName string, email string, password string) (*Workspace, *Account, *Member, error) {
+func (s *service) Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error) {
 
+	workspaceName = govalidator.Trim(workspaceName, "")
+	name = govalidator.Trim(name, "")
 	email = govalidator.Trim(email, "")
 
 	if !govalidator.IsEmail(email) {
 		return nil, nil, nil, errors.New("email_invalid")
 	}
 
-	if len(workspaceName) < 3 || len(workspaceName) > 200 || !govalidator.IsAlphanumeric(workspaceName) || workspaceName == "account" {
+	if len(workspaceName) < 2 || len(workspaceName) > 200 || !govalidator.IsAlphanumeric(workspaceName) || workspaceName == "account" {
 		return nil, nil, nil, errors.New("workspace_invalid")
+	}
+
+	if len(name) < 1 || len(name) > 200 {
+		return nil, nil, nil, errors.New("name_invalid")
 	}
 
 	if len(password) < 6 || len(password) > 200 {
@@ -146,6 +154,7 @@ func (s *service) Register(workspaceName string, email string, password string) 
 	}
 	usr := &Account{
 		ID:                       uuid.Must(uuid.NewV4(), nil).String(),
+		Name:                     name,
 		Email:                    email,
 		Password:                 string(hash),
 		CreatedAt:                time.Now(),
@@ -286,11 +295,13 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 	}
 
 	p := &Project{
-		WorkspaceID: s.Member.WorkspaceID,
-		ID:          id,
-		Title:       title,
-		CreatedBy:   s.Member.ID,
-		CreatedAt:   time.Now()}
+		WorkspaceID:   s.Member.WorkspaceID,
+		ID:            id,
+		Title:         title,
+		CreatedBy:     s.Member.ID,
+		CreatedAt:     time.Now(),
+		CreatedByName: s.Acc.Name,
+	}
 
 	p, err = s.r.StoreProject(p)
 	if err != nil {
@@ -351,13 +362,14 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 	}
 
 	p := &Milestone{
-		WorkspaceID: s.Member.WorkspaceID,
-		ProjectID:   projectID,
-		ID:          id,
-		Title:       title,
-		Index:       "a",
-		CreatedBy:   s.Member.ID,
-		CreatedAt:   time.Now()}
+		WorkspaceID:   s.Member.WorkspaceID,
+		ProjectID:     projectID,
+		ID:            id,
+		Title:         title,
+		Index:         "a",
+		CreatedBy:     s.Member.ID,
+		CreatedAt:     time.Now(),
+		CreatedByName: s.Acc.Name}
 
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
@@ -415,13 +427,14 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	}
 
 	p := &Workflow{
-		WorkspaceID: s.Member.WorkspaceID,
-		ProjectID:   projectID,
-		ID:          id,
-		Title:       title,
-		Index:       "a",
-		CreatedBy:   s.Member.ID,
-		CreatedAt:   time.Now()}
+		WorkspaceID:   s.Member.WorkspaceID,
+		ProjectID:     projectID,
+		ID:            id,
+		Title:         title,
+		Index:         "a",
+		CreatedBy:     s.Member.ID,
+		CreatedAt:     time.Now(),
+		CreatedByName: s.Acc.Name}
 
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
@@ -478,13 +491,14 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 	}
 
 	p := &SubWorkflow{
-		WorkspaceID: s.Member.WorkspaceID,
-		WorkflowID:  workflowID,
-		ID:          id,
-		Title:       title,
-		Index:       "a",
-		CreatedBy:   s.Member.ID,
-		CreatedAt:   time.Now()}
+		WorkspaceID:   s.Member.WorkspaceID,
+		WorkflowID:    workflowID,
+		ID:            id,
+		Title:         title,
+		Index:         "a",
+		CreatedBy:     s.Member.ID,
+		CreatedAt:     time.Now(),
+		CreatedByName: s.Acc.Name}
 
 	p, err = s.r.StoreSubWorkflow(p)
 	if err != nil {
@@ -551,7 +565,8 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		Index:         "a",
 		Description:   "",
 		CreatedBy:     s.Member.ID,
-		CreatedAt:     time.Now()}
+		CreatedAt:     time.Now(),
+		CreatedByName: s.Acc.Name}
 
 	p, err = s.r.StoreFeature(p)
 	if err != nil {
@@ -584,6 +599,14 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 	}
 
 	return p, nil
+}
+
+func (s *service) GetFeaturesByProject(id string) []*Feature {
+	pp, err := s.r.FindFeaturesByProject(s.Member.WorkspaceID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
 }
 
 func validateTitle(title string) (string, error) {
@@ -649,6 +672,26 @@ func (s *service) UpdateEmail(email string) error {
 	if err != nil {
 		return errors.New("send_error")
 	}
+	return nil
+}
+
+func (s *service) UpdateName(name string) error {
+
+	a := s.Acc
+
+	name = govalidator.Trim(name, "")
+
+	if len(name) < 1 || len(name) > 200 {
+		return errors.New("name_invalid")
+	}
+
+	a.Name = name
+
+	_, err := s.r.SaveAccount(a)
+	if err != nil {
+		return errors.New("save_error")
+	}
+
 	return nil
 }
 
