@@ -29,11 +29,8 @@ func api(r chi.Router) {
 				r.Route("/milestones/{ID}", func(r chi.Router) {
 					r.Post("/", createMilestone)
 					r.Delete("/", deleteMilestone)
-					r.Put("/rename", renameMilestone)
-				})
-
-				r.Route("/milestones/{ID}/move", func(r chi.Router) {
-					r.Post("/", moveMilestone)
+					r.Post("/rename", renameMilestone)
+					r.Post("/move", moveMilestone)
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
@@ -231,11 +228,13 @@ func renameMilestone(w http.ResponseWriter, r *http.Request) {
 	}
 	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.RenameMilestone(id, data.Title); err != nil {
+	m, err := GetEnv(r).Service.RenameMilestone(id, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, m)
+
 }
 
 func deleteMilestone(w http.ResponseWriter, r *http.Request) {
