@@ -53,16 +53,19 @@ type Service interface {
 	DeleteMilestone(id string) error
 
 	GetWorkflowsByProject(id string) []*Workflow
+	MoveWorkflow(id string, index int) (*Workflow, error)
 	CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error)
 	RenameWorkflow(id string, title string) (*Workflow, error)
 	DeleteWorkflow(id string) error
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
+	MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error)
 	GetSubWorkflowsByProject(id string) []*SubWorkflow
 	RenameSubWorkflow(id string, title string) (*SubWorkflow, error)
 	DeleteSubWorkflow(id string) error
 
 	GetFeaturesByProject(id string) []*Feature
+	MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error)
 	CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error)
 	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
@@ -359,6 +362,11 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		return nil, err
 	}
 
+	a, _ := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if a != nil {
+		return nil, errors.New("already exists")
+	}
+
 	mm, _ := s.r.FindMilestonesByProject(s.Member.WorkspaceID, projectID)
 
 	p := &Milestone{
@@ -421,9 +429,6 @@ func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
 			nextRank = mmf[index].Rank
 		}
 	}
-	log.Println("XXX")
-	log.Println(length)
-	log.Println(prevRank, nextRank)
 
 	rank, _ := lexorank.Rank(prevRank, nextRank)
 
@@ -484,15 +489,26 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		return nil, errors.New("already exists")
 	}
 
+	ww, _ := s.r.FindWorkflowsByProject(s.Member.WorkspaceID, projectID)
+
 	p := &Workflow{
 		WorkspaceID:   s.Member.WorkspaceID,
 		ProjectID:     projectID,
 		ID:            id,
 		Title:         title,
-		Rank:          "a",
+		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
 		CreatedByName: s.Acc.Name}
+
+	n := len(ww)
+	if n == 0 {
+		rank, _ := lexorank.Rank("", "")
+		p.Rank = rank
+	} else {
+		rank, _ := lexorank.Rank(ww[n-1].Rank, "")
+		p.Rank = rank
+	}
 
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
@@ -500,6 +516,52 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	}
 
 	return p, nil
+}
+
+func (s *service) MoveWorkflow(id string, index int) (*Workflow, error) {
+
+	if index < 0 || index > 1000 {
+		return nil, errors.New("index invalid")
+	}
+
+	m, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	mm, _ := s.r.FindWorkflowsByProject(s.Member.WorkspaceID, m.ProjectID)
+
+	// Remove the item we are moving
+	mmf := []*Workflow{}
+	for _, x := range mm {
+		if x.ID != id {
+			mmf = append(mmf, x)
+		}
+	}
+
+	var prevRank, nextRank string
+	length := len(mmf)
+
+	if length != 0 {
+		if (index - 1) >= 0 {
+			prevRank = mmf[index-1].Rank
+		}
+
+		if index < length {
+			nextRank = mmf[index].Rank
+		}
+	}
+
+	rank, _ := lexorank.Rank(prevRank, nextRank)
+
+	m.Rank = rank
+
+	m, err = s.r.StoreWorkflow(m)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
+	}
+
+	return m, nil
 }
 
 func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
@@ -548,15 +610,26 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		return nil, errors.New("already exists")
 	}
 
+	mm, _ := s.r.FindSubWorkflowsByWorkflow(s.Member.WorkspaceID, workflowID)
+
 	p := &SubWorkflow{
 		WorkspaceID:   s.Member.WorkspaceID,
 		WorkflowID:    workflowID,
 		ID:            id,
 		Title:         title,
-		Rank:          "a",
+		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
 		CreatedByName: s.Acc.Name}
+
+	n := len(mm)
+	if n == 0 {
+		rank, _ := lexorank.Rank("", "")
+		p.Rank = rank
+	} else {
+		rank, _ := lexorank.Rank(mm[n-1].Rank, "")
+		p.Rank = rank
+	}
 
 	p, err = s.r.StoreSubWorkflow(p)
 	if err != nil {
@@ -564,6 +637,53 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 	}
 
 	return p, nil
+}
+
+func (s *service) MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error) {
+
+	if index < 0 || index > 1000 {
+		return nil, errors.New("index invalid")
+	}
+
+	m, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	mm, _ := s.r.FindSubWorkflowsByWorkflow(s.Member.WorkspaceID, toWorkflowID)
+
+	// Remove the item we are moving
+	mmf := []*SubWorkflow{}
+	for _, x := range mm {
+		if x.ID != id {
+			mmf = append(mmf, x)
+		}
+	}
+
+	var prevRank, nextRank string
+	length := len(mmf)
+
+	if length != 0 {
+		if (index - 1) >= 0 {
+			prevRank = mmf[index-1].Rank
+		}
+
+		if index < length {
+			nextRank = mmf[index].Rank
+		}
+	}
+
+	rank, _ := lexorank.Rank(prevRank, nextRank)
+
+	m.Rank = rank
+	m.WorkflowID = toWorkflowID
+
+	m, err = s.r.StoreSubWorkflow(m)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
+	}
+
+	return m, nil
 }
 
 func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, error) {
@@ -614,17 +734,28 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		return nil, errors.New("already exists")
 	}
 
+	mm, _ := s.r.FindFeaturesByMilestoneAndSubWorkflow(s.Member.WorkspaceID, milestoneID, subWorkflowID)
+
 	p := &Feature{
 		WorkspaceID:   s.Member.WorkspaceID,
 		MilestoneID:   milestoneID,
 		SubWorkflowID: subWorkflowID,
 		ID:            id,
 		Title:         title,
-		Rank:          "a",
+		Rank:          "",
 		Description:   "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
 		CreatedByName: s.Acc.Name}
+
+	n := len(mm)
+	if n == 0 {
+		rank, _ := lexorank.Rank("", "")
+		p.Rank = rank
+	} else {
+		rank, _ := lexorank.Rank(mm[n-1].Rank, "")
+		p.Rank = rank
+	}
 
 	p, err = s.r.StoreFeature(p)
 	if err != nil {
@@ -657,6 +788,53 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 	}
 
 	return p, nil
+}
+
+func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error) {
+
+	if index < 0 || index > 1000 {
+		return nil, errors.New("index invalid")
+	}
+
+	m, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
+
+	mm, _ := s.r.FindFeaturesByMilestoneAndSubWorkflow(s.Member.WorkspaceID, toMilestoneID, toSubWorkflowID)
+
+	// Remove the item we are moving
+	mmf := []*Feature{}
+	for _, x := range mm {
+		if x.ID != id {
+			mmf = append(mmf, x)
+		}
+	}
+
+	var prevRank, nextRank string
+	length := len(mmf)
+
+	if length != 0 {
+		if (index - 1) >= 0 {
+			prevRank = mmf[index-1].Rank
+		}
+
+		if index < length {
+			nextRank = mmf[index].Rank
+		}
+	}
+
+	rank, _ := lexorank.Rank(prevRank, nextRank)
+	m.Rank = rank
+	m.MilestoneID = toMilestoneID
+	m.SubWorkflowID = toSubWorkflowID
+
+	m, err = s.r.StoreFeature(m)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not store")
+	}
+
+	return m, nil
 }
 
 func (s *service) GetFeaturesByProject(id string) []*Feature {

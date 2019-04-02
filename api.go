@@ -37,18 +37,21 @@ func api(r chi.Router) {
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
 					r.Put("/rename", renameWorkflow)
+					r.Post("/move", moveWorkflow)
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
 					r.Post("/", createSubWorkflow)
 					r.Put("/rename", renameSubWorkflow)
 					r.Delete("/", deleteSubWorkflow)
+					r.Post("/move", moveSubWorkflow)
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
 					r.Post("/", createFeature)
 					r.Put("/rename", renameFeature)
 					r.Delete("/", deleteFeature)
+					r.Post("/move", moveFeature)
 				})
 			})
 	})
@@ -265,11 +268,13 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := chi.URLParam(r, "ID")
-	if _, err := GetEnv(r).Service.CreateWorkflowWithID(id, data.ProjectID, data.Title); err != nil {
+	wf, err := GetEnv(r).Service.CreateWorkflowWithID(id, data.ProjectID, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+
+	render.JSON(w, r, wf)
 }
 
 func renameWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -280,11 +285,13 @@ func renameWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.RenameWorkflow(id, data.Title); err != nil {
+	wf, err := GetEnv(r).Service.RenameWorkflow(id, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, wf)
+
 }
 
 func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -295,6 +302,31 @@ func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.Status(r, http.StatusOK)
+}
+
+type moveWorkflowRequest struct {
+	Index int `json:"index"`
+}
+
+func (p *moveWorkflowRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func moveWorkflow(w http.ResponseWriter, r *http.Request) {
+
+	data := &moveWorkflowRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.MoveWorkflow(id, data.Index)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 // SubWorkflows
@@ -316,11 +348,12 @@ func createSubWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "ID")
-	if _, err := GetEnv(r).Service.CreateSubWorkflowWithID(id, data.WorkflowID, data.Title); err != nil {
+	sw, err := GetEnv(r).Service.CreateSubWorkflowWithID(id, data.WorkflowID, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, sw)
 }
 
 func renameSubWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -331,11 +364,13 @@ func renameSubWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.RenameSubWorkflow(id, data.Title); err != nil {
+	sw, err := GetEnv(r).Service.RenameSubWorkflow(id, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, sw)
+
 }
 
 func deleteSubWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -346,6 +381,32 @@ func deleteSubWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.Status(r, http.StatusOK)
+}
+
+type moveSubWorkflowRequest struct {
+	Index        int    `json:"index"`
+	ToWorkflowID string `json:"toWorkflowId"`
+}
+
+func (p *moveSubWorkflowRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func moveSubWorkflow(w http.ResponseWriter, r *http.Request) {
+
+	data := &moveSubWorkflowRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.MoveSubWorkflow(id, data.ToWorkflowID, data.Index)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 // Features
@@ -368,11 +429,12 @@ func createFeature(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := chi.URLParam(r, "ID")
-	if _, err := GetEnv(r).Service.CreateFeatureWithID(id, data.SubWorkflowID, data.MilestoneID, data.Title); err != nil {
+	f, err := GetEnv(r).Service.CreateFeatureWithID(id, data.SubWorkflowID, data.MilestoneID, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, f)
 }
 
 func renameFeature(w http.ResponseWriter, r *http.Request) {
@@ -383,11 +445,12 @@ func renameFeature(w http.ResponseWriter, r *http.Request) {
 	}
 	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.RenameFeature(id, data.Title); err != nil {
+	f, err := GetEnv(r).Service.RenameFeature(id, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, f)
 }
 
 func deleteFeature(w http.ResponseWriter, r *http.Request) {
@@ -398,6 +461,33 @@ func deleteFeature(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.Status(r, http.StatusOK)
+}
+
+type moveFeatureRequest struct {
+	Index           int    `json:"index"`
+	ToSubWorkflowID string `json:"toSubWorkflowId"`
+	ToMilestoneID   string `json:"toMilestoneId"`
+}
+
+func (p *moveFeatureRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func moveFeature(w http.ResponseWriter, r *http.Request) {
+
+	data := &moveFeatureRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.MoveFeature(id, data.ToMilestoneID, data.ToSubWorkflowID, data.Index)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 // Common

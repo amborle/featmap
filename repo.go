@@ -43,11 +43,13 @@ type Repository interface {
 
 	GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error)
 	FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error)
+	FindSubWorkflowsByWorkflow(workspaceID string, workflowID string) ([]*SubWorkflow, error)
 	StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error)
 	DeleteSubWorkflow(workspaceID string, workflowID string) error
 
 	GetFeature(workspaceID string, featureID string) (*Feature, error)
-	FindFeaturesByProject(workspaceID string, featureID string) ([]*Feature, error)
+	FindFeaturesByProject(workspaceID string, projectID string) ([]*Feature, error)
+	FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid string, swid string) ([]*Feature, error)
 	StoreFeature(x *Feature) (*Feature, error)
 	DeleteFeature(workspaceID string, workflowID string) error
 }
@@ -254,7 +256,7 @@ func (a *repo) GetWorkflow(workspaceID string, workflowID string) (*Workflow, er
 
 func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*Workflow, error) {
 	x := []*Workflow{}
-	err := a.db.Select(&x, "SELECT * FROM workflows WHERE workspace_id = $1 and project_id = $2", workspaceID, projectID)
+	err := a.db.Select(&x, "SELECT * FROM workflows WHERE workspace_id = $1 and project_id = $2 order by rank", workspaceID, projectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "none found")
 	}
@@ -297,6 +299,16 @@ func (a *repo) FindSubWorkflowsByProject(workspaceID string, projectID string) (
 	return x, nil
 }
 
+func (a *repo) FindSubWorkflowsByWorkflow(workspaceID string, workflowID string) ([]*SubWorkflow, error) {
+	x := []*SubWorkflow{}
+	err := a.db.Select(&x, "SELECT * FROM subworkflows s WHERE s.workspace_id = $1 AND s.workflow_id = $2 ORDER BY s.rank", workspaceID, workflowID)
+	if err != nil {
+		return nil, errors.Wrap(err, "no found")
+	}
+	return x, nil
+
+}
+
 func (a *repo) StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error) {
 
 	if //noinspection ALL
@@ -327,6 +339,15 @@ func (a *repo) GetFeature(workspaceID string, featureID string) (*Feature, error
 func (a *repo) FindFeaturesByProject(workspaceID string, projectID string) ([]*Feature, error) {
 	x := []*Feature{}
 	err := a.db.Select(&x, "SELECT * FROM features f WHERE f.workspace_id = $1 AND f.milestone_id IN (select m.id from milestones m where m.workspace_id = $1 and m.project_id = $2) ", workspaceID, projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "no found")
+	}
+	return x, nil
+}
+
+func (a *repo) FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid string, swid string) ([]*Feature, error) {
+	x := []*Feature{}
+	err := a.db.Select(&x, "SELECT * FROM features f WHERE f.workspace_id = $1 AND f.milestone_id = $2 AND f.subworkflow_id = $3 ORDER BY f.rank", workspaceID, mid, swid)
 	if err != nil {
 		return nil, errors.Wrap(err, "no found")
 	}
