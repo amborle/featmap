@@ -42,50 +42,61 @@ type Project struct {
 
 // Milestone ...
 type Milestone struct {
-	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
-	ProjectID     string    `db:"project_id" json:"projectId"`
-	ID            string    `db:"id" json:"id"`
-	Title         string    `db:"title" json:"title"`
-	Rank          string    `db:"rank" json:"rank"`
-	CreatedBy     string    `db:"created_by" json:"createdBy"`
-	CreatedByName string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	ProjectID          string    `db:"project_id" json:"projectId"`
+	ID                 string    `db:"id" json:"id"`
+	Title              string    `db:"title" json:"title"`
+	Description        string    `db:"description" json:"description"`
+	Rank               string    `db:"rank" json:"rank"`
+	CreatedBy          string    `db:"created_by" json:"createdBy"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 }
 
 // Workflow ...
 type Workflow struct {
-	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
-	ProjectID     string    `db:"project_id" json:"projectId"`
-	ID            string    `db:"id" json:"id"`
-	Title         string    `db:"title" json:"title"`
-	Rank          string    `db:"rank" json:"rank"`
-	CreatedBy     string    `db:"created_by" json:"createdBy"`
-	CreatedByName string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	ProjectID          string    `db:"project_id" json:"projectId"`
+	ID                 string    `db:"id" json:"id"`
+	Title              string    `db:"title" json:"title"`
+	Description        string    `db:"description" json:"description"`
+	Rank               string    `db:"rank" json:"rank"`
+	CreatedBy          string    `db:"created_by" json:"createdBy"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 }
 
 // SubWorkflow ...
 type SubWorkflow struct {
-	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
-	WorkflowID    string    `db:"workflow_id" json:"workflowId"`
-	ID            string    `db:"id" json:"id"`
-	Title         string    `db:"title" json:"title"`
-	Rank          string    `db:"rank" json:"rank"`
-	CreatedBy     string    `db:"created_by" json:"createdBy"`
-	CreatedByName string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	WorkflowID         string    `db:"workflow_id" json:"workflowId"`
+	ID                 string    `db:"id" json:"id"`
+	Title              string    `db:"title" json:"title"`
+	Description        string    `db:"description" json:"description"`
+	Rank               string    `db:"rank" json:"rank"`
+	CreatedBy          string    `db:"created_by" json:"createdBy"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 }
 
 // Feature ...
 type Feature struct {
-	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
-	SubWorkflowID string    `db:"subworkflow_id" json:"subWorkflowId"`
-	MilestoneID   string    `db:"milestone_id" json:"milestoneId"`
-	ID            string    `db:"id" json:"id"`
-	Title         string    `db:"title" json:"title"`
-	Rank          string    `db:"rank" json:"rank"`
-	Description   string    `db:"description" json:"description"`
-	CreatedBy     string    `db:"created_by" json:"createdBy"`
-	CreatedByName string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	SubWorkflowID      string    `db:"subworkflow_id" json:"subWorkflowId"`
+	MilestoneID        string    `db:"milestone_id" json:"milestoneId"`
+	ID                 string    `db:"id" json:"id"`
+	Title              string    `db:"title" json:"title"`
+	Rank               string    `db:"rank" json:"rank"`
+	Description        string    `db:"description" json:"description"`
+	CreatedBy          string    `db:"created_by" json:"createdBy"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 }

@@ -377,7 +377,8 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
-		CreatedByName: s.Acc.Name}
+		CreatedByName: s.Acc.Name,
+	}
 
 	n := len(mm)
 	if n == 0 {
@@ -387,7 +388,8 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		rank, _ := lexorank.Rank(mm[n-1].Rank, "")
 		p.Rank = rank
 	}
-
+	
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
@@ -433,6 +435,7 @@ func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
 	rank, _ := lexorank.Rank(prevRank, nextRank)
 
 	m.Rank = rank
+	m.LastModifiedByName = s.Acc.Name
 
 	m, err = s.r.StoreMilestone(m)
 	if err != nil {
@@ -455,6 +458,7 @@ func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
 	}
 
 	p.Title = title
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -499,7 +503,8 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
-		CreatedByName: s.Acc.Name}
+		CreatedByName: s.Acc.Name,
+	}
 
 	n := len(ww)
 	if n == 0 {
@@ -509,7 +514,9 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		rank, _ := lexorank.Rank(ww[n-1].Rank, "")
 		p.Rank = rank
 	}
-
+	
+	p.LastModifiedByName = s.Acc.Name
+	
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
@@ -555,6 +562,7 @@ func (s *service) MoveWorkflow(id string, index int) (*Workflow, error) {
 	rank, _ := lexorank.Rank(prevRank, nextRank)
 
 	m.Rank = rank
+	m.LastModifiedByName = s.Acc.Name
 
 	m, err = s.r.StoreWorkflow(m)
 	if err != nil {
@@ -577,6 +585,7 @@ func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
 	}
 
 	p.Title = title
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -632,6 +641,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 	}
 
 	p, err = s.r.StoreSubWorkflow(p)
+	p.LastModifiedByName = s.Acc.Name
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
 	}
@@ -677,6 +687,7 @@ func (s *service) MoveSubWorkflow(id string, toWorkflowID string, index int) (*S
 
 	m.Rank = rank
 	m.WorkflowID = toWorkflowID
+	m.LastModifiedByName = s.Acc.Name
 
 	m, err = s.r.StoreSubWorkflow(m)
 	if err != nil {
@@ -699,7 +710,9 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 	}
 
 	p.Title = title
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreSubWorkflow(p)
+	
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
 	}
@@ -757,7 +770,9 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		p.Rank = rank
 	}
 
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreFeature(p)
+	
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
 	}
@@ -782,6 +797,7 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 	}
 
 	p.Title = title
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreFeature(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -828,6 +844,7 @@ func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID s
 	m.Rank = rank
 	m.MilestoneID = toMilestoneID
 	m.SubWorkflowID = toSubWorkflowID
+	m.LastModifiedByName = s.Acc.Name
 
 	m, err = s.r.StoreFeature(m)
 	if err != nil {
