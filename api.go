@@ -23,7 +23,8 @@ func api(r chi.Router) {
 					r.Post("/", createProject)
 					r.Get("/", getProjectExtended)
 					r.Delete("/", deleteProject)
-					r.Put("/rename", renameProject)
+					r.Post("/rename", renameProject)
+					r.Post("/description", updateProjectDescription)
 				})
 
 				r.Route("/milestones/{ID}", func(r chi.Router) {
@@ -31,27 +32,31 @@ func api(r chi.Router) {
 					r.Delete("/", deleteMilestone)
 					r.Post("/rename", renameMilestone)
 					r.Post("/move", moveMilestone)
+					r.Post("/description", updateMilestoneDescription)
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
-					r.Put("/rename", renameWorkflow)
+					r.Post("/rename", renameWorkflow)
 					r.Post("/move", moveWorkflow)
+					r.Post("/description", updateWorkflowDescription)
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
 					r.Post("/", createSubWorkflow)
-					r.Put("/rename", renameSubWorkflow)
+					r.Post("/rename", renameSubWorkflow)
 					r.Delete("/", deleteSubWorkflow)
 					r.Post("/move", moveSubWorkflow)
+					r.Post("/description", updateSubWorkflowDescription)
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
 					r.Post("/", createFeature)
-					r.Put("/rename", renameFeature)
+					r.Post("/rename", renameFeature)
 					r.Delete("/", deleteFeature)
 					r.Post("/move", moveFeature)
+					r.Post("/description", updateFeatureDescription)
 				})
 			})
 	})
@@ -153,11 +158,28 @@ func renameProject(w http.ResponseWriter, r *http.Request) {
 	}
 	id := chi.URLParam(r, "ID")
 
-	if _, err := GetEnv(r).Service.RenameProject(id, data.Title); err != nil {
+	p, err := GetEnv(r).Service.RenameProject(id, data.Title)
+	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-	render.Status(r, http.StatusOK)
+	render.JSON(w, r, p)
+}
+
+func updateProjectDescription(w http.ResponseWriter, r *http.Request) {
+	data := &updateDescriptionRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.UpdateProjectDescription(id, data.Description)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 func deleteProject(w http.ResponseWriter, r *http.Request) {
@@ -238,6 +260,22 @@ func renameMilestone(w http.ResponseWriter, r *http.Request) {
 	}
 	render.JSON(w, r, m)
 
+}
+
+func updateMilestoneDescription(w http.ResponseWriter, r *http.Request) {
+	data := &updateDescriptionRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.UpdateMilestoneDescription(id, data.Description)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 func deleteMilestone(w http.ResponseWriter, r *http.Request) {
@@ -329,6 +367,22 @@ func moveWorkflow(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, m)
 }
 
+func updateWorkflowDescription(w http.ResponseWriter, r *http.Request) {
+	data := &updateDescriptionRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.UpdateWorkflowDescription(id, data.Description)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
+}
+
 // SubWorkflows
 
 type createSubWorkflowRequest struct {
@@ -371,6 +425,22 @@ func renameSubWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 	render.JSON(w, r, sw)
 
+}
+
+func updateSubWorkflowDescription(w http.ResponseWriter, r *http.Request) {
+	data := &updateDescriptionRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+	m, err := GetEnv(r).Service.UpdateSubWorkflowDescription(id, data.Description)
+
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
 }
 
 func deleteSubWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -453,6 +523,22 @@ func renameFeature(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, f)
 }
 
+func updateFeatureDescription(w http.ResponseWriter, r *http.Request) {
+	data := &updateDescriptionRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.UpdateFeatureDescription(id, data.Description)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
+}
+
 func deleteFeature(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
@@ -497,5 +583,13 @@ type renameRequest struct {
 }
 
 func (p *renameRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+type updateDescriptionRequest struct {
+	Description string `json:"description"`
+}
+
+func (p *updateDescriptionRequest) Bind(r *http.Request) error {
 	return nil
 }

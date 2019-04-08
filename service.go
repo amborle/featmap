@@ -45,30 +45,35 @@ type Service interface {
 	RenameProject(id string, title string) (*Project, error)
 	DeleteProject(id string) error
 	GetProjects() []*Project
+	UpdateProjectDescription(id string, d string) (*Project, error)
 
 	CreateMilestoneWithID(id string, projectID string, title string) (*Milestone, error)
 	MoveMilestone(id string, index int) (*Milestone, error)
 	RenameMilestone(id string, title string) (*Milestone, error)
 	GetMilestonesByProject(id string) []*Milestone
 	DeleteMilestone(id string) error
+	UpdateMilestoneDescription(id string, d string) (*Milestone, error)
 
 	GetWorkflowsByProject(id string) []*Workflow
 	MoveWorkflow(id string, index int) (*Workflow, error)
 	CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error)
 	RenameWorkflow(id string, title string) (*Workflow, error)
 	DeleteWorkflow(id string) error
+	UpdateWorkflowDescription(id string, d string) (*Workflow, error)
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
 	MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error)
 	GetSubWorkflowsByProject(id string) []*SubWorkflow
 	RenameSubWorkflow(id string, title string) (*SubWorkflow, error)
 	DeleteSubWorkflow(id string) error
+	UpdateSubWorkflowDescription(id string, d string) (*SubWorkflow, error)
 
 	GetFeaturesByProject(id string) []*Feature
 	MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error)
 	CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error)
 	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
+	UpdateFeatureDescription(id string, d string) (*Feature, error)
 }
 
 type service struct {
@@ -306,8 +311,11 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		Title:         title,
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now(),
-		CreatedByName: s.Acc.Name,
+		CreatedByName: s.Acc.Name,		
 	}
+
+	p.LastModified =  time.Now()
+	p.LastModifiedByName = s.Acc.Name
 
 	p, err = s.r.StoreProject(p)
 	if err != nil {
@@ -329,12 +337,27 @@ func (s *service) RenameProject(id string, title string) (*Project, error) {
 	}
 
 	p.Title = title
+	p.LastModified =  time.Now()
+	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreProject(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
 	}
 
 	return p, nil
+}
+
+func (s *service) UpdateProjectDescription(id string, d string) (*Project, error) {
+	x, err := s.r.GetProject(s.Member.WorkspaceID, id)
+	if err != nil { return nil, err }
+
+	x.Description = d
+	x.LastModified =  time.Now()
+	x.LastModifiedByName = s.Acc.Name
+	x, err = s.r.StoreProject(x)
+	if err != nil { return nil, err }
+
+	return  x, nil
 }
 
 func (s *service) DeleteProject(id string) error {
@@ -346,11 +369,6 @@ func (s *service) GetProjects() []*Project {
 	if err != nil {
 		log.Println(err)
 	}
-
-	// if pp == nil {
-	// 	pp = []*Project{}
-	// }
-
 	return pp
 }
 
@@ -390,6 +408,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 	}
 	
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
@@ -436,6 +455,7 @@ func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
 
 	m.Rank = rank
 	m.LastModifiedByName = s.Acc.Name
+	m.LastModified = time.Now()
 
 	m, err = s.r.StoreMilestone(m)
 	if err != nil {
@@ -459,6 +479,8 @@ func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
+
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -477,6 +499,19 @@ func (s *service) GetMilestonesByProject(id string) []*Milestone {
 		log.Println(err)
 	}
 	return pp
+}
+
+func (s *service) UpdateMilestoneDescription(id string, d string) (*Milestone, error) {
+	x, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if err != nil { return nil, err }
+
+	x.Description = d
+	x.LastModified = time.Now()
+	x.LastModifiedByName = s.Acc.Name
+	x, err = s.r.StoreMilestone(x)
+	if err != nil { return nil, err }
+
+	return  x, nil
 }
 
 // Workflow
@@ -516,6 +551,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	}
 	
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
 	
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
@@ -563,6 +599,7 @@ func (s *service) MoveWorkflow(id string, index int) (*Workflow, error) {
 
 	m.Rank = rank
 	m.LastModifiedByName = s.Acc.Name
+	m.LastModified = time.Now()
 
 	m, err = s.r.StoreWorkflow(m)
 	if err != nil {
@@ -586,6 +623,8 @@ func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
+
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -604,6 +643,19 @@ func (s *service) GetWorkflowsByProject(id string) []*Workflow {
 		log.Println(err)
 	}
 	return pp
+}
+
+func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, error) {
+	x, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if err != nil { return nil, err }
+
+	x.Description = d
+	x.LastModified = time.Now()
+	x.LastModifiedByName = s.Acc.Name
+	x, err = s.r.StoreWorkflow(x)
+	if err != nil { return nil, err }
+
+	return  x, nil
 }
 
 // SubWorkflow
@@ -642,6 +694,8 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 
 	p, err = s.r.StoreSubWorkflow(p)
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
+
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
 	}
@@ -688,6 +742,7 @@ func (s *service) MoveSubWorkflow(id string, toWorkflowID string, index int) (*S
 	m.Rank = rank
 	m.WorkflowID = toWorkflowID
 	m.LastModifiedByName = s.Acc.Name
+	m.LastModified = time.Now()
 
 	m, err = s.r.StoreSubWorkflow(m)
 	if err != nil {
@@ -711,6 +766,8 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
+
 	p, err = s.r.StoreSubWorkflow(p)
 	
 	if err != nil {
@@ -730,6 +787,19 @@ func (s *service) GetSubWorkflowsByProject(id string) []*SubWorkflow {
 		log.Println(err)
 	}
 	return pp
+}
+
+func (s *service) UpdateSubWorkflowDescription(id string, d string) (*SubWorkflow, error) {
+	x, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)	
+	if err != nil { return nil, err }
+
+	x.Description = d
+	x.LastModified = time.Now()
+	x.LastModifiedByName = s.Acc.Name
+	x, err = s.r.StoreSubWorkflow(x)
+	if err != nil { return nil, err }
+
+	return  x, nil
 }
 
 // Features
@@ -771,6 +841,8 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 	}
 
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
+
 	p, err = s.r.StoreFeature(p)
 	
 	if err != nil {
@@ -798,6 +870,9 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now()
+
+
 	p, err = s.r.StoreFeature(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -845,6 +920,8 @@ func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID s
 	m.MilestoneID = toMilestoneID
 	m.SubWorkflowID = toSubWorkflowID
 	m.LastModifiedByName = s.Acc.Name
+	m.LastModified = time.Now()
+
 
 	m, err = s.r.StoreFeature(m)
 	if err != nil {
@@ -861,6 +938,23 @@ func (s *service) GetFeaturesByProject(id string) []*Feature {
 	}
 	return pp
 }
+
+
+func (s *service) UpdateFeatureDescription(id string, d string) (*Feature, error) {
+	x, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if err != nil { return nil, err }
+
+	x.Description = d
+	x.LastModified = time.Now()
+	x.LastModifiedByName = s.Acc.Name
+	x, err = s.r.StoreFeature(x)
+	if err != nil { return nil, err }
+
+	return  x, nil
+}
+
+
+// -----------
 
 func validateTitle(title string) (string, error) {
 	title = govalidator.Trim(title, "")

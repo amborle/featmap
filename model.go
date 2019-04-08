@@ -32,12 +32,15 @@ type Member struct {
 
 // Project ...
 type Project struct {
-	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
-	ID            string    `db:"id" json:"id"`
-	Title         string    `db:"title" json:"title"`
-	CreatedBy     string    `db:"created_by" json:"createdBy"`
-	CreatedByName string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	ID                 string    `db:"id" json:"id"`
+	Title              string    `db:"title" json:"title"`
+	Description        string    `db:"description" json:"description"`
+	CreatedBy          string    `db:"created_by" json:"createdBy"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 }
 
 // Milestone ...
