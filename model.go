@@ -48,6 +48,18 @@ type Member struct {
 	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
 }
 
+// Invite ...
+type Invite struct {
+	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
+	ID            string    `db:"id" json:"id"`
+	Email         string    `db:"email" json:"email"`
+	Level         int       `db:"level" json:"level"`
+	Code          string    `db:"code" json:"code"`
+	CreatedBy     string    `db:"created_by" json:"createdBy"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+}
+
 // Project ...
 type Project struct {
 	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`

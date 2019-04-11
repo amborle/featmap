@@ -23,6 +23,13 @@ func api(r chi.Router) {
 			r.Delete("/", deleteMember)
 		})
 
+		r.Get("/invites", getInvites)
+		r.Post("/invites", createInvite)
+		r.Route("/invites/{ID}", func(r chi.Router) {
+			r.Delete("/", deleteMember)
+			r.Post("/resend", resendInvite)
+		})
+
 	})
 
 	r.Group(func(r chi.Router) {
@@ -123,6 +130,57 @@ func updateMemberLevel(w http.ResponseWriter, r *http.Request) {
 func deleteMember(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	err := GetEnv(r).Service.DeleteMember(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+// Invites
+
+func getInvites(w http.ResponseWriter, r *http.Request) {
+	render.JSON(w, r, GetEnv(r).Service.GetInvitesByWorkspace())
+}
+
+type createInviteRequest struct {
+	Email string `json:"email"`
+	Level int    `json:"level"`
+}
+
+func (p *createInviteRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func createInvite(w http.ResponseWriter, r *http.Request) {
+	data := &createInviteRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	_, err := GetEnv(r).Service.CreateInvite(data.Email, data.Level)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+}
+
+func deleteInvite(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	err := GetEnv(r).Service.DeleteInvite(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+func resendInvite(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+
+	err := GetEnv(r).Service.SendInvitationMail(id)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

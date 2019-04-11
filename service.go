@@ -45,6 +45,11 @@ type Service interface {
 	UpdateMemberLevel(memberID string, level int) (*Member, error)
 	DeleteMember(memberID string) error
 
+	GetInvitesByWorkspace() []*Invite
+	CreateInvite(email string, level int) (*Invite, error)
+	SendInvitationMail(invitationID string) error
+	DeleteInvite(invitationID string) error
+
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
 	RenameProject(id string, title string) (*Project, error)
@@ -190,8 +195,8 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID: t.ID,
 		AccountID:   account.ID,
-		Level: 40, // This corresponds to Owner 
-		CreatedAt: time.Now().UTC(),
+		Level:       40, // This corresponds to Owner
+		CreatedAt:   time.Now().UTC(),
 	}
 	_, err = s.r.SaveMember(member)
 	if err != nil {
@@ -201,15 +206,15 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	// Save subscription
 
 	sub := &Subscription{
-		ID:  uuid.Must(uuid.NewV4(), nil).String(),
-		WorkspaceID: t.ID,
-		Level: 10, // 10 ~ Free trial
-		NumberOfEditors: 2,
-		FromDate: time.Now().UTC(),
-		CreatedBy: member.ID,
-		CreatedByName: account.Name,
-		CreatedAt: time.Now().UTC(),
-		LastModified: time.Now().UTC(),
+		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID:        t.ID,
+		Level:              10, // 10 ~ Free trial
+		NumberOfEditors:    2,
+		FromDate:           time.Now().UTC(),
+		CreatedBy:          member.ID,
+		CreatedByName:      account.Name,
+		CreatedAt:          time.Now().UTC(),
+		LastModified:       time.Now().UTC(),
 		LastModifiedByName: account.Name,
 	}
 
@@ -262,7 +267,7 @@ func (s *service) GetAccount(id string) (*Account, error) {
 	return acc, nil
 }
 
-func (s *service) GetAccountsByWorkspace() []*Account { 
+func (s *service) GetAccountsByWorkspace() []*Account {
 	accounts, err := s.r.FindAccountsByWorkspace(s.Member.WorkspaceID)
 	if err != nil {
 		log.Println(err)
@@ -299,10 +304,10 @@ func (s *service) GetWorkspaces() []*Workspace {
 	return workspace
 }
 
-func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error)  {
+func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error) {
 
-	if !(level == 10 || level == 20 || level == 30 || level == 40) {
-		return nil, errors.New("invalid level")
+	if !levelIsValid(level) {
+		return nil, errors.New("level invalid")
 	}
 
 	member, err := s.r.GetMember(s.Member.WorkspaceID, memberID)
@@ -310,42 +315,42 @@ func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error)
 		return nil, err
 	}
 
-	if member.ID == s.Member.ID  {
+	if member.ID == s.Member.ID {
 		return nil, errors.New("not allowed to change own role")
 	}
 
-	if member.Level == 40 && s.Member.Level == 30  {
+	if member.Level == 40 && s.Member.Level == 30 {
 		return nil, errors.New("not allowed to change role of owner")
 	}
 
-	member.Level = level 
+	member.Level = level
 
 	if _, err := s.r.SaveMember(member); err != nil {
-		return nil, err		
+		return nil, err
 	}
-	
+
 	return member, nil
 }
 
-func (s *service) DeleteMember(id string) error  {
+func (s *service) DeleteMember(id string) error {
 
 	member, err := s.r.GetMember(s.Member.WorkspaceID, id)
 	if err != nil {
 		return err
 	}
 
-	if member.ID == s.Member.ID && s.Member.Level == 40   {
-		return errors.New("owners not allowed to remo their own membership")
+	if member.ID == s.Member.ID && s.Member.Level == 40 {
+		return errors.New("owners not allowed to remove their own membership")
 	}
 
-	if member.Level == 40 && s.Member.Level == 30  {
-		return  errors.New("non-owners not allowed to remove membership of owner ")
+	if member.Level == 40 && s.Member.Level == 30 {
+		return errors.New("admins not allowed to remove membership of owner ")
 	}
-	
-	if err := s.r.DeleteMember(s.Member.WorkspaceID, id) ; err != nil {
-		return  err		
+
+	if err := s.r.DeleteMember(s.Member.WorkspaceID, id); err != nil {
+		return err
 	}
-	
+
 	return nil
 }
 
@@ -368,17 +373,108 @@ func (s *service) GetMembers() []*Member {
 	return members
 }
 
-
 func (s *service) GetMembersByWorkspace() []*Member {
 	members, err := s.r.FindMembersByWorkspace(s.Member.WorkspaceID)
-
-	log.Println("XXX")
-	log.Println(members)
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 	return members
+}
+
+// INVITES
+
+func (s *service) CreateInvite(email string, level int) (*Invite, error) {
+
+	email = govalidator.Trim(email, "")
+
+	if !govalidator.IsEmail(email) {
+		return nil, errors.New("email invalid")
+	}
+
+	if !levelIsValid(level) {
+		return nil, errors.New("level invalid")
+	}
+
+	member, _ := s.r.GetMemberByEmail(s.Member.WorkspaceID, email)
+	if member != nil {
+		return nil, errors.New("already member of the workspace")
+	}
+
+	m, _ := s.r.GetInviteByEmail(s.Member.WorkspaceID, email)
+	if m != nil {
+		return nil, errors.New("email already has an pending invite")
+	}
+
+	if s.Member.Level == 30 && level == 40 {
+		return nil, errors.New("admins are not allowed to appoint new owners")
+	}
+
+	x := &Invite{
+		WorkspaceID: s.Member.WorkspaceID,
+		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		Email:       email,
+		Level:       level,
+		Code:        uuid.Must(uuid.NewV4(), nil).String(),
+		CreatedBy:   s.Member.AccountID,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	if err := s.r.StoreInvite(x); err != nil {
+		return nil, err
+	}
+
+	if err := s.SendInvitationMail(x.ID); err != nil {
+		return nil, err
+	}
+
+	return x, nil
+}
+
+func (s *service) SendInvitationMail(invitationID string) error {
+
+	ws, err := s.r.GetWorkspace(s.Member.WorkspaceID)
+	if err != nil {
+		return err
+	}
+
+	invite, err := s.r.GetInvite(s.Member.WorkspaceID, invitationID)
+	if err != nil {
+		return err
+	}
+
+	i := InviteStruct{
+		AppSiteURL:    s.appSiteURL,
+		WorkspaceName: ws.Name,
+		Email:         invite.Email,
+		Code:          invite.Code,
+		InvitedBy:     invite.CreatedByName,
+	}
+
+	body, err := inviteBody(i)
+	if err != nil {
+		return err
+	}
+
+	err = s.SendEmail(invite.Email, "Featmap: invitation to join a workspace", body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) DeleteInvite(id string) error {
+	return s.r.DeleteInvite(s.Member.WorkspaceID, id)
+}
+
+func (s *service) GetInvitesByWorkspace() []*Invite {
+	invites, err := s.r.FindInvitesByWorkspace(s.Member.WorkspaceID)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return invites
 }
 
 // const datelayout = "2006-01-02"
@@ -411,10 +507,10 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		Title:         title,
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
-		CreatedByName: s.Acc.Name,		
+		CreatedByName: s.Acc.Name,
 	}
 
-	p.LastModified =  time.Now().UTC()
+	p.LastModified = time.Now().UTC()
 	p.LastModifiedByName = s.Acc.Name
 
 	p, err = s.r.StoreProject(p)
@@ -437,7 +533,7 @@ func (s *service) RenameProject(id string, title string) (*Project, error) {
 	}
 
 	p.Title = title
-	p.LastModified =  time.Now().UTC()
+	p.LastModified = time.Now().UTC()
 	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreProject(p)
 	if err != nil {
@@ -449,15 +545,19 @@ func (s *service) RenameProject(id string, title string) (*Project, error) {
 
 func (s *service) UpdateProjectDescription(id string, d string) (*Project, error) {
 	x, err := s.r.GetProject(s.Member.WorkspaceID, id)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	x.Description = d
-	x.LastModified =  time.Now().UTC()
+	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreProject(x)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
-	return  x, nil
+	return x, nil
 }
 
 func (s *service) DeleteProject(id string) error {
@@ -506,7 +606,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		rank, _ := lexorank.Rank(mm[n-1].Rank, "")
 		p.Rank = rank
 	}
-	
+
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 	p, err = s.r.StoreMilestone(p)
@@ -603,15 +703,19 @@ func (s *service) GetMilestonesByProject(id string) []*Milestone {
 
 func (s *service) UpdateMilestoneDescription(id string, d string) (*Milestone, error) {
 	x, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreMilestone(x)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
-	return  x, nil
+	return x, nil
 }
 
 // Workflow
@@ -649,10 +753,10 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		rank, _ := lexorank.Rank(ww[n-1].Rank, "")
 		p.Rank = rank
 	}
-	
+
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
-	
+
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
@@ -747,15 +851,19 @@ func (s *service) GetWorkflowsByProject(id string) []*Workflow {
 
 func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, error) {
 	x, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreWorkflow(x)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
-	return  x, nil
+	return x, nil
 }
 
 // SubWorkflow
@@ -869,7 +977,7 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 	p.LastModified = time.Now().UTC()
 
 	p, err = s.r.StoreSubWorkflow(p)
-	
+
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
 	}
@@ -890,16 +998,20 @@ func (s *service) GetSubWorkflowsByProject(id string) []*SubWorkflow {
 }
 
 func (s *service) UpdateSubWorkflowDescription(id string, d string) (*SubWorkflow, error) {
-	x, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)	
-	if err != nil { return nil, err }
+	x, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, err
+	}
 
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreSubWorkflow(x)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
-	return  x, nil
+	return x, nil
 }
 
 // Features
@@ -944,7 +1056,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 	p.LastModified = time.Now().UTC()
 
 	p, err = s.r.StoreFeature(p)
-	
+
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
 	}
@@ -971,7 +1083,6 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
-
 
 	p, err = s.r.StoreFeature(p)
 	if err != nil {
@@ -1022,7 +1133,6 @@ func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID s
 	m.LastModifiedByName = s.Acc.Name
 	m.LastModified = time.Now().UTC()
 
-
 	m, err = s.r.StoreFeature(m)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not store")
@@ -1039,20 +1149,22 @@ func (s *service) GetFeaturesByProject(id string) []*Feature {
 	return pp
 }
 
-
 func (s *service) UpdateFeatureDescription(id string, d string) (*Feature, error) {
 	x, err := s.r.GetFeature(s.Member.WorkspaceID, id)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreFeature(x)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
-	return  x, nil
+	return x, nil
 }
-
 
 // -----------
 
@@ -1173,7 +1285,7 @@ func (s *service) SendResetEmail(email string) error {
 	if err != nil {
 		return errors.New("send_error")
 	}
-	return nil
+	return nil 
 }
 
 func (s *service) SetPassword(password string, key string) error {
@@ -1199,4 +1311,11 @@ func (s *service) SetPassword(password string, key string) error {
 	}
 
 	return nil
+}
+
+func levelIsValid(level int) bool {
+	if !(level == 10 || level == 20 || level == 30 || level == 40) {
+		return false
+	}
+	return true
 }

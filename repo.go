@@ -26,11 +26,19 @@ type Repository interface {
 	GetMember(workspaceID string, id string) (*Member, error)
 	GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
 	GetMembersByAccount(id string) ([]*Member, error)
+	GetMemberByEmail(workspaceID string, email string) (*Member, error)
 	FindMembersByWorkspace(id string) ([]*Member, error)
 	DeleteMember(wsid string, id string) error
 
 	StoreSubscription(z *Subscription) (*Subscription, error)
 	FindSubscriptionsByWorkspace(id string) ([]*Subscription, error)
+
+	StoreInvite(x *Invite) error
+	DeleteInvite(wsid string, id string) error
+	GetInviteByCode(code string) (*Invite, error)
+	GetInviteByEmail(wsid string, email string) (*Invite, error)
+	GetInvite(workspaceID string, id string) (*Invite, error)
+	FindInvitesByWorkspace(wsid string) ([]*Invite, error)
 
 	GetProject(workspaceID string, projectID string) (*Project, error)
 	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
@@ -202,6 +210,14 @@ func (a *repo) GetMembersByAccount(id string) ([]*Member, error) {
 	return members, nil
 }
 
+func (a *repo) GetMemberByEmail(workspaceId string, email string) (*Member, error) {
+	member := &Member{}
+	if err := a.db.Get(member, "SELECT * FROM members m WHERE m.workspace_id = workspaceId AND m.account_id IN (SELECT account_id FROM accpounts a WHERE a.email = $1 ", email); err != nil {
+		return nil, err
+	}
+	return member, nil
+}
+
 func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 	x := []*Member{}
 	if err := a.db.Select(&x, "SELECT m.workspace_id, m.id, m.account_id, m.level, m.created_at, a.name, a.email FROM members m INNER JOIN accounts a ON m.account_id = a.id WHERE m.workspace_id = $1 ORDER by m.created_at DESC ", id); err != nil {
@@ -225,6 +241,55 @@ func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) 
 	err := a.db.Select(&x, "SELECT * FROM subscriptions WHERE workspace_id = $1 order by date", id)
 	if err != nil {
 		return nil, errors.Wrap(err, "no subscriptions found")
+	}
+	return x, nil
+}
+
+// IVITES
+
+func (a *repo) StoreInvite(x *Invite) error {
+	if _, err := a.db.Exec("INSERT INTO invites (workspace_id, id, email, level, code, created_by, created_by_name, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)", x.WorkspaceID, x.ID, x.Email, x.Level, x.Code, x.CreatedBy, x.CreatedByName, x.CreatedAt); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *repo) DeleteInvite(wsid string, id string) error {
+	if _, err := a.db.Exec("DELETE FROM invites WHERE workspace_id = $1 AND id = $2", wsid, id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *repo) GetInviteByCode(code string) (*Invite, error) {
+	x := &Invite{}
+	if err := a.db.Get(x, "SELECT * FROM invites WHERE code = $1", code); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+func (a *repo) GetInviteByEmail(wsid string, email string) (*Invite, error) {
+	x := &Invite{}
+	if err := a.db.Get(x, "SELECT * FROM invites WHERE wsid = $1 AND email = $1", wsid, email); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+func (a *repo) GetInvite(workspaceID string, id string) (*Invite, error) {
+	x := &Invite{}
+	if err := a.db.Get(x, "SELECT * FROM invites WHERE workspace_id = $1 AND id = $2", workspaceID, id); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+func (a *repo) FindInvitesByWorkspace(wsid string) ([]*Invite, error) {
+	x := []*Invite{}
+	if err := a.db.Select(&x, "SELECT * FROM invites WHERE workspace_id = $1", wsid); err != nil {
+		return nil, err
 	}
 	return x, nil
 }

@@ -81,3 +81,26 @@ func ResetPasswordBody(w resetPasswordBody) (string, error) {
 	}
 	return buf.String(), nil
 }
+
+// InviteStruct ...
+type InviteStruct struct {
+	AppSiteURL    string
+	Email         string
+	WorkspaceName string
+	Code          string
+	InvitedBy     string
+}
+
+func inviteBody(w InviteStruct) (string, error) {
+
+	t, err := template.ParseFiles("./tmpl/invite.tmpl")
+	if err != nil {
+		return "", err
+	}
+
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, w); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
