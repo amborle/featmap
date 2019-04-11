@@ -15,6 +15,18 @@ func api(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireMember())
+		r.Use(RequireAdmin())
+
+		r.Get("/members", getMembers)
+		r.Route("/members/{ID}", func(r chi.Router) {
+			r.Post("/level", updateMemberLevel)
+			r.Delete("/", deleteMember)
+		})
+
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireMember())
 		r.Route("/",
 			func(r chi.Router) {
 
@@ -78,17 +90,43 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func getWorkspaceExtended(w http.ResponseWriter, r *http.Request) {
-	type response struct {
-		Workspace *Workspace `json:"workspace"`
-		Projects  []*Project `json:"projects"`
-	}
-
+func getMembers(w http.ResponseWriter, r *http.Request) {
 	s := GetEnv(r).Service
-	render.JSON(w, r, response{
-		Workspace: s.GetWorkspaceByContext(),
-		Projects:  s.GetProjects(),
-	})
+	a := s.GetMembersByWorkspace()
+	render.JSON(w, r, a)
+}
+
+type updateMemberLevelRequest struct {
+	Level int `json:"level"`
+}
+
+func (p *updateMemberLevelRequest) Bind(r *http.Request) error {
+
+	return nil
+}
+
+func updateMemberLevel(w http.ResponseWriter, r *http.Request) {
+	data := &updateMemberLevelRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+	m, err := GetEnv(r).Service.UpdateMemberLevel(id, data.Level)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
+}
+
+func deleteMember(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+	err := GetEnv(r).Service.DeleteMember(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
 }
 
 // Projects

@@ -123,7 +123,7 @@ func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 }
 
 func addCookie(w http.ResponseWriter, name string, value string) {
-	expire := time.Now().AddDate(10, 0, 0)
+	expire := time.Now().UTC().AddDate(10, 0, 0)
 	cookie := http.Cookie{
 		Name:    name,
 		Value:   value,

@@ -23,11 +23,29 @@ type Account struct {
 	PasswordResetKey         string    `db:"password_reset_key" json:"-"`
 }
 
+// Subscription ...
+type Subscription struct {
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	ID                 string    `db:"id" json:"id"`
+	Level              int       `db:"level" json:"level"` // 10 ~ Free trial, 20 ~ Basic
+	NumberOfEditors    int       `db:"number_of_editors" json:"numberOfEditors"`
+	FromDate           time.Time `db:"from_date" json:"fromDate"`
+	CreatedBy          string    `db:"created_by" json:"createdBy"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+}
+
 // Member ...
 type Member struct {
-	ID          string `db:"id" json:"id"`
-	WorkspaceID string `db:"workspace_id" json:"workspaceId"`
-	AccountID   string `db:"account_id" json:"accountId"`
+	ID          string    `db:"id" json:"id"`
+	WorkspaceID string    `db:"workspace_id" json:"workspaceId"`
+	AccountID   string    `db:"account_id" json:"accountId"`
+	Level       int       `db:"level" json:"level"`
+	Name        string    `db:"name" json:"name"`   // Joined in
+	Email       string    `db:"email" json:"email"` // Joined in
+	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
 }
 
 // Project ...

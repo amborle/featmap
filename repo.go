@@ -19,12 +19,18 @@ type Repository interface {
 	GetAccountByEmail(email string) (*Account, error)
 	GetAccountByConfirmationKey(key string) (*Account, error)
 	GetAccountByPasswordKey(key string) (*Account, error)
+	FindAccountsByWorkspace(id string) ([]*Account, error)
 	SaveAccount(x *Account) (*Account, error)
 
 	SaveMember(x *Member) (*Member, error)
-
+	GetMember(workspaceID string, id string) (*Member, error)
 	GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
 	GetMembersByAccount(id string) ([]*Member, error)
+	FindMembersByWorkspace(id string) ([]*Member, error)
+	DeleteMember(wsid string, id string) error
+
+	StoreSubscription(z *Subscription) (*Subscription, error)
+	FindSubscriptionsByWorkspace(id string) ([]*Subscription, error)
 
 	GetProject(workspaceID string, projectID string) (*Project, error)
 	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
@@ -147,19 +153,42 @@ func (a *repo) SaveAccount(x *Account) (*Account, error) {
 	return x, nil
 }
 
+func (a *repo) FindAccountsByWorkspace(id string) ([]*Account, error) {
+	accounts := []*Account{}
+	if err := a.db.Select(&accounts, "SELECT * FROM accounts a where a.id in (select m.account_id from members m where m.workspace_id = $1)", id); err != nil {
+		return nil, err
+	}
+	return accounts, nil
+}
+
 // Members
 
 func (a *repo) SaveMember(x *Member) (*Member, error) {
-	if _, err := a.db.Exec("INSERT INTO members (id, workspace_id, account_id) VALUES ($1,$2,$3)", x.ID, x.WorkspaceID, x.AccountID); err != nil {
+	if _, err := a.db.Exec("INSERT INTO members (id, workspace_id, account_id, level, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $4", x.ID, x.WorkspaceID, x.AccountID, x.Level, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing member")
 	}
 
 	return x, nil
 }
 
+func (a *repo) DeleteMember(wsid string, id string) error {
+	if _, err := a.db.Exec("DELETE FROM members WHERE workspace_id = $1 AND id = $2", wsid, id); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *repo) GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error) {
 	member := &Member{}
 	if err := a.db.Get(member, "SELECT * FROM members WHERE account_id = $1 AND workspace_id = $2", accountID, workspaceID); err != nil {
+		return nil, errors.Wrap(err, "member not found")
+	}
+	return member, nil
+}
+
+func (a *repo) GetMember(workspaceID string, id string) (*Member, error) {
+	member := &Member{}
+	if err := a.db.Get(member, "SELECT * FROM members WHERE workspace_id = $1 AND id = $2", workspaceID, id); err != nil {
 		return nil, errors.Wrap(err, "member not found")
 	}
 	return member, nil
@@ -171,6 +200,33 @@ func (a *repo) GetMembersByAccount(id string) ([]*Member, error) {
 		return nil, err
 	}
 	return members, nil
+}
+
+func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
+	x := []*Member{}
+	if err := a.db.Select(&x, "SELECT m.workspace_id, m.id, m.account_id, m.level, m.created_at, a.name, a.email FROM members m INNER JOIN accounts a ON m.account_id = a.id WHERE m.workspace_id = $1 ORDER by m.created_at DESC ", id); err != nil {
+		//if err := a.db.Select(&x, "SELECT * FROM members m WHERE m.workspace_id = $1 ", id); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// Subscriptions
+
+func (a *repo) StoreSubscription(x *Subscription) (*Subscription, error) {
+	if _, err := a.db.Exec("INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date, created_by, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)", x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.CreatedBy, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName); err != nil {
+		return nil, errors.Wrap(err, "something went wrong when storing subscription")
+	}
+	return x, nil
+}
+
+func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
+	x := []*Subscription{}
+	err := a.db.Select(&x, "SELECT * FROM subscriptions WHERE workspace_id = $1 order by date", id)
+	if err != nil {
+		return nil, errors.Wrap(err, "no subscriptions found")
+	}
+	return x, nil
 }
 
 // Projects

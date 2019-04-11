@@ -30,6 +30,8 @@ type Service interface {
 	GetWorkspaceByContext() *Workspace
 	GetWorkspaces() []*Workspace
 	GetAccount(accountID string) (*Account, error)
+	GetAccountsByWorkspace() []*Account
+
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
 	UpdateName(name string) error
@@ -39,6 +41,9 @@ type Service interface {
 
 	GetMember(accountID string, workspaceID string) (*Member, error)
 	GetMembers() []*Member
+	GetMembersByWorkspace() []*Member
+	UpdateMemberLevel(memberID string, level int) (*Member, error)
+	DeleteMember(memberID string) error
 
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
@@ -150,7 +155,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	workspace := &Workspace{
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      workspaceName,
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
 	}
 
 	t, err := s.r.SaveWorkspace(workspace)
@@ -168,7 +173,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		Name:                     name,
 		Email:                    email,
 		Password:                 string(hash),
-		CreatedAt:                time.Now(),
+		CreatedAt:                time.Now().UTC(),
 		EmailConfirmationSentTo:  email,
 		EmailConfirmed:           false,
 		EmailConfirmationKey:     uuid.Must(uuid.NewV4(), nil).String(),
@@ -185,8 +190,31 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID: t.ID,
 		AccountID:   account.ID,
+		Level: 40, // This corresponds to Owner 
+		CreatedAt: time.Now().UTC(),
 	}
 	_, err = s.r.SaveMember(member)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	// Save subscription
+
+	sub := &Subscription{
+		ID:  uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID: t.ID,
+		Level: 10, // 10 ~ Free trial
+		NumberOfEditors: 2,
+		FromDate: time.Now().UTC(),
+		CreatedBy: member.ID,
+		CreatedByName: account.Name,
+		CreatedAt: time.Now().UTC(),
+		LastModified: time.Now().UTC(),
+		LastModifiedByName: account.Name,
+	}
+
+	_, err = s.r.StoreSubscription(sub)
+
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -234,6 +262,15 @@ func (s *service) GetAccount(id string) (*Account, error) {
 	return acc, nil
 }
 
+func (s *service) GetAccountsByWorkspace() []*Account { 
+	accounts, err := s.r.FindAccountsByWorkspace(s.Member.WorkspaceID)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return accounts
+}
+
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
 	workspace, err := s.r.GetWorkspace(id)
@@ -262,6 +299,56 @@ func (s *service) GetWorkspaces() []*Workspace {
 	return workspace
 }
 
+func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error)  {
+
+	if !(level == 10 || level == 20 || level == 30 || level == 40) {
+		return nil, errors.New("invalid level")
+	}
+
+	member, err := s.r.GetMember(s.Member.WorkspaceID, memberID)
+	if err != nil {
+		return nil, err
+	}
+
+	if member.ID == s.Member.ID  {
+		return nil, errors.New("not allowed to change own role")
+	}
+
+	if member.Level == 40 && s.Member.Level == 30  {
+		return nil, errors.New("not allowed to change role of owner")
+	}
+
+	member.Level = level 
+
+	if _, err := s.r.SaveMember(member); err != nil {
+		return nil, err		
+	}
+	
+	return member, nil
+}
+
+func (s *service) DeleteMember(id string) error  {
+
+	member, err := s.r.GetMember(s.Member.WorkspaceID, id)
+	if err != nil {
+		return err
+	}
+
+	if member.ID == s.Member.ID && s.Member.Level == 40   {
+		return errors.New("owners not allowed to remo their own membership")
+	}
+
+	if member.Level == 40 && s.Member.Level == 30  {
+		return  errors.New("non-owners not allowed to remove membership of owner ")
+	}
+	
+	if err := s.r.DeleteMember(s.Member.WorkspaceID, id) ; err != nil {
+		return  err		
+	}
+	
+	return nil
+}
+
 func (s *service) GetMember(accountID string, workspaceID string) (*Member, error) {
 
 	member, err := s.r.GetMemberByAccountAndWorkspace(accountID, workspaceID)
@@ -274,6 +361,19 @@ func (s *service) GetMember(accountID string, workspaceID string) (*Member, erro
 func (s *service) GetMembers() []*Member {
 
 	members, err := s.r.GetMembersByAccount(s.Acc.ID)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return members
+}
+
+
+func (s *service) GetMembersByWorkspace() []*Member {
+	members, err := s.r.FindMembersByWorkspace(s.Member.WorkspaceID)
+
+	log.Println("XXX")
+	log.Println(members)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -310,11 +410,11 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		ID:            id,
 		Title:         title,
 		CreatedBy:     s.Member.ID,
-		CreatedAt:     time.Now(),
+		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,		
 	}
 
-	p.LastModified =  time.Now()
+	p.LastModified =  time.Now().UTC()
 	p.LastModifiedByName = s.Acc.Name
 
 	p, err = s.r.StoreProject(p)
@@ -337,7 +437,7 @@ func (s *service) RenameProject(id string, title string) (*Project, error) {
 	}
 
 	p.Title = title
-	p.LastModified =  time.Now()
+	p.LastModified =  time.Now().UTC()
 	p.LastModifiedByName = s.Acc.Name
 	p, err = s.r.StoreProject(p)
 	if err != nil {
@@ -352,7 +452,7 @@ func (s *service) UpdateProjectDescription(id string, d string) (*Project, error
 	if err != nil { return nil, err }
 
 	x.Description = d
-	x.LastModified =  time.Now()
+	x.LastModified =  time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreProject(x)
 	if err != nil { return nil, err }
@@ -394,7 +494,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		Title:         title,
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
-		CreatedAt:     time.Now(),
+		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
 	}
 
@@ -408,7 +508,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 	}
 	
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
@@ -455,7 +555,7 @@ func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
 
 	m.Rank = rank
 	m.LastModifiedByName = s.Acc.Name
-	m.LastModified = time.Now()
+	m.LastModified = time.Now().UTC()
 
 	m, err = s.r.StoreMilestone(m)
 	if err != nil {
@@ -479,7 +579,7 @@ func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 
 	p, err = s.r.StoreMilestone(p)
 	if err != nil {
@@ -506,7 +606,7 @@ func (s *service) UpdateMilestoneDescription(id string, d string) (*Milestone, e
 	if err != nil { return nil, err }
 
 	x.Description = d
-	x.LastModified = time.Now()
+	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreMilestone(x)
 	if err != nil { return nil, err }
@@ -537,7 +637,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		Title:         title,
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
-		CreatedAt:     time.Now(),
+		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
 	}
 
@@ -551,7 +651,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	}
 	
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 	
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
@@ -599,7 +699,7 @@ func (s *service) MoveWorkflow(id string, index int) (*Workflow, error) {
 
 	m.Rank = rank
 	m.LastModifiedByName = s.Acc.Name
-	m.LastModified = time.Now()
+	m.LastModified = time.Now().UTC()
 
 	m, err = s.r.StoreWorkflow(m)
 	if err != nil {
@@ -623,7 +723,7 @@ func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 
 	p, err = s.r.StoreWorkflow(p)
 	if err != nil {
@@ -650,7 +750,7 @@ func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, err
 	if err != nil { return nil, err }
 
 	x.Description = d
-	x.LastModified = time.Now()
+	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreWorkflow(x)
 	if err != nil { return nil, err }
@@ -680,7 +780,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		Title:         title,
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
-		CreatedAt:     time.Now(),
+		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name}
 
 	n := len(mm)
@@ -694,7 +794,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 
 	p, err = s.r.StoreSubWorkflow(p)
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create")
@@ -742,7 +842,7 @@ func (s *service) MoveSubWorkflow(id string, toWorkflowID string, index int) (*S
 	m.Rank = rank
 	m.WorkflowID = toWorkflowID
 	m.LastModifiedByName = s.Acc.Name
-	m.LastModified = time.Now()
+	m.LastModified = time.Now().UTC()
 
 	m, err = s.r.StoreSubWorkflow(m)
 	if err != nil {
@@ -766,7 +866,7 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 
 	p, err = s.r.StoreSubWorkflow(p)
 	
@@ -794,7 +894,7 @@ func (s *service) UpdateSubWorkflowDescription(id string, d string) (*SubWorkflo
 	if err != nil { return nil, err }
 
 	x.Description = d
-	x.LastModified = time.Now()
+	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreSubWorkflow(x)
 	if err != nil { return nil, err }
@@ -828,7 +928,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		Rank:          "",
 		Description:   "",
 		CreatedBy:     s.Member.ID,
-		CreatedAt:     time.Now(),
+		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name}
 
 	n := len(mm)
@@ -841,7 +941,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 	}
 
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 
 	p, err = s.r.StoreFeature(p)
 	
@@ -870,7 +970,7 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 
 	p.Title = title
 	p.LastModifiedByName = s.Acc.Name
-	p.LastModified = time.Now()
+	p.LastModified = time.Now().UTC()
 
 
 	p, err = s.r.StoreFeature(p)
@@ -920,7 +1020,7 @@ func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID s
 	m.MilestoneID = toMilestoneID
 	m.SubWorkflowID = toSubWorkflowID
 	m.LastModifiedByName = s.Acc.Name
-	m.LastModified = time.Now()
+	m.LastModified = time.Now().UTC()
 
 
 	m, err = s.r.StoreFeature(m)
@@ -945,7 +1045,7 @@ func (s *service) UpdateFeatureDescription(id string, d string) (*Feature, error
 	if err != nil { return nil, err }
 
 	x.Description = d
-	x.LastModified = time.Now()
+	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
 	x, err = s.r.StoreFeature(x)
 	if err != nil { return nil, err }
