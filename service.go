@@ -32,6 +32,8 @@ type Service interface {
 	GetAccount(accountID string) (*Account, error)
 	GetAccountsByWorkspace() []*Account
 
+	GetSubscriptionByWorkspace(id string) *Subscription
+
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
 	UpdateName(name string) error
@@ -40,15 +42,20 @@ type Service interface {
 	SetPassword(password string, key string) error
 
 	GetMember(accountID string, workspaceID string) (*Member, error)
+	GetMembersByAccount() []*Member
 	GetMembers() []*Member
-	GetMembersByWorkspace() []*Member
+	GetMembersByWorkspace(id string) []*Member
 	UpdateMemberLevel(memberID string, level int) (*Member, error)
 	DeleteMember(memberID string) error
+	CreateMember(workspaceID string, accountID string, level int) (*Member, error)
+	Leave() error
 
 	GetInvitesByWorkspace() []*Invite
 	CreateInvite(email string, level int) (*Invite, error)
 	SendInvitationMail(invitationID string) error
 	DeleteInvite(invitationID string) error
+	AcceptInvite(code string) error
+	GetInvite(code string) (*Invite, error) 
 
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
@@ -190,28 +197,13 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		return nil, nil, nil, err
 	}
 
-	// Save member
-	member := &Member{
-		ID:          uuid.Must(uuid.NewV4(), nil).String(),
-		WorkspaceID: t.ID,
-		AccountID:   account.ID,
-		Level:       40, // This corresponds to Owner
-		CreatedAt:   time.Now().UTC(),
-	}
-	_, err = s.r.SaveMember(member)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
 	// Save subscription
-
 	sub := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        t.ID,
 		Level:              10, // 10 ~ Free trial
 		NumberOfEditors:    2,
 		FromDate:           time.Now().UTC(),
-		CreatedBy:          member.ID,
 		CreatedByName:      account.Name,
 		CreatedAt:          time.Now().UTC(),
 		LastModified:       time.Now().UTC(),
@@ -220,6 +212,11 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 
 	_, err = s.r.StoreSubscription(sub)
 
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	member, err := s.CreateMember(t.ID, account.ID, 40)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -276,6 +273,15 @@ func (s *service) GetAccountsByWorkspace() []*Account {
 	return accounts
 }
 
+func (s *service) GetSubscriptionByWorkspace(id string) *Subscription {
+	subs, err := s.r.FindSubscriptionsByWorkspace(id)
+	if err != nil {
+		return nil
+	}
+	// Take the latest one, they come sorted from the db!
+	return subs[0]
+}
+
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
 	workspace, err := s.r.GetWorkspace(id)
@@ -323,6 +329,23 @@ func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error)
 		return nil, errors.New("not allowed to change role of owner")
 	}
 
+	if isEditor(level) {
+		members := s.GetMembers()
+		sub := s.GetSubscriptionByWorkspace(s.Member.WorkspaceID)
+
+		n := 0
+		for _, m := range members {
+			if isEditor(m.Level) {
+				n++
+			}
+		}
+
+		if n > sub.NumberOfEditors {
+			return nil, errors.New("subscription exceeded")
+		}
+
+	}
+
 	member.Level = level
 
 	if _, err := s.r.SaveMember(member); err != nil {
@@ -354,6 +377,49 @@ func (s *service) DeleteMember(id string) error {
 	return nil
 }
 
+func isEditor(level int) bool {
+	return level == 20 || level == 30 || level == 40
+}
+
+func (s *service) CreateMember(workspaceID string, accountID string, level int) (*Member, error) {
+	sub := s.GetSubscriptionByWorkspace(workspaceID)
+
+	if sub.Level == 0 {
+		return nil, errors.New("cannot create member on readonly workspace")
+	}
+
+	if isEditor(level) {
+		members := s.GetMembersByWorkspace(workspaceID)
+
+		n := 0
+		for _, m := range members {
+			if isEditor(m.Level) {
+				n++
+			}
+		}
+
+		if n >= sub.NumberOfEditors {
+			return nil, errors.New("subscription exceeded")
+		}
+	}
+
+	// Store member
+	member := &Member{
+		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID: workspaceID,
+		AccountID:   accountID,
+		Level:       level,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	m, err := s.r.SaveMember(member)
+	if err != nil {
+		return nil, err
+	}
+
+	return m, err
+}
+
 func (s *service) GetMember(accountID string, workspaceID string) (*Member, error) {
 
 	member, err := s.r.GetMemberByAccountAndWorkspace(accountID, workspaceID)
@@ -363,7 +429,7 @@ func (s *service) GetMember(accountID string, workspaceID string) (*Member, erro
 	return member, nil
 }
 
-func (s *service) GetMembers() []*Member {
+func (s *service) GetMembersByAccount() []*Member {
 
 	members, err := s.r.GetMembersByAccount(s.Acc.ID)
 	if err != nil {
@@ -373,10 +439,18 @@ func (s *service) GetMembers() []*Member {
 	return members
 }
 
-func (s *service) GetMembersByWorkspace() []*Member {
+func (s *service) GetMembers() []*Member {
 	members, err := s.r.FindMembersByWorkspace(s.Member.WorkspaceID)
 	if err != nil {
 		log.Println(err)
+		return nil
+	}
+	return members
+}
+
+func (s *service) GetMembersByWorkspace(id string) []*Member {
+	members, err := s.r.FindMembersByWorkspace(id)
+	if err != nil {
 		return nil
 	}
 	return members
@@ -396,28 +470,37 @@ func (s *service) CreateInvite(email string, level int) (*Invite, error) {
 		return nil, errors.New("level invalid")
 	}
 
+	if s.Member.Level == 30 && level == 40 {
+		return nil, errors.New("admins are not allowed to appoint new owners")
+	}
+
 	member, _ := s.r.GetMemberByEmail(s.Member.WorkspaceID, email)
+	
 	if member != nil {
 		return nil, errors.New("already member of the workspace")
 	}
 
 	m, _ := s.r.GetInviteByEmail(s.Member.WorkspaceID, email)
 	if m != nil {
-		return nil, errors.New("email already has an pending invite")
+		return nil, errors.New("email already has a pending invite")
 	}
 
-	if s.Member.Level == 30 && level == 40 {
-		return nil, errors.New("admins are not allowed to appoint new owners")
+	ws, err := s.r.GetWorkspace(s.Member.WorkspaceID)
+	if err != nil {
+		return nil, err
 	}
 
 	x := &Invite{
-		WorkspaceID: s.Member.WorkspaceID,
-		ID:          uuid.Must(uuid.NewV4(), nil).String(),
-		Email:       email,
-		Level:       level,
-		Code:        uuid.Must(uuid.NewV4(), nil).String(),
-		CreatedBy:   s.Member.AccountID,
-		CreatedAt:   time.Now().UTC(),
+		WorkspaceID:    s.Member.WorkspaceID,
+		ID:             uuid.Must(uuid.NewV4(), nil).String(),
+		Email:          email,
+		Level:          level,
+		Code:           uuid.Must(uuid.NewV4(), nil).String(),
+		CreatedBy:      s.Member.ID,
+		CreatedByName:  s.Acc.Name,
+		CreatedAt:      time.Now().UTC(),
+		CreatedByEmail: s.Acc.Email,
+		WorkspaceName:  ws.Name,
 	}
 
 	if err := s.r.StoreInvite(x); err != nil {
@@ -444,11 +527,12 @@ func (s *service) SendInvitationMail(invitationID string) error {
 	}
 
 	i := InviteStruct{
-		AppSiteURL:    s.appSiteURL,
-		WorkspaceName: ws.Name,
-		Email:         invite.Email,
-		Code:          invite.Code,
-		InvitedBy:     invite.CreatedByName,
+		AppSiteURL:     s.appSiteURL,
+		WorkspaceName:  ws.Name,
+		Email:          invite.Email,
+		Code:           invite.Code,
+		InvitedBy:      invite.CreatedByName,
+		InvitedByEmail: invite.CreatedByEmail,
 	}
 
 	body, err := inviteBody(i)
@@ -461,11 +545,30 @@ func (s *service) SendInvitationMail(invitationID string) error {
 		return err
 	}
 
+
 	return nil
 }
 
 func (s *service) DeleteInvite(id string) error {
+	m, err := s.r.GetInvite(s.Member.WorkspaceID, id)
+	if err != nil {
+		return err
+	}
+
+	if s.Member.Level == 30 && m.Level == 40 {
+		return errors.New("admins are not allowed to cancel invite to owner")
+	}
+
 	return s.r.DeleteInvite(s.Member.WorkspaceID, id)
+}
+
+func (s *service) Leave() error {
+	
+	if s.Member.Level == 40  {
+		return errors.New("owners cannot not themselves leave a workspace")
+	}
+
+	return s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)	
 }
 
 func (s *service) GetInvitesByWorkspace() []*Invite {
@@ -475,6 +578,39 @@ func (s *service) GetInvitesByWorkspace() []*Invite {
 		return nil
 	}
 	return invites
+}
+
+func (s *service) AcceptInvite(code string) error {
+	invite, err := s.r.GetInviteByCode(code)
+
+	if err != nil {
+		return errors.New("invite not found")
+	}
+
+	acc, err := s.r.GetAccountByEmail(invite.Email)
+	if err != nil {
+		return errors.New("Please create an account first using " + invite.Email)
+	}
+
+	if err := s.r.DeleteInvite(invite.WorkspaceID, invite.ID); err != nil {
+		return err
+	}
+	
+	if _, err := s.CreateMember(invite.WorkspaceID, acc.ID, invite.Level); err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+func (s *service) GetInvite(code string) (*Invite, error) {
+	invite, err := s.r.GetInviteByCode(code)
+
+	if err != nil {
+		return nil, err
+	}	
+
+	return invite, nil
 }
 
 // const datelayout = "2006-01-02"
@@ -1285,7 +1421,7 @@ func (s *service) SendResetEmail(email string) error {
 	if err != nil {
 		return errors.New("send_error")
 	}
-	return nil 
+	return nil
 }
 
 func (s *service) SetPassword(password string, key string) error {

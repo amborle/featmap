@@ -30,7 +30,6 @@ type Subscription struct {
 	Level              int       `db:"level" json:"level"` // 10 ~ Free trial, 20 ~ Basic
 	NumberOfEditors    int       `db:"number_of_editors" json:"numberOfEditors"`
 	FromDate           time.Time `db:"from_date" json:"fromDate"`
-	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
@@ -50,14 +49,16 @@ type Member struct {
 
 // Invite ...
 type Invite struct {
-	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
-	ID            string    `db:"id" json:"id"`
-	Email         string    `db:"email" json:"email"`
-	Level         int       `db:"level" json:"level"`
-	Code          string    `db:"code" json:"code"`
-	CreatedBy     string    `db:"created_by" json:"createdBy"`
-	CreatedByName string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	WorkspaceID    string    `db:"workspace_id" json:"workspaceId"`
+	ID             string    `db:"id" json:"id"`
+	Email          string    `db:"email" json:"email"`
+	Level          int       `db:"level" json:"level"`
+	Code           string    `db:"code" json:"code"`
+	CreatedBy      string    `db:"created_by" json:"createdBy"`
+	CreatedByName  string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt      time.Time `db:"created_at" json:"createdAt"`
+	CreatedByEmail string    `db:"created_by_email" json:"createdByEmail"`
+	WorkspaceName  string    `db:"workspace_name" json:"workspaceName"`
 }
 
 // Project ...

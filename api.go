@@ -15,6 +15,11 @@ func api(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireMember())
+		r.Post("/leave", leave)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireMember())
 		r.Use(RequireAdmin())
 
 		r.Get("/members", getMembers)
@@ -26,7 +31,7 @@ func api(r chi.Router) {
 		r.Get("/invites", getInvites)
 		r.Post("/invites", createInvite)
 		r.Route("/invites/{ID}", func(r chi.Router) {
-			r.Delete("/", deleteMember)
+			r.Delete("/", deleteInvite)
 			r.Post("/resend", resendInvite)
 		})
 
@@ -34,6 +39,7 @@ func api(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireMember())
+
 		r.Route("/",
 			func(r chi.Router) {
 
@@ -93,13 +99,13 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, response{
 		Account:     s.GetAccountObject(),
 		Workspaces:  s.GetWorkspaces(),
-		Memberships: s.GetMembers(),
+		Memberships: s.GetMembersByAccount(),
 	})
 }
 
 func getMembers(w http.ResponseWriter, r *http.Request) {
 	s := GetEnv(r).Service
-	a := s.GetMembersByWorkspace()
+	a := s.GetMembers()
 	render.JSON(w, r, a)
 }
 
@@ -130,6 +136,14 @@ func updateMemberLevel(w http.ResponseWriter, r *http.Request) {
 func deleteMember(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	err := GetEnv(r).Service.DeleteMember(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+func leave(w http.ResponseWriter, r *http.Request) {
+	err := GetEnv(r).Service.Leave()
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
@@ -167,9 +181,7 @@ func createInvite(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteInvite(w http.ResponseWriter, r *http.Request) {
-
 	id := chi.URLParam(r, "ID")
-
 	err := GetEnv(r).Service.DeleteInvite(id)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))

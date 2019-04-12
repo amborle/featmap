@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/pkg/errors"
-
-	"github.com/go-chi/chi"
 )
 
 func usersAPI(r chi.Router) {
@@ -24,11 +23,14 @@ func usersAPI(r chi.Router) {
 				r.Route("/reset/{EMAIL}", func(r chi.Router) {
 					r.Post("/", ResetEmail)
 				})
-
 				r.Route("/setpassword", func(r chi.Router) {
 					r.Post("/", SetPassword)
 				})
 
+				r.Route("/invite/{CODE}", func(r chi.Router) {
+					r.Get("/", getInvite)
+					r.Post("/", acceptInvite)
+				})
 			})
 	})
 }
@@ -197,6 +199,29 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 
 	type response struct {
 		message string
+	}
+
+	return
+}
+
+func getInvite(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "CODE")
+
+	invite, err := GetEnv(r).Service.GetInvite(code)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, invite)
+}
+
+func acceptInvite(w http.ResponseWriter, r *http.Request) {
+	code := chi.URLParam(r, "CODE")
+
+	err := GetEnv(r).Service.AcceptInvite(code)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
 	}
 
 	return

@@ -84,11 +84,12 @@ func ResetPasswordBody(w resetPasswordBody) (string, error) {
 
 // InviteStruct ...
 type InviteStruct struct {
-	AppSiteURL    string
-	Email         string
-	WorkspaceName string
-	Code          string
-	InvitedBy     string
+	AppSiteURL     string
+	Email          string
+	WorkspaceName  string
+	Code           string
+	InvitedBy      string
+	InvitedByEmail string
 }
 
 func inviteBody(w InviteStruct) (string, error) {

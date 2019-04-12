@@ -77,9 +77,9 @@ func main() {
 		w.Write([]byte("Featmap"))
 	})
 
-	r.Route("/v1/account", accountAPI)
-	r.Route("/v1/users", usersAPI)
-	r.Route("/v1/", api)
+	r.Route("/v1/users", usersAPI)     // Nothing is needed
+	r.Route("/v1/account", accountAPI) // Account needed
+	r.Route("/v1/", api)               // Account + workspace is needed
 
 	fmt.Println("Serving on port " + config.Port)
 	_ = http.ListenAndServe(":"+config.Port, r)
