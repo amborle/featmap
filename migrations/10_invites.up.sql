@@ -2,7 +2,7 @@ CREATE TABLE invites (
 	workspace_id uuid NOT NULL,
 	id uuid NOT NULL,		
 	email varchar NOT NULL,	
-	level int NOT NULL,
+	level varchar NOT NULL,
 	code uuid not null,
 	created_by uuid,
 	created_by_name varchar NOT NULL,	

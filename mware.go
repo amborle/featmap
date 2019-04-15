@@ -83,7 +83,7 @@ func RequireAdmin() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
-			if GetEnv(r).Service.GetMemberObject().Level < 30 {
+			if !(GetEnv(r).Service.GetMemberObject().Level == "ADMIN" || GetEnv(r).Service.GetMemberObject().Level == "OWNER") {
 				http.Error(w, http.StatusText(401), 401)
 				return
 			}
@@ -99,6 +99,21 @@ func RequireAccount() func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
 			if GetEnv(r).Service.GetAccountObject() == nil {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// RequireEditor ...
+func RequireEditor() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			if !(GetEnv(r).Service.GetMemberObject().Level == "EDITOR" || GetEnv(r).Service.GetMemberObject().Level == "ADMIN" || GetEnv(r).Service.GetMemberObject().Level == "OWNER") {
 				http.Error(w, http.StatusText(401), 401)
 				return
 			}

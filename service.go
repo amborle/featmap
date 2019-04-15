@@ -16,16 +16,20 @@ import (
 
 // Service ...
 type Service interface {
+	// Technical
 	GetMemberObject() *Member
 	SetMemberObject(m *Member)
 	SendEmail(recipient string, subject string, body string) error
-
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
+
 
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
+
+
+
 	GetWorkspace(id string) (*Workspace, error)
 	GetWorkspaceByContext() *Workspace
 	GetWorkspaces() []*Workspace
@@ -45,13 +49,13 @@ type Service interface {
 	GetMembersByAccount() []*Member
 	GetMembers() []*Member
 	GetMembersByWorkspace(id string) []*Member
-	UpdateMemberLevel(memberID string, level int) (*Member, error)
+	UpdateMemberLevel(memberID string, level string) (*Member, error)
 	DeleteMember(memberID string) error
-	CreateMember(workspaceID string, accountID string, level int) (*Member, error)
+	CreateMember(workspaceID string, accountID string, level string) (*Member, error)
 	Leave() error
 
 	GetInvitesByWorkspace() []*Invite
-	CreateInvite(email string, level int) (*Invite, error)
+	CreateInvite(email string, level string) (*Invite, error)
 	SendInvitationMail(invitationID string) error
 	DeleteInvite(invitationID string) error
 	AcceptInvite(code string) error
@@ -110,7 +114,7 @@ func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo
 		Member:     member,
 		r:          repo,
 		auth:       auth,
-		mg:         mg,
+		mg:         mg, 
 	}
 }
 
@@ -216,7 +220,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		return nil, nil, nil, err
 	}
 
-	member, err := s.CreateMember(t.ID, account.ID, 40)
+	member, err := s.CreateMember(t.ID, account.ID, "OWNER")
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -310,9 +314,9 @@ func (s *service) GetWorkspaces() []*Workspace {
 	return workspace
 }
 
-func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error) {
+func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, error) {
 
-	if !levelIsValid(level) {
+	if !levelIsValid(level) { 
 		return nil, errors.New("level invalid")
 	}
 
@@ -325,11 +329,11 @@ func (s *service) UpdateMemberLevel(memberID string, level int) (*Member, error)
 		return nil, errors.New("not allowed to change own role")
 	}
 
-	if member.Level == 40 && s.Member.Level == 30 {
+	if member.Level == "OWNER" && s.Member.Level == "ADMIN" {
 		return nil, errors.New("not allowed to change role of owner")
 	}
 
-	if isEditor(level) {
+	if isEditor(level ) {
 		members := s.GetMembers()
 		sub := s.GetSubscriptionByWorkspace(s.Member.WorkspaceID)
 
@@ -362,11 +366,11 @@ func (s *service) DeleteMember(id string) error {
 		return err
 	}
 
-	if member.ID == s.Member.ID && s.Member.Level == 40 {
+	if member.ID == s.Member.ID && s.Member.Level == "OWNER" {
 		return errors.New("owners not allowed to remove their own membership")
 	}
 
-	if member.Level == 40 && s.Member.Level == 30 {
+	if member.Level == "OWNER" && s.Member.Level == "ADMIN" {
 		return errors.New("admins not allowed to remove membership of owner ")
 	}
 
@@ -377,11 +381,11 @@ func (s *service) DeleteMember(id string) error {
 	return nil
 }
 
-func isEditor(level int) bool {
-	return level == 20 || level == 30 || level == 40
+func isEditor(level string) bool {
+	return level == "EDITOR" || level == "ADMIN" || level == "OWNER"
 }
 
-func (s *service) CreateMember(workspaceID string, accountID string, level int) (*Member, error) {
+func (s *service) CreateMember(workspaceID string, accountID string, level string) (*Member, error) {
 	sub := s.GetSubscriptionByWorkspace(workspaceID)
 
 	if sub.Level == 0 {
@@ -458,7 +462,7 @@ func (s *service) GetMembersByWorkspace(id string) []*Member {
 
 // INVITES
 
-func (s *service) CreateInvite(email string, level int) (*Invite, error) {
+func (s *service) CreateInvite(email string, level string) (*Invite, error) {
 
 	email = govalidator.Trim(email, "")
 
@@ -470,7 +474,7 @@ func (s *service) CreateInvite(email string, level int) (*Invite, error) {
 		return nil, errors.New("level invalid")
 	}
 
-	if s.Member.Level == 30 && level == 40 {
+	if s.Member.Level == "ADMIN" && level == "OWNER" {
 		return nil, errors.New("admins are not allowed to appoint new owners")
 	}
 
@@ -555,7 +559,7 @@ func (s *service) DeleteInvite(id string) error {
 		return err
 	}
 
-	if s.Member.Level == 30 && m.Level == 40 {
+	if s.Member.Level == "ADMIN" && m.Level == "OWNER" {
 		return errors.New("admins are not allowed to cancel invite to owner")
 	}
 
@@ -564,7 +568,7 @@ func (s *service) DeleteInvite(id string) error {
 
 func (s *service) Leave() error {
 	
-	if s.Member.Level == 40  {
+	if s.Member.Level == "OWNER"  {
 		return errors.New("owners cannot not themselves leave a workspace")
 	}
 
@@ -1449,8 +1453,8 @@ func (s *service) SetPassword(password string, key string) error {
 	return nil
 }
 
-func levelIsValid(level int) bool {
-	if !(level == 10 || level == 20 || level == 30 || level == 40) {
+func levelIsValid(level string) bool {
+	if !(level == "VIEWER" || level == "EDITOR" || level == "ADMIN" || level == "OWNER") {
 		return false
 	}
 	return true

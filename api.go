@@ -44,15 +44,24 @@ func api(r chi.Router) {
 			func(r chi.Router) {
 
 				r.Get("/projects", getProjects)
+
 				r.Route("/projects/{ID}", func(r chi.Router) {
-					r.Post("/", createProject)
-					r.Get("/", getProjectExtended)
-					r.Delete("/", deleteProject)
-					r.Post("/rename", renameProject)
-					r.Post("/description", updateProjectDescription)
+
+					r.Group(func(r chi.Router) {
+						r.Get("/", getProjectExtended)
+					})
+
+					r.Group(func(r chi.Router) {
+						r.Use(RequireEditor())
+						r.Post("/", createProject)
+						r.Delete("/", deleteProject)
+						r.Post("/rename", renameProject)
+						r.Post("/description", updateProjectDescription)
+					})
 				})
 
 				r.Route("/milestones/{ID}", func(r chi.Router) {
+					r.Use(RequireEditor())
 					r.Post("/", createMilestone)
 					r.Delete("/", deleteMilestone)
 					r.Post("/rename", renameMilestone)
@@ -61,6 +70,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
+					r.Use(RequireEditor())
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
 					r.Post("/rename", renameWorkflow)
@@ -69,6 +79,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
+					r.Use(RequireEditor())
 					r.Post("/", createSubWorkflow)
 					r.Post("/rename", renameSubWorkflow)
 					r.Delete("/", deleteSubWorkflow)
@@ -77,6 +88,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
+					r.Use(RequireEditor())
 					r.Post("/", createFeature)
 					r.Post("/rename", renameFeature)
 					r.Delete("/", deleteFeature)
@@ -110,7 +122,7 @@ func getMembers(w http.ResponseWriter, r *http.Request) {
 }
 
 type updateMemberLevelRequest struct {
-	Level int `json:"level"`
+	Level string `json:"level"`
 }
 
 func (p *updateMemberLevelRequest) Bind(r *http.Request) error {
@@ -158,7 +170,7 @@ func getInvites(w http.ResponseWriter, r *http.Request) {
 
 type createInviteRequest struct {
 	Email string `json:"email"`
-	Level int    `json:"level"`
+	Level string `json:"level"`
 }
 
 func (p *createInviteRequest) Bind(r *http.Request) error {
