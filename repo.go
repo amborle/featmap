@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -10,6 +9,8 @@ import (
 
 // Repository ...
 type Repository interface {
+	Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error
+
 	SaveWorkspace(x *Workspace) (*Workspace, error)
 	GetWorkspace(workspaceID string) (*Workspace, error)
 	GetWorkspacesByAccount(id string) ([]*Workspace, error)
@@ -75,9 +76,51 @@ type repo struct {
 	db *sqlx.DB
 }
 
+type txnFunc func(*sqlx.Tx) error
+
+func txnDo(db *sqlx.DB, f txnFunc) (err error) {
+	var tx *sqlx.Tx
+	tx, err = db.Beginx()
+	if err != nil {
+		return
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	return f(tx)
+}
+
 // NewFeatmapRepository ...
 func NewFeatmapRepository(db *sqlx.DB) Repository {
 	return &repo{db: db}
+}
+
+func (a *repo) DB() *sqlx.DB {
+	return a.db
+}
+
+// Transactions needed
+
+func (a *repo) Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error {
+	err := txnDo(a.DB(), func(tx *sqlx.Tx) error {
+
+		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt)
+		tx.MustExec(saveAccountQuery, acc.ID, acc.Email, acc.Password, acc.CreatedAt, acc.EmailConfirmationSentTo, acc.EmailConfirmed, acc.EmailConfirmationKey, acc.EmailConfirmationPending, acc.PasswordResetKey, acc.Name)
+		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
+		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
+
+		return nil
+	})
+
+	return err
 }
 
 // Tentants
@@ -106,11 +149,10 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at) VALUES ($1,$2,$3)"
+
 func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
-
-	fmt.Println(x)
-
-	if _, err := a.db.Exec("INSERT INTO workspaces (id, name, created_at) VALUES ($1,$2,$3)", x.ID, x.Name, x.CreatedAt); err != nil {
+	if _, err := a.db.Exec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing workspace")
 	}
 
@@ -162,9 +204,11 @@ func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
 	return acc, nil
 }
 
+const saveAccountQuery = "INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10"
+
 func (a *repo) SaveAccount(x *Account) (*Account, error) {
 
-	if _, err := a.db.Exec("INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10", x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name); err != nil {
+	if _, err := a.db.Exec(saveAccountQuery, x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when saving account")
 	}
 
@@ -188,8 +232,10 @@ func (a *repo) DeleteAccount(accountID string) error {
 
 // Members
 
+const saveMemberQuery = "INSERT INTO members (id, workspace_id, account_id, level, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $4"
+
 func (a *repo) SaveMember(x *Member) (*Member, error) {
-	if _, err := a.db.Exec("INSERT INTO members (id, workspace_id, account_id, level, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $4", x.ID, x.WorkspaceID, x.AccountID, x.Level, x.CreatedAt); err != nil {
+	if _, err := a.db.Exec(saveMemberQuery, x.ID, x.WorkspaceID, x.AccountID, x.Level, x.CreatedAt); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing member")
 	}
 
@@ -247,8 +293,10 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 // Subscriptions
 
+const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
+
 func (a *repo) StoreSubscription(x *Subscription) (*Subscription, error) {
-	if _, err := a.db.Exec("INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)", x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName); err != nil {
+	if _, err := a.db.Exec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing subscription")
 	}
 	return x, nil

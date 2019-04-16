@@ -145,6 +145,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	name = govalidator.Trim(name, "")
 	email = govalidator.Trim(email, "")
 
+	
 	if !govalidator.IsEmail(email) {
 		return nil, nil, nil, errors.New("email_invalid")
 	}
@@ -172,76 +173,68 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		return nil, nil, nil, errors.New("workspace_taken")
 	}
 
-	// Save workspace
+	// Create all needed objects
+
+	t := time.Now().UTC()
+	
 	workspace := &Workspace{
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      workspaceName,
-		CreatedAt: time.Now().UTC(),
+		CreatedAt: t,
 	}
 
-	t, err := s.r.SaveWorkspace(workspace)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	// Save account
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	usr := &Account{
+	acc := &Account{
 		ID:                       uuid.Must(uuid.NewV4(), nil).String(),
 		Name:                     name,
 		Email:                    email,
 		Password:                 string(hash),
-		CreatedAt:                time.Now().UTC(),
+		CreatedAt:                t,
 		EmailConfirmationSentTo:  email,
 		EmailConfirmed:           false,
 		EmailConfirmationKey:     uuid.Must(uuid.NewV4(), nil).String(),
 		EmailConfirmationPending: true,
 		PasswordResetKey:         uuid.Must(uuid.NewV4(), nil).String(),
 	}
-	account, err := s.r.SaveAccount(usr)
-	if err != nil {
-		return nil, nil, nil, err
-	}
 
-	// Save subscription
 	sub := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
-		WorkspaceID:        t.ID,
+		WorkspaceID:        workspace.ID,
 		Level:              "TRIAL",
 		NumberOfEditors:    2,
-		FromDate:           time.Now().UTC(),
-		ExpirationDate:     time.Now().UTC().AddDate(0, 0, 30),
-		CreatedByName:      account.Name,
-		CreatedAt:          time.Now().UTC(),
-		LastModified:       time.Now().UTC(),
-		LastModifiedByName: account.Name,
+		FromDate:           t,
+		ExpirationDate:     t.AddDate(0, 0, 30),
+		CreatedByName:      acc.Name,
+		CreatedAt:          t,
+		LastModified:       t,
+		LastModifiedByName: acc.Name,
 	}
 
-	_, err = s.r.StoreSubscription(sub)
+	member := &Member{
+		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID: workspace.ID,
+		AccountID:   acc.ID,
+		Level:       "OWNER",
+		CreatedAt:   t,
+	}
 
+	err = s.r.Register(workspace, acc, sub, member) 
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	member, err := s.CreateMember(t.ID, account.ID, "OWNER")
+
+	body, err := WelcomeBody(welcome{s.appSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	body, err := WelcomeBody(welcome{s.appSiteURL, usr.EmailConfirmationSentTo, workspace.Name, usr.EmailConfirmationKey})
+	err = s.SendEmail(acc.EmailConfirmationSentTo, "Welcome to Featmap!", body)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	err = s.SendEmail(usr.EmailConfirmationSentTo, "Welcome to Featmap!", body)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return workspace, account, member, nil
+	return workspace, acc, member, nil
 }
 
 func (s *service) DeleteAccount() error {
