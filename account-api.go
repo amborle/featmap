@@ -37,7 +37,6 @@ func updateEmail(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// Projects
 type updateNameRequest struct {
 	Name string `json:"name"`
 }

@@ -1,9 +1,10 @@
 CREATE TABLE subscriptions (
 	workspace_id uuid NOT NULL,
 	id uuid NOT NULL,		
-	level int NOT NULL,	
+	level varchar NOT NULL,	
 	number_of_editors int NOT NULL,
 	from_date DATE NOT NULL,  	
+	expiration_date DATE NOT NULL,  	
 	created_by_name varchar NOT NULL,	
 	created_at TIMESTAMP WITH TIME ZONE not null,			
 	last_modified TIMESTAMP WITH TIME ZONE not null,		

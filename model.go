@@ -27,9 +27,10 @@ type Account struct {
 type Subscription struct {
 	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
 	ID                 string    `db:"id" json:"id"`
-	Level              int       `db:"level" json:"level"` // 10 ~ Free trial, 20 ~ Basic
+	Level              string    `db:"level" json:"level"`
 	NumberOfEditors    int       `db:"number_of_editors" json:"numberOfEditors"`
 	FromDate           time.Time `db:"from_date" json:"fromDate"`
+	ExpirationDate     time.Time `db:"expiration_date" json:"expirationDate"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`

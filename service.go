@@ -23,12 +23,9 @@ type Service interface {
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
 
-
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
-
-
 
 	GetWorkspace(id string) (*Workspace, error)
 	GetWorkspaceByContext() *Workspace
@@ -59,7 +56,7 @@ type Service interface {
 	SendInvitationMail(invitationID string) error
 	DeleteInvite(invitationID string) error
 	AcceptInvite(code string) error
-	GetInvite(code string) (*Invite, error) 
+	GetInvite(code string) (*Invite, error)
 
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
@@ -114,7 +111,7 @@ func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo
 		Member:     member,
 		r:          repo,
 		auth:       auth,
-		mg:         mg, 
+		mg:         mg,
 	}
 }
 
@@ -205,7 +202,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	sub := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        t.ID,
-		Level:              10, // 10 ~ Free trial
+		Level:              "TRIAL",
 		NumberOfEditors:    2,
 		FromDate:           time.Now().UTC(),
 		CreatedByName:      account.Name,
@@ -316,7 +313,7 @@ func (s *service) GetWorkspaces() []*Workspace {
 
 func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, error) {
 
-	if !levelIsValid(level) { 
+	if !levelIsValid(level) {
 		return nil, errors.New("level invalid")
 	}
 
@@ -333,7 +330,7 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 		return nil, errors.New("not allowed to change role of owner")
 	}
 
-	if isEditor(level ) {
+	if isEditor(level) {
 		members := s.GetMembers()
 		sub := s.GetSubscriptionByWorkspace(s.Member.WorkspaceID)
 
@@ -388,7 +385,7 @@ func isEditor(level string) bool {
 func (s *service) CreateMember(workspaceID string, accountID string, level string) (*Member, error) {
 	sub := s.GetSubscriptionByWorkspace(workspaceID)
 
-	if sub.Level == 0 {
+	if sub.Level == "READONLY" {
 		return nil, errors.New("cannot create member on readonly workspace")
 	}
 
@@ -479,7 +476,7 @@ func (s *service) CreateInvite(email string, level string) (*Invite, error) {
 	}
 
 	member, _ := s.r.GetMemberByEmail(s.Member.WorkspaceID, email)
-	
+
 	if member != nil {
 		return nil, errors.New("already member of the workspace")
 	}
@@ -549,7 +546,6 @@ func (s *service) SendInvitationMail(invitationID string) error {
 		return err
 	}
 
-
 	return nil
 }
 
@@ -567,12 +563,12 @@ func (s *service) DeleteInvite(id string) error {
 }
 
 func (s *service) Leave() error {
-	
-	if s.Member.Level == "OWNER"  {
+
+	if s.Member.Level == "OWNER" {
 		return errors.New("owners cannot not themselves leave a workspace")
 	}
 
-	return s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)	
+	return s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)
 }
 
 func (s *service) GetInvitesByWorkspace() []*Invite {
@@ -599,11 +595,11 @@ func (s *service) AcceptInvite(code string) error {
 	if err := s.r.DeleteInvite(invite.WorkspaceID, invite.ID); err != nil {
 		return err
 	}
-	
+
 	if _, err := s.CreateMember(invite.WorkspaceID, acc.ID, invite.Level); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -612,7 +608,7 @@ func (s *service) GetInvite(code string) (*Invite, error) {
 
 	if err != nil {
 		return nil, err
-	}	
+	}
 
 	return invite, nil
 }
