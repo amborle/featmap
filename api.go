@@ -11,15 +11,13 @@ import (
 func api(r chi.Router) {
 
 	r.Use(RequireAccount())
-	r.Get("/app", getApp)
+	r.Use(RequireMember())
 
 	r.Group(func(r chi.Router) {
-		r.Use(RequireMember())
 		r.Post("/leave", leave)
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(RequireMember())
 		r.Use(RequireAdmin())
 
 		r.Get("/members", getMembers)
@@ -38,7 +36,6 @@ func api(r chi.Router) {
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(RequireMember())
 
 		r.Route("/",
 			func(r chi.Router) {
@@ -100,20 +97,6 @@ func api(r chi.Router) {
 }
 
 // Workspaces
-func getApp(w http.ResponseWriter, r *http.Request) {
-	type response struct {
-		Account     *Account     `json:"account"`
-		Workspaces  []*Workspace `json:"workspaces"`
-		Memberships []*Member    `json:"memberships"`
-	}
-
-	s := GetEnv(r).Service
-	render.JSON(w, r, response{
-		Account:     s.GetAccountObject(),
-		Workspaces:  s.GetWorkspaces(),
-		Memberships: s.GetMembersByAccount(),
-	})
-}
 
 func getMembers(w http.ResponseWriter, r *http.Request) {
 	s := GetEnv(r).Service

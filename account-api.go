@@ -10,6 +10,9 @@ import (
 func accountAPI(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAccount())
+
+		r.Get("/app", getApp)
+
 		r.Route("/",
 			func(r chi.Router) {
 				r.Route("/emailupdate/{EMAIL}", func(r chi.Router) {
@@ -22,6 +25,21 @@ func accountAPI(r chi.Router) {
 
 				r.Post("/resend", resend)
 			})
+	})
+}
+
+func getApp(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		Account     *Account     `json:"account"`
+		Workspaces  []*Workspace `json:"workspaces"`
+		Memberships []*Member    `json:"memberships"`
+	}
+
+	s := GetEnv(r).Service
+	render.JSON(w, r, response{
+		Account:     s.GetAccountObject(),
+		Workspaces:  s.GetWorkspaces(),
+		Memberships: s.GetMembersByAccount(),
 	})
 }
 

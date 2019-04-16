@@ -32,7 +32,7 @@ type Service interface {
 	GetWorkspaces() []*Workspace
 	GetAccount(accountID string) (*Account, error)
 	GetAccountsByWorkspace() []*Account
-
+	
 	GetSubscriptionByWorkspace(id string) *Subscription
 
 	ConfirmEmail(key string) error
@@ -205,6 +205,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		Level:              "TRIAL",
 		NumberOfEditors:    2,
 		FromDate:           time.Now().UTC(),
+		ExpirationDate:     time.Now().UTC().AddDate(0, 0, 30),
 		CreatedByName:      account.Name,
 		CreatedAt:          time.Now().UTC(),
 		LastModified:       time.Now().UTC(),

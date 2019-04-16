@@ -231,7 +231,7 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 // Subscriptions
 
 func (a *repo) StoreSubscription(x *Subscription) (*Subscription, error) {
-	if _, err := a.db.Exec("INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)", x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName); err != nil {
+	if _, err := a.db.Exec("INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)", x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing subscription")
 	}
 	return x, nil
