@@ -75,6 +75,8 @@ type Service interface {
 	GetMilestonesByProject(id string) []*Milestone
 	DeleteMilestone(id string) error
 	UpdateMilestoneDescription(id string, d string) (*Milestone, error)
+	CloseMilestone(id string) (*Milestone, error)
+	OpenMilestone(id string) (*Milestone, error)
 
 	GetWorkflowsByProject(id string) []*Workflow
 	MoveWorkflow(id string, index int) (*Workflow, error)
@@ -96,6 +98,8 @@ type Service interface {
 	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
 	UpdateFeatureDescription(id string, d string) (*Feature, error)
+	CloseFeature(id string) (*Feature, error)
+	OpenFeature(id string) (*Feature, error)
 }
 
 type service struct {
@@ -814,6 +818,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		ProjectID:     projectID,
 		ID:            id,
 		Title:         title,
+		Status: "OPEN",
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
@@ -938,6 +943,43 @@ func (s *service) UpdateMilestoneDescription(id string, d string) (*Milestone, e
 	}
 
 	return x, nil
+}
+
+func (s *service) CloseMilestone(id string) (*Milestone, error) {
+	p, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "CLOSED"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	p, err = s.r.StoreMilestone(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+
+func (s *service) OpenMilestone(id string) (*Milestone, error) {
+	p, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "OPEN"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	p, err = s.r.StoreMilestone(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
 }
 
 // Workflow
@@ -1261,6 +1303,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		Title:         title,
 		Rank:          "",
 		Description:   "",
+		Status: "OPEN",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name}
@@ -1313,6 +1356,44 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 
 	return p, nil
 }
+
+func (s *service) CloseFeature(id string) (*Feature, error) {
+	p, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "CLOSED"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	p, err = s.r.StoreFeature(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+
+func (s *service) OpenFeature(id string) (*Feature, error) {
+	p, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "OPEN"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	p, err = s.r.StoreFeature(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
 
 func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error) {
 

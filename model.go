@@ -82,6 +82,7 @@ type Milestone struct {
 	ID                 string    `db:"id" json:"id"`
 	Title              string    `db:"title" json:"title"`
 	Description        string    `db:"description" json:"description"`
+	Status             string    `db:"status" json:"status"`
 	Rank               string    `db:"rank" json:"rank"`
 	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
@@ -129,6 +130,7 @@ type Feature struct {
 	Title              string    `db:"title" json:"title"`
 	Rank               string    `db:"rank" json:"rank"`
 	Description        string    `db:"description" json:"description"`
+	Status             string    `db:"status" json:"status"`
 	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`

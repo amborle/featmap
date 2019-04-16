@@ -69,6 +69,8 @@ func api(r chi.Router) {
 					r.Post("/rename", renameMilestone)
 					r.Post("/move", moveMilestone)
 					r.Post("/description", updateMilestoneDescription)
+					r.Post("/open", openMilestone)
+					r.Post("/close", closeMilestone)
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
@@ -96,6 +98,8 @@ func api(r chi.Router) {
 					r.Delete("/", deleteFeature)
 					r.Post("/move", moveFeature)
 					r.Post("/description", updateFeatureDescription)
+					r.Post("/open", openFeature)
+					r.Post("/close", closeFeature)
 				})
 			})
 	})
@@ -404,6 +408,30 @@ func deleteMilestone(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+func closeMilestone(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.CloseMilestone(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func openMilestone(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.OpenMilestone(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
 // Workflows
 
 type createWorkflowRequest struct {
@@ -690,6 +718,30 @@ func moveFeature(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, r, m)
+}
+
+func closeFeature(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.CloseFeature(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func openFeature(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.OpenFeature(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
 }
 
 // Common

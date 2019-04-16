@@ -5,6 +5,7 @@ CREATE TABLE milestones (
 	rank varchar not null,	
 	title varchar NOT NULL,	
 	"description" varchar not null,	
+	status varchar not null,	
 	created_by uuid,
 	created_by_name varchar NOT NULL,	
 	created_at TIMESTAMP WITH TIME ZONE not null,			
