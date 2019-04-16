@@ -13,33 +13,33 @@ func accountAPI(r chi.Router) {
 
 		r.Get("/app", getApp)
 
-		r.Route("/",
-			func(r chi.Router) {
-				r.Route("/emailupdate/{EMAIL}", func(r chi.Router) {
-					r.Post("/", updateEmail)
-				})
+		r.Route("/emailupdate/{EMAIL}", func(r chi.Router) {
+			r.Post("/", updateEmail)
+		})
 
-				r.Route("/nameupdate", func(r chi.Router) {
-					r.Post("/", updateName)
-				})
+		r.Post("/nameupdate", updateName)
+		r.Post("/resend", resend)
+		r.Post("/delete", deleteAccount)
 
-				r.Post("/resend", resend)
-			})
+		r.Post("/workspaces", createWorkspace)
+
 	})
 }
 
 func getApp(w http.ResponseWriter, r *http.Request) {
 	type response struct {
-		Account     *Account     `json:"account"`
-		Workspaces  []*Workspace `json:"workspaces"`
-		Memberships []*Member    `json:"memberships"`
+		Account       *Account        `json:"account"`
+		Workspaces    []*Workspace    `json:"workspaces"`
+		Memberships   []*Member       `json:"memberships"`
+		Subscriptions []*Subscription `json:"subscriptions"`
 	}
 
 	s := GetEnv(r).Service
 	render.JSON(w, r, response{
-		Account:     s.GetAccountObject(),
-		Workspaces:  s.GetWorkspaces(),
-		Memberships: s.GetMembersByAccount(),
+		Account:       s.GetAccountObject(),
+		Workspaces:    s.GetWorkspaces(),
+		Memberships:   s.GetMembersByAccount(),
+		Subscriptions: s.GetSubscriptionsByAccount(),
 	})
 }
 
@@ -79,6 +79,17 @@ func updateName(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func deleteAccount(w http.ResponseWriter, r *http.Request) {
+
+	s := GetEnv(r).Service
+	err := s.DeleteAccount()
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	return
+}
+
 func resend(w http.ResponseWriter, r *http.Request) {
 
 	s := GetEnv(r).Service
@@ -88,4 +99,28 @@ func resend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	return
+}
+
+// Workspace
+type createWorkspaceRequest struct {
+	Name string `json:"name"`
+}
+
+func (p *createWorkspaceRequest) Bind(r *http.Request) error {
+	return nil
+}
+func createWorkspace(w http.ResponseWriter, r *http.Request) {
+	data := &createWorkspaceRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	s := GetEnv(r).Service
+	workspace, _, _, err := s.CreateWorkspace(data.Name)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, workspace)
 }

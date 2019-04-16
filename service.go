@@ -26,15 +26,19 @@ type Service interface {
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
+	DeleteAccount() error
 
+	CreateWorkspace(name string) (*Workspace,*Subscription, *Member, error)
 	GetWorkspace(id string) (*Workspace, error)
 	GetWorkspaceByContext() *Workspace
 	GetWorkspaces() []*Workspace
 	GetAccount(accountID string) (*Account, error)
 	GetAccountsByWorkspace() []*Account
-	
+	DeleteWorkspace() error
+		
 	GetSubscriptionByWorkspace(id string) *Subscription
-
+	GetSubscriptionsByAccount() []*Subscription
+	
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
 	UpdateName(name string) error
@@ -141,7 +145,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		return nil, nil, nil, errors.New("email_invalid")
 	}
 
-	if len(workspaceName) < 2 || len(workspaceName) > 200 || !govalidator.IsAlphanumeric(workspaceName) || workspaceName == "account" {
+	if !workspaceNameIsValid(workspaceName) {
 		return nil, nil, nil, errors.New("workspace_invalid")
 	}
 
@@ -236,6 +240,18 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	return workspace, account, member, nil
 }
 
+func (s *service) DeleteAccount() error {
+	members := s.GetMembersByAccount()
+
+	for _, m := range members {
+		if(m.Level == "OWNER") {
+			return errors.New("Cannot delete account if owner of workspace. ")
+		}
+	}	
+	return s.r.DeleteAccount(s.Acc.ID) 
+}
+
+
 func (s *service) Login(email string, password string) (*Account, error) {
 
 	acc, err := s.r.GetAccountByEmail(email)
@@ -275,6 +291,14 @@ func (s *service) GetAccountsByWorkspace() []*Account {
 	return accounts
 }
 
+func (s *service) GetSubscriptionsByAccount() []*Subscription {
+	subs, err := s.r.FindSubscriptionsByAccount(s.Acc.ID)
+	if err != nil {
+		return nil
+	}
+	return subs
+}
+
 func (s *service) GetSubscriptionByWorkspace(id string) *Subscription {
 	subs, err := s.r.FindSubscriptionsByWorkspace(id)
 	if err != nil {
@@ -283,6 +307,63 @@ func (s *service) GetSubscriptionByWorkspace(id string) *Subscription {
 	// Take the latest one, they come sorted from the db!
 	return subs[0]
 }
+
+func workspaceNameIsValid(name string) bool {
+	 return !(len(name) < 2 || len(name) > 200 || !govalidator.IsAlphanumeric(name) || name == "account")
+}
+
+
+func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error) {
+	name = govalidator.Trim(name, "")
+
+	if !workspaceNameIsValid(name) {
+		return nil,nil, nil, errors.New("workspace_invalid")
+	}
+
+	dupworkspace, err := s.r.GetWorkspaceByName(name)
+	if dupworkspace != nil {
+		return nil, nil, nil, errors.New("workspace_taken")
+	}
+
+	// Save workspace
+	workspace := &Workspace{
+		ID:        uuid.Must(uuid.NewV4(), nil).String(),
+		Name:      name,
+		CreatedAt: time.Now().UTC(),
+	}
+
+	workspace, err = s.r.SaveWorkspace(workspace)
+	if err != nil {
+		return nil,nil, nil, err
+	}
+
+	// Save subscription
+	subscription := &Subscription{
+		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID:        workspace.ID,
+		Level:              "TRIAL",
+		NumberOfEditors:    2,
+		FromDate:           time.Now().UTC(),
+		ExpirationDate:     time.Now().UTC().AddDate(0, 0, 30),
+		CreatedByName:      s.Acc.Name,
+		CreatedAt:          time.Now().UTC(),
+		LastModified:       time.Now().UTC(),
+		LastModifiedByName: s.Acc.Name,
+	}
+
+	subscription, err = s.r.StoreSubscription(subscription)
+	if err != nil {
+		return nil,nil, nil,  err
+	}
+
+	member, err := s.CreateMember(workspace.ID, s.Acc.ID, "OWNER")
+	if err != nil {
+		return nil,nil, nil, err
+	}
+
+	return workspace, subscription, member, nil
+}
+
 
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
@@ -570,6 +651,10 @@ func (s *service) Leave() error {
 	}
 
 	return s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)
+}
+
+func (s *service) DeleteWorkspace() error {
+	return s.r.DeleteWorkspace(s.Member.WorkspaceID)
 }
 
 func (s *service) GetInvitesByWorkspace() []*Invite {

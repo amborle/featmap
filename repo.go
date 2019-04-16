@@ -14,6 +14,7 @@ type Repository interface {
 	GetWorkspace(workspaceID string) (*Workspace, error)
 	GetWorkspacesByAccount(id string) ([]*Workspace, error)
 	GetWorkspaceByName(name string) (*Workspace, error)
+	DeleteWorkspace(workspaceID string) error
 
 	GetAccount(id string) (*Account, error)
 	GetAccountByEmail(email string) (*Account, error)
@@ -21,6 +22,7 @@ type Repository interface {
 	GetAccountByPasswordKey(key string) (*Account, error)
 	FindAccountsByWorkspace(id string) ([]*Account, error)
 	SaveAccount(x *Account) (*Account, error)
+	DeleteAccount(accountID string) error
 
 	SaveMember(x *Member) (*Member, error)
 	GetMember(workspaceID string, id string) (*Member, error)
@@ -32,6 +34,7 @@ type Repository interface {
 
 	StoreSubscription(z *Subscription) (*Subscription, error)
 	FindSubscriptionsByWorkspace(id string) ([]*Subscription, error)
+	FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
 
 	StoreInvite(x *Invite) error
 	DeleteInvite(wsid string, id string) error
@@ -97,7 +100,7 @@ func (a *repo) GetWorkspaceByName(name string) (*Workspace, error) {
 
 func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	var workspaces []*Workspace
-	if err := a.db.Select(&workspaces, "SELECT * FROM workspaces w where id in (select m.workspace_id from members m where m.account_id = $1)", id); err != nil {
+	if err := a.db.Select(&workspaces, "SELECT * FROM workspaces w where id in (select m.workspace_id from members m where m.account_id = $1) order by w.name", id); err != nil {
 		return nil, err
 	}
 	return workspaces, nil
@@ -112,6 +115,13 @@ func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
 	}
 
 	return x, nil
+}
+
+func (a *repo) DeleteWorkspace(workspaceID string) error {
+	if _, err := a.db.Exec("DELETE FROM workspaces WHERE id=$1", workspaceID); err != nil {
+		return errors.Wrap(err, "error when deleting ")
+	}
+	return nil
 }
 
 // Accounts
@@ -167,6 +177,13 @@ func (a *repo) FindAccountsByWorkspace(id string) ([]*Account, error) {
 		return nil, err
 	}
 	return accounts, nil
+}
+
+func (a *repo) DeleteAccount(accountID string) error {
+	if _, err := a.db.Exec("DELETE FROM accounts WHERE id=$1", accountID); err != nil {
+		return errors.Wrap(err, "error when deleting ")
+	}
+	return nil
 }
 
 // Members
@@ -240,6 +257,18 @@ func (a *repo) StoreSubscription(x *Subscription) (*Subscription, error) {
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
 	x := []*Subscription{}
 	err := a.db.Select(&x, "SELECT * FROM subscriptions WHERE workspace_id = $1 order by created_at desc", id)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.Wrap(err, "no subscriptions found")
+	}
+	return x, nil
+}
+
+func (a *repo) FindSubscriptionsByAccount(accID string) ([]*Subscription, error) {
+	x := []*Subscription{}
+	log.Println(accID)
+
+	err := a.db.Select(&x, "SELECT DISTINCT ON (s.workspace_id) * FROM subscriptions s WHERE s.workspace_id IN  (select m.workspace_id from members m where m.account_id = $1) order by s.workspace_id, s.from_date desc", accID)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.Wrap(err, "no subscriptions found")

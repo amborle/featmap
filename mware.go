@@ -93,6 +93,21 @@ func RequireAdmin() func(next http.Handler) http.Handler {
 	}
 }
 
+// RequireOwner ...
+func RequireOwner() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			if !(GetEnv(r).Service.GetMemberObject().Level == "OWNER") {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
 // RequireAccount ...
 func RequireAccount() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

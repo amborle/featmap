@@ -14,7 +14,12 @@ func api(r chi.Router) {
 	r.Use(RequireMember())
 
 	r.Group(func(r chi.Router) {
-		r.Post("/leave", leave)
+		r.Post("/leave", leaveWorkspace)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireOwner())
+		r.Post("/delete", deleteWorkspace)
 	})
 
 	r.Group(func(r chi.Router) {
@@ -137,8 +142,16 @@ func deleteMember(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func leave(w http.ResponseWriter, r *http.Request) {
+func leaveWorkspace(w http.ResponseWriter, r *http.Request) {
 	err := GetEnv(r).Service.Leave()
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+func deleteWorkspace(w http.ResponseWriter, r *http.Request) {
+	err := GetEnv(r).Service.DeleteWorkspace()
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
