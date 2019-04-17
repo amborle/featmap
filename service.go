@@ -28,17 +28,17 @@ type Service interface {
 	Token(accountID string) string
 	DeleteAccount() error
 
-	CreateWorkspace(name string) (*Workspace,*Subscription, *Member, error)
+	CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error)
 	GetWorkspace(id string) (*Workspace, error)
 	GetWorkspaceByContext() *Workspace
 	GetWorkspaces() []*Workspace
 	GetAccount(accountID string) (*Account, error)
 	GetAccountsByWorkspace() []*Account
 	DeleteWorkspace() error
-		
+
 	GetSubscriptionByWorkspace(id string) *Subscription
 	GetSubscriptionsByAccount() []*Subscription
-	
+
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
 	UpdateName(name string) error
@@ -145,7 +145,6 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	name = govalidator.Trim(name, "")
 	email = govalidator.Trim(email, "")
 
-	
 	if !govalidator.IsEmail(email) {
 		return nil, nil, nil, errors.New("email_invalid")
 	}
@@ -176,7 +175,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	// Create all needed objects
 
 	t := time.Now().UTC()
-	
+
 	workspace := &Workspace{
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      workspaceName,
@@ -218,11 +217,10 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		CreatedAt:   t,
 	}
 
-	err = s.r.Register(workspace, acc, sub, member) 
+	err = s.r.Register(workspace, acc, sub, member)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-
 
 	body, err := WelcomeBody(welcome{s.appSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
@@ -241,13 +239,12 @@ func (s *service) DeleteAccount() error {
 	members := s.GetMembersByAccount()
 
 	for _, m := range members {
-		if(m.Level == "OWNER") {
+		if m.Level == "OWNER" {
 			return errors.New("Cannot delete account if owner of workspace. ")
 		}
-	}	
-	return s.r.DeleteAccount(s.Acc.ID) 
+	}
+	return s.r.DeleteAccount(s.Acc.ID)
 }
-
 
 func (s *service) Login(email string, password string) (*Account, error) {
 
@@ -306,15 +303,14 @@ func (s *service) GetSubscriptionByWorkspace(id string) *Subscription {
 }
 
 func workspaceNameIsValid(name string) bool {
-	 return !(len(name) < 2 || len(name) > 200 || !govalidator.IsAlphanumeric(name) || name == "account")
+	return !(len(name) < 2 || len(name) > 200 || !govalidator.IsAlphanumeric(name) || name == "account")
 }
 
-
-func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error) {
+func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error) { // todo: put in transaction
 	name = govalidator.Trim(name, "")
 
 	if !workspaceNameIsValid(name) {
-		return nil,nil, nil, errors.New("workspace_invalid")
+		return nil, nil, nil, errors.New("workspace_invalid")
 	}
 
 	dupworkspace, err := s.r.GetWorkspaceByName(name)
@@ -331,7 +327,7 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 
 	workspace, err = s.r.SaveWorkspace(workspace)
 	if err != nil {
-		return nil,nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// Save subscription
@@ -350,17 +346,16 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 
 	subscription, err = s.r.StoreSubscription(subscription)
 	if err != nil {
-		return nil,nil, nil,  err
+		return nil, nil, nil, err
 	}
 
 	member, err := s.CreateMember(workspace.ID, s.Acc.ID, "OWNER")
 	if err != nil {
-		return nil,nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	return workspace, subscription, member, nil
 }
-
 
 func (s *service) GetWorkspace(id string) (*Workspace, error) {
 
@@ -663,7 +658,7 @@ func (s *service) GetInvitesByWorkspace() []*Invite {
 	return invites
 }
 
-func (s *service) AcceptInvite(code string) error {
+func (s *service) AcceptInvite(code string) error { // todo: put in transaction
 	invite, err := s.r.GetInviteByCode(code)
 
 	if err != nil {
@@ -811,7 +806,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		ProjectID:     projectID,
 		ID:            id,
 		Title:         title,
-		Status: "OPEN",
+		Status:        "OPEN",
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
@@ -955,7 +950,6 @@ func (s *service) CloseMilestone(id string) (*Milestone, error) {
 
 	return p, nil
 }
-
 
 func (s *service) OpenMilestone(id string) (*Milestone, error) {
 	p, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
@@ -1296,7 +1290,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		Title:         title,
 		Rank:          "",
 		Description:   "",
-		Status: "OPEN",
+		Status:        "OPEN",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name}
@@ -1368,7 +1362,6 @@ func (s *service) CloseFeature(id string) (*Feature, error) {
 	return p, nil
 }
 
-
 func (s *service) OpenFeature(id string) (*Feature, error) {
 	p, err := s.r.GetFeature(s.Member.WorkspaceID, id)
 	if p == nil {
@@ -1386,7 +1379,6 @@ func (s *service) OpenFeature(id string) (*Feature, error) {
 
 	return p, nil
 }
-
 
 func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error) {
 
@@ -1548,7 +1540,7 @@ func (s *service) UpdateName(name string) error {
 	}
 
 	return nil
-}
+} 
 
 func (s *service) ResendEmail() error {
 
