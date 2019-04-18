@@ -19,6 +19,8 @@ type Service interface {
 	// Technical
 	GetMemberObject() *Member
 	SetMemberObject(m *Member)
+	SetSubscriptionObject(s *Subscription)
+	GetSubscriptionObject()  *Subscription	
 	SendEmail(recipient string, subject string, body string) error
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
@@ -106,7 +108,8 @@ type service struct {
 	appSiteURL string
 	Acc        *Account
 	Member     *Member
-	r          Repository
+	Subscription  *Subscription
+	r          Repository 
 	auth       *jwtauth.JWTAuth
 	mg         *mailgun.MailgunImpl
 }
@@ -116,11 +119,19 @@ func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo
 	return &service{
 		appSiteURL: appSiteURL,
 		Acc:        account,
-		Member:     member,
+		Member:     member,		
 		r:          repo,
 		auth:       auth,
 		mg:         mg,
 	}
+}
+
+func (s *service) GetSubscriptionObject() *Subscription {
+	return s.Subscription
+}
+
+func (s *service) SetSubscriptionObject(x *Subscription) {
+	s.Subscription = x
 }
 
 func (s *service) GetMemberObject() *Member {
@@ -313,43 +324,39 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		return nil, nil, nil, errors.New("workspace_invalid")
 	}
 
-	dupworkspace, err := s.r.GetWorkspaceByName(name)
+	dupworkspace, _ := s.r.GetWorkspaceByName(name)
 	if dupworkspace != nil {
 		return nil, nil, nil, errors.New("workspace_taken")
 	}
 
-	// Save workspace
+
+	t := time.Now().UTC()
 	workspace := &Workspace{
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      name,
-		CreatedAt: time.Now().UTC(),
+		CreatedAt: t,
 	}
-
-	workspace, err = s.r.SaveWorkspace(workspace)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	// Save subscription
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
 		Level:              "TRIAL",
 		NumberOfEditors:    2,
-		FromDate:           time.Now().UTC(),
-		ExpirationDate:     time.Now().UTC().AddDate(0, 0, 30),
+		FromDate:           t,
+		ExpirationDate:     t.AddDate(0, 0, 30),
 		CreatedByName:      s.Acc.Name,
-		CreatedAt:          time.Now().UTC(),
-		LastModified:       time.Now().UTC(),
+		CreatedAt:          t,
+		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
 	}
-
-	subscription, err = s.r.StoreSubscription(subscription)
-	if err != nil {
-		return nil, nil, nil, err
+	member := &Member{
+		ID:          uuid.Must(uuid.NewV4(), nil).String(),
+		WorkspaceID: workspace.ID,
+		AccountID:   s.Acc.ID,
+		Level:       "OWNER",
+		CreatedAt:   t,
 	}
 
-	member, err := s.CreateMember(workspace.ID, s.Acc.ID, "OWNER")
+	err := s.r.NewWorkspace(workspace, subscription, member)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -415,8 +422,8 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 			}
 		}
 
-		if n > sub.NumberOfEditors {
-			return nil, errors.New("subscription exceeded")
+		if (!isEditor(member.Level)) &&  (n + 1  > sub.NumberOfEditors) {
+			return nil, errors.New("subscription exceeded - please contact the owner of the workspace.")
 		}
 
 	}
@@ -459,8 +466,8 @@ func isEditor(level string) bool {
 func (s *service) CreateMember(workspaceID string, accountID string, level string) (*Member, error) {
 	sub := s.GetSubscriptionByWorkspace(workspaceID)
 
-	if sub.Level == "READONLY" {
-		return nil, errors.New("cannot create member on readonly workspace")
+	if sub.Level == "NONE" {
+		return nil, errors.New("cannot create member on workspace wihout subscription")
 	}
 
 	if isEditor(level) {
@@ -474,7 +481,7 @@ func (s *service) CreateMember(workspaceID string, accountID string, level strin
 		}
 
 		if n >= sub.NumberOfEditors {
-			return nil, errors.New("subscription exceeded")
+			return nil, errors.New("subscription exceeded - please contact the owner of the workspace") 
 		}
 	}
 
@@ -658,23 +665,23 @@ func (s *service) GetInvitesByWorkspace() []*Invite {
 	return invites
 }
 
-func (s *service) AcceptInvite(code string) error { // todo: put in transaction
+func (s *service) AcceptInvite(code string) error { 
 	invite, err := s.r.GetInviteByCode(code)
 
 	if err != nil {
 		return errors.New("invite not found")
 	}
 
-	acc, err := s.r.GetAccountByEmail(invite.Email)
+	acc, err := s.r.GetAccountByEmail(invite.Email) 
 	if err != nil {
-		return errors.New("Please create an account first using " + invite.Email)
-	}
-
-	if err := s.r.DeleteInvite(invite.WorkspaceID, invite.ID); err != nil {
-		return err
+		return errors.New("Please create an account first  (using " + invite.Email + ") and then accept again.")
 	}
 
 	if _, err := s.CreateMember(invite.WorkspaceID, acc.ID, invite.Level); err != nil {
+		return err
+	}
+
+	if err := s.r.DeleteInvite(invite.WorkspaceID, invite.ID); err != nil {
 		return err
 	}
 

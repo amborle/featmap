@@ -24,20 +24,44 @@ func api(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAdmin())
-
 		r.Get("/members", getMembers)
-		r.Route("/members/{ID}", func(r chi.Router) {
-			r.Post("/level", updateMemberLevel)
-			r.Delete("/", deleteMember)
-		})
-
 		r.Get("/invites", getInvites)
-		r.Post("/invites", createInvite)
-		r.Route("/invites/{ID}", func(r chi.Router) {
-			r.Delete("/", deleteInvite)
-			r.Post("/resend", resendInvite)
-		})
+	})
 
+	r.Group(func(r chi.Router) {
+		r.Use(RequireAdmin())
+
+		r.Route("/members/{ID}", func(r chi.Router) {
+			r.Group(func(r chi.Router) {
+				r.Use(RequireSubscription())
+				r.Post("/level", updateMemberLevel)
+			})
+
+			r.Group(func(r chi.Router) {
+				r.Delete("/", deleteMember)
+			})
+		})
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireAdmin())
+		r.Use(RequireSubscription())
+		r.Post("/invites", createInvite)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireAdmin())
+
+		r.Route("/invites/{ID}", func(r chi.Router) {
+			r.Group(func(r chi.Router) {
+				r.Use(RequireSubscription())
+				r.Post("/resend", resendInvite)
+			})
+
+			r.Group(func(r chi.Router) {
+				r.Delete("/", deleteInvite)
+			})
+		})
 	})
 
 	r.Group(func(r chi.Router) {
@@ -54,6 +78,7 @@ func api(r chi.Router) {
 					})
 
 					r.Group(func(r chi.Router) {
+						r.Use(RequireSubscription())
 						r.Use(RequireEditor())
 						r.Post("/", createProject)
 						r.Delete("/", deleteProject)
@@ -63,6 +88,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/milestones/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createMilestone)
 					r.Delete("/", deleteMilestone)
@@ -74,6 +100,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
@@ -83,6 +110,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createSubWorkflow)
 					r.Post("/rename", renameSubWorkflow)
@@ -92,6 +120,7 @@ func api(r chi.Router) {
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createFeature)
 					r.Post("/rename", renameFeature)

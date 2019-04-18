@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/jwtauth"
@@ -50,9 +49,17 @@ func AddService(appSiteURL string, db *sqlx.DB, auth *jwtauth.JWTAuth, mg *mailg
 
 					member, err := s.GetMember(acc.ID, val[0])
 					if err != nil {
-						log.Println(err)
+						http.Error(w, http.StatusText(401), 401)
+						return
 					}
 					s.SetMemberObject(member)
+
+					sub := s.GetSubscriptionByWorkspace(member.WorkspaceID)
+					if sub == nil {
+						http.Error(w, http.StatusText(401), 401)
+						return
+					}
+					s.SetSubscriptionObject(sub)
 				}
 			}
 
@@ -99,6 +106,21 @@ func RequireOwner() func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
 			if !(GetEnv(r).Service.GetMemberObject().Level == "OWNER") {
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// RequireSubscription  ...
+func RequireSubscription() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			level := GetEnv(r).Service.GetSubscriptionObject().Level
+			if isReadOnlySubscription(level) {
 				http.Error(w, http.StatusText(401), 401)
 				return
 			}

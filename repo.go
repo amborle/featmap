@@ -10,6 +10,7 @@ import (
 // Repository ...
 type Repository interface {
 	Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error
+	NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error
 
 	SaveWorkspace(x *Workspace) (*Workspace, error)
 	GetWorkspace(workspaceID string) (*Workspace, error)
@@ -114,6 +115,19 @@ func (a *repo) Register(ws *Workspace, acc *Account, sub *Subscription, memb *Me
 
 		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt)
 		tx.MustExec(saveAccountQuery, acc.ID, acc.Email, acc.Password, acc.CreatedAt, acc.EmailConfirmationSentTo, acc.EmailConfirmed, acc.EmailConfirmationKey, acc.EmailConfirmationPending, acc.PasswordResetKey, acc.Name)
+		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
+		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
+
+		return nil
+	})
+
+	return err
+}
+
+func (a *repo) NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error {
+	err := txnDo(a.DB(), func(tx *sqlx.Tx) error {
+
+		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt)
 		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
 		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
 
