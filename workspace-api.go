@@ -266,14 +266,15 @@ func createProject(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, p)
 }
 
+type projectResponse struct {
+	Project      *Project       `json:"project"`
+	Milestones   []*Milestone   `json:"milestones"`
+	Workflows    []*Workflow    `json:"workflows"`
+	SubWorkflows []*SubWorkflow `json:"subWorkflows"`
+	Features     []*Feature     `json:"features"`
+}
+
 func getProjectExtended(w http.ResponseWriter, r *http.Request) {
-	type response struct {
-		Project      *Project       `json:"project"`
-		Milestones   []*Milestone   `json:"milestones"`
-		Workflows    []*Workflow    `json:"workflows"`
-		SubWorkflows []*SubWorkflow `json:"subWorkflows"`
-		Features     []*Feature     `json:"features"`
-	}
 
 	s := GetEnv(r).Service
 	id := chi.URLParam(r, "ID")
@@ -283,7 +284,7 @@ func getProjectExtended(w http.ResponseWriter, r *http.Request) {
 	workflows := s.GetWorkflowsByProject(id)
 	subworkflows := s.GetSubWorkflowsByProject(id)
 	features := s.GetFeaturesByProject(id)
-	oo := response{
+	oo := projectResponse{
 		Project:      project,
 		Milestones:   milestones,
 		Workflows:    workflows,

@@ -64,6 +64,7 @@ type Service interface {
 	AcceptInvite(code string) error
 	GetInvite(code string) (*Invite, error)
 
+	GetProjectByExternalLink(link string) (*projectResponse, error)
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
 	RenameProject(id string, title string) (*Project, error)
@@ -191,6 +192,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      workspaceName,
 		CreatedAt: t,
+		AllowExternalSharing: true,
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -314,7 +316,7 @@ func (s *service) GetSubscriptionByWorkspace(id string) *Subscription {
 }
 
 func workspaceNameIsValid(name string) bool {
-	return !(len(name) < 2 || len(name) > 200 || !govalidator.IsAlphanumeric(name) || name == "account")
+	return !(len(name) < 2 || len(name) > 200 || !govalidator.IsAlphanumeric(name) || name == "account" || name == "link")
 }
 
 func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error) { // todo: put in transaction
@@ -335,6 +337,7 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		ID:        uuid.Must(uuid.NewV4(), nil).String(),
 		Name:      name,
 		CreatedAt: t,
+		AllowExternalSharing: true,
 	}
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
@@ -710,6 +713,30 @@ func (s *service) GetProject(id string) *Project {
 	return pp
 }
 
+func (s *service) GetProjectByExternalLink(link string) (*projectResponse, error) {
+	project, err := s.r.GetProjectByExternalLink(link)
+	if err != nil { return nil, err}
+	
+	milestones, err :=  s.r.FindMilestonesByProject(project.WorkspaceID,project.ID)
+	if err != nil { return nil, err }
+	workflows, err :=  s.r.FindWorkflowsByProject(project.WorkspaceID,project.ID)
+	if err != nil { return nil, err }
+	subworkflows, err :=  s.r.FindSubWorkflowsByProject(project.WorkspaceID,project.ID)
+	if err != nil { return nil, err }
+	features, err :=  s.r.FindFeaturesByProject(project.WorkspaceID,project.ID)
+	if err != nil { return nil, err }
+
+	resp := &projectResponse{
+		Project:      project,
+		Milestones:   milestones,
+		Workflows:    workflows,
+		SubWorkflows: subworkflows,
+		Features:     features,
+	}
+	
+	return resp, nil
+}
+
 func (s *service) CreateProjectWithID(id string, title string) (*Project, error) {
 
 	title, err := validateTitle(title)
@@ -729,6 +756,7 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
+		ExternalLink:  uuid.Must(uuid.NewV4(), nil).String(),
 	}
 
 	p.LastModified = time.Now().UTC()

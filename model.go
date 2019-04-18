@@ -4,9 +4,10 @@ import "time"
 
 // Workspace ...
 type Workspace struct {
-	ID        string    `db:"id" json:"id"`
-	Name      string    `db:"name" json:"name"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt"`
+	ID                   string    `db:"id" json:"id"`
+	Name                 string    `db:"name" json:"name"`
+	CreatedAt            time.Time `db:"created_at" json:"createdAt"`
+	AllowExternalSharing bool      `db:"allow_external_sharing" json:"allowExternalSharing"`
 }
 
 // Account ...
@@ -73,6 +74,7 @@ type Project struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	ExternalLink       string    `db:"external_link" json:"externalLink"`
 }
 
 // Milestone ...

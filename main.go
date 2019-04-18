@@ -78,6 +78,7 @@ func main() {
 		w.Write([]byte("Featmap"))
 	})
 
+	r.Route("/v1/link", linkAPI)       // Nothing is needed
 	r.Route("/v1/users", usersAPI)     // Nothing is needed
 	r.Route("/v1/account", accountAPI) // Account needed
 	r.Route("/v1/", api)               // Account + workspace is needed

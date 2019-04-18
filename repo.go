@@ -45,6 +45,7 @@ type Repository interface {
 	GetInvite(workspaceID string, id string) (*Invite, error)
 	FindInvitesByWorkspace(wsid string) ([]*Invite, error)
 
+	GetProjectByExternalLink(link string) (*Project, error)
 	GetProject(workspaceID string, projectID string) (*Project, error)
 	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
 	StoreProject(x *Project) (*Project, error)
@@ -113,7 +114,7 @@ func (a *repo) DB() *sqlx.DB {
 func (a *repo) Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error {
 	err := txnDo(a.DB(), func(tx *sqlx.Tx) error {
 
-		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt)
+		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
 		tx.MustExec(saveAccountQuery, acc.ID, acc.Email, acc.Password, acc.CreatedAt, acc.EmailConfirmationSentTo, acc.EmailConfirmed, acc.EmailConfirmationKey, acc.EmailConfirmationPending, acc.PasswordResetKey, acc.Name)
 		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
 		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
@@ -127,7 +128,7 @@ func (a *repo) Register(ws *Workspace, acc *Account, sub *Subscription, memb *Me
 func (a *repo) NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error {
 	err := txnDo(a.DB(), func(tx *sqlx.Tx) error {
 
-		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt)
+		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
 		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
 		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
 
@@ -163,10 +164,10 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
-const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at) VALUES ($1,$2,$3)"
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3, $4)"
 
 func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
-	if _, err := a.db.Exec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt); err != nil {
+	if _, err := a.db.Exec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing workspace")
 	}
 
@@ -403,6 +404,14 @@ func (a *repo) GetProject(workspaceID string, projectID string) (*Project, error
 	return x, nil
 }
 
+func (a *repo) GetProjectByExternalLink(link string) (*Project, error) {
+	x := &Project{}
+	if err := a.db.Get(x, "SELECT * FROM projects WHERE external_link = $1", link); err != nil {
+		return nil, errors.Wrap(err, "project not found")
+	}
+	return x, nil
+}
+
 func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
 	x := []*Project{}
 	err := a.db.Select(&x, "SELECT * FROM projects WHERE workspace_id = $1", workspaceID)
@@ -415,7 +424,7 @@ func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
 func (a *repo) StoreProject(x *Project) (*Project, error) {
 
 	if //noinspection ALL
-	_, err := a.db.Exec("INSERT INTO projects (workspace_id, id, title, created_by, created_at,created_by_name, description, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3, description = $7, last_modified = $8, last_modified_by_name = $9", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName); err != nil {
+	_, err := a.db.Exec("INSERT INTO projects (workspace_id, id, title, created_by, created_at,created_by_name, description, last_modified, last_modified_by_name, external_link) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3, description = $7, last_modified = $8, last_modified_by_name = $9, external_link = $10", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.ExternalLink); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing")
 	}
 
