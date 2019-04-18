@@ -423,7 +423,7 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 		}
 
 		if (!isEditor(member.Level)) &&  (n + 1  > sub.NumberOfEditors) {
-			return nil, errors.New("subscription exceeded - please contact the owner of the workspace.")
+			return nil, errors.New("subscription exceeded - please contact the owner of the workspace")
 		}
 
 	}
