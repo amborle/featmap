@@ -16,9 +16,9 @@ func usersAPI(r chi.Router) {
 				r.Post("/signup", UsersSignup)
 				r.Post("/logout", UsersLogout)
 				r.Post("/login", UsersLogin)
-				r.Post("/confirm", ConfirmEmail)
-				r.Route("/confirm/{KEY}", func(r chi.Router) {
-					r.Post("/", ConfirmEmail)
+				r.Post("/verify", VerifyEmail)
+				r.Route("/verify/{KEY}", func(r chi.Router) {
+					r.Post("/", VerifyEmail)
 				})
 				r.Route("/reset/{EMAIL}", func(r chi.Router) {
 					r.Post("/", ResetEmail)
@@ -145,8 +145,8 @@ func deleteCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, &cookie)
 }
 
-// ConfirmEmail ...
-func ConfirmEmail(w http.ResponseWriter, r *http.Request) {
+// VerifyEmail ...
+func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	key := chi.URLParam(r, "KEY")
 
 	s := GetEnv(r).Service

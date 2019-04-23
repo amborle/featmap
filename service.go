@@ -56,6 +56,8 @@ type Service interface {
 	DeleteMember(memberID string) error
 	CreateMember(workspaceID string, accountID string, level string) (*Member, error)
 	Leave() error
+	
+	ChangeAllowExternalSharing(value bool) error
 
 	GetInvitesByWorkspace() []*Invite
 	CreateInvite(email string, level string) (*Invite, error)
@@ -540,6 +542,21 @@ func (s *service) GetMembersByWorkspace(id string) []*Member {
 	}
 	return members
 }
+
+// SETTINGS
+
+func (s *service) ChangeAllowExternalSharing(value bool) error {
+
+	w := s.GetWorkspaceByContext()
+
+	w.AllowExternalSharing = value
+
+	 _, err := s.r.SaveWorkspace(w)
+	
+	return err
+}
+
+
 
 // INVITES
 
@@ -1550,7 +1567,7 @@ func (s *service) UpdateEmail(email string) error {
 
 	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err = s.SendEmail(email, "FeatMap: confirm your email adress", body)
+	err = s.SendEmail(email, "FeatMap: verify your email adress", body)
 	if err != nil {
 		return errors.New("send_error")
 	}
@@ -1587,7 +1604,7 @@ func (s *service) ResendEmail() error {
 
 	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err := s.SendEmail(a.EmailConfirmationSentTo, "Featmap: confirm your email adress", body)
+	err := s.SendEmail(a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
 	if err != nil {
 		return errors.New("send_error")
 	}

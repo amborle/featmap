@@ -51,6 +51,12 @@ func api(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAdmin())
+		r.Use(RequireSubscription())
+		r.Post("/settings/allow-external-sharing", changeExternalSharingRequest)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireAdmin())
 
 		r.Route("/invites/{ID}", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
@@ -234,6 +240,29 @@ func resendInvite(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	err := GetEnv(r).Service.SendInvitationMail(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+// Settings
+type booleanSettingRequest struct {
+	Value bool `json:"value"`
+}
+
+func (p *booleanSettingRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func changeExternalSharingRequest(w http.ResponseWriter, r *http.Request) {
+	data := &booleanSettingRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	err := GetEnv(r).Service.ChangeAllowExternalSharing(data.Value)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

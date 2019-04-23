@@ -138,7 +138,7 @@ func (a *repo) NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) erro
 	return err
 }
 
-// Tentants
+// Workspaces
 
 func (a *repo) GetWorkspace(id string) (*Workspace, error) {
 	workspace := &Workspace{}
@@ -164,7 +164,7 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
-const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3, $4)"
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4"
 
 func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
 	if _, err := a.db.Exec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing); err != nil {
