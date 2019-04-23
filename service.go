@@ -24,6 +24,8 @@ type Service interface {
 	SendEmail(recipient string, subject string, body string) error
 	GetAccountObject() *Account
 	SetAccountObject(a *Account)
+	GetWorkspaceObject() *Workspace
+	SetWorkspaceObject(m *Workspace)
 
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
@@ -66,7 +68,8 @@ type Service interface {
 	AcceptInvite(code string) error
 	GetInvite(code string) (*Invite, error)
 
-	GetProjectByExternalLink(link string) (*projectResponse, error)
+	GetProjectByExternalLink(link string) (*Project, error)
+	GetProjectExtendedByExternalLink(link string) (*projectResponse, error)
 	GetProject(id string) *Project
 	CreateProjectWithID(id string, title string) (*Project, error)
 	RenameProject(id string, title string) (*Project, error)
@@ -115,6 +118,7 @@ type service struct {
 	r          Repository 
 	auth       *jwtauth.JWTAuth
 	mg         *mailgun.MailgunImpl
+	ws         *Workspace
 }
 
 // NewFeatmapService ...
@@ -151,6 +155,14 @@ func (s *service) GetAccountObject() *Account {
 
 func (s *service) SetAccountObject(a *Account) {
 	s.Acc = a
+}
+
+func (s *service) GetWorkspaceObject() *Workspace {
+	return s.ws
+}
+
+func (s *service) SetWorkspaceObject(a *Workspace) {
+	s.ws = a
 }
 
 func (s *service) Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error) {
@@ -730,7 +742,12 @@ func (s *service) GetProject(id string) *Project {
 	return pp
 }
 
-func (s *service) GetProjectByExternalLink(link string) (*projectResponse, error) {
+func (s *service) GetProjectByExternalLink(link string) (*Project, error) {
+	return  s.r.GetProjectByExternalLink(link)
+	
+}
+
+func (s *service) GetProjectExtendedByExternalLink(link string) (*projectResponse, error) {
 	project, err := s.r.GetProjectByExternalLink(link)
 	if err != nil { return nil, err}
 	

@@ -27,5 +27,18 @@ func getLink(w http.ResponseWriter, r *http.Request) {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not found")))
 		return
 	}
-	render.JSON(w, r, project)
+
+	ws, _ := s.GetWorkspace(project.WorkspaceID)
+	if !ws.AllowExternalSharing {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
+		return
+	}
+
+	extended, err := s.GetProjectExtendedByExternalLink(link)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not found")))
+		return
+	}
+
+	render.JSON(w, r, extended)
 }

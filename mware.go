@@ -54,6 +54,13 @@ func AddService(appSiteURL string, db *sqlx.DB, auth *jwtauth.JWTAuth, mg *mailg
 					}
 					s.SetMemberObject(member)
 
+					ws, err := s.GetWorkspace(val[0])
+					if err != nil {
+						http.Error(w, http.StatusText(401), 401)
+						return
+					}
+					s.SetWorkspaceObject(ws)
+
 					sub := s.GetSubscriptionByWorkspace(member.WorkspaceID)
 					if sub == nil {
 						http.Error(w, http.StatusText(401), 401)
