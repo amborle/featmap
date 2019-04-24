@@ -132,19 +132,6 @@ type service struct {
 	ws         *Workspace
 }
 
-// NewFeatmapService ...
-// func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo Repository, auth *jwtauth.JWTAuth, mg *mailgun.MailgunImpl) Service {
-// 	return &service{
-// 		appSiteURL: appSiteURL,
-// 		Acc:        account,
-// 		Member:     member,		
-// 		r:          repo,
-// 		auth:       auth,
-// 		mg:         mg,
-// 	}
-// }
-
-
 func NewFeatmapService() Service {
 	return &service{}	
 }
