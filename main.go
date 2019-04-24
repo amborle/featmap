@@ -66,7 +66,12 @@ func main() {
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	r.Use(jwtauth.Verifier(auth))
-	r.Use(AddService(config.AppSiteURL, db, auth, mg))
+	r.Use(ContextSkeleton(config.AppSiteURL))
+	r.Use(Transaction(db))
+	r.Use(Mailgun(mg))
+	r.Use(Auth(auth))
+
+	r.Use(User())
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further

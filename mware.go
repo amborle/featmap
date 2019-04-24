@@ -26,15 +26,71 @@ type key int
 
 const contextKey key = 0
 
-// AddService ...
-func AddService(appSiteURL string, db *sqlx.DB, auth *jwtauth.JWTAuth, mg *mailgun.MailgunImpl) func(next http.Handler) http.Handler {
+// ContextSkeleton ...
+func ContextSkeleton(url string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
-			s := NewFeatmapService(appSiteURL, nil, nil, NewFeatmapRepository(db), auth, mg)
+			s := NewFeatmapService()
+			s.SetURL(url)
+			ctx := context.WithValue(r.Context(), contextKey, &Env{Service: s})
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}
+		return http.HandlerFunc(fn)
+	}
+}
 
+// Transaction ...
+func Transaction(db *sqlx.DB) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			s := GetEnv(r).Service
+
+			txnDo(db, func(tx *sqlx.Tx) error {
+				repo := NewFeatmapRepository(db)
+				repo.SetTx(tx)
+				s.SetRepoObject(repo)
+				next.ServeHTTP(w, r)
+				return nil
+			})
+
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// Mailgun service ...
+func Mailgun(mg *mailgun.MailgunImpl) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			s := GetEnv(r).Service
+			s.SetMg(mg)
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// Auth ...
+func Auth(auth *jwtauth.JWTAuth) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			s := GetEnv(r).Service
+			s.SetAuth(auth)
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// User ...
+func User() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			s := GetEnv(r).Service
 			_, claims, _ := jwtauth.FromContext(r.Context())
-
 			accountID, aok := claims.Get("id")
 
 			var acc *Account

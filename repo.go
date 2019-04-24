@@ -9,6 +9,10 @@ import (
 
 // Repository ...
 type Repository interface {
+	DB() *sqlx.DB
+
+	SetTx(tx *sqlx.Tx)
+
 	Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error
 	NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error
 
@@ -76,6 +80,7 @@ type Repository interface {
 
 type repo struct {
 	db *sqlx.DB
+	tx *sqlx.Tx
 }
 
 type txnFunc func(*sqlx.Tx) error
@@ -109,40 +114,33 @@ func (a *repo) DB() *sqlx.DB {
 	return a.db
 }
 
+func (a *repo) SetTx(tx *sqlx.Tx) {
+	a.tx = tx
+}
+
 // Transactions needed
 
 func (a *repo) Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error {
-	err := txnDo(a.DB(), func(tx *sqlx.Tx) error {
+	a.tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
+	a.tx.MustExec(saveAccountQuery, acc.ID, acc.Email, acc.Password, acc.CreatedAt, acc.EmailConfirmationSentTo, acc.EmailConfirmed, acc.EmailConfirmationKey, acc.EmailConfirmationPending, acc.PasswordResetKey, acc.Name)
+	a.tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
+	a.tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
 
-		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
-		tx.MustExec(saveAccountQuery, acc.ID, acc.Email, acc.Password, acc.CreatedAt, acc.EmailConfirmationSentTo, acc.EmailConfirmed, acc.EmailConfirmationKey, acc.EmailConfirmationPending, acc.PasswordResetKey, acc.Name)
-		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
-		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
-
-		return nil
-	})
-
-	return err
+	return nil
 }
 
 func (a *repo) NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error {
-	err := txnDo(a.DB(), func(tx *sqlx.Tx) error {
-
-		tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
-		tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
-		tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
-
-		return nil
-	})
-
-	return err
+	a.tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
+	a.tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
+	a.tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
+	return nil
 }
 
 // Workspaces
 
 func (a *repo) GetWorkspace(id string) (*Workspace, error) {
 	workspace := &Workspace{}
-	if err := a.db.Get(workspace, "SELECT * FROM workspaces WHERE id = $1", id); err != nil {
+	if err := a.tx.Get(workspace, "SELECT * FROM workspaces WHERE id = $1", id); err != nil {
 		return nil, errors.Wrap(err, "workspace not found")
 	}
 	return workspace, nil
@@ -150,7 +148,7 @@ func (a *repo) GetWorkspace(id string) (*Workspace, error) {
 
 func (a *repo) GetWorkspaceByName(name string) (*Workspace, error) {
 	workspace := &Workspace{}
-	if err := a.db.Get(workspace, "SELECT * FROM workspaces WHERE name = $1", name); err != nil {
+	if err := a.tx.Get(workspace, "SELECT * FROM workspaces WHERE name = $1", name); err != nil {
 		return nil, errors.Wrap(err, "workspace not found")
 	}
 	return workspace, nil
@@ -158,7 +156,7 @@ func (a *repo) GetWorkspaceByName(name string) (*Workspace, error) {
 
 func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	var workspaces []*Workspace
-	if err := a.db.Select(&workspaces, "SELECT * FROM workspaces w where id in (select m.workspace_id from members m where m.account_id = $1) order by w.name", id); err != nil {
+	if err := a.tx.Select(&workspaces, "SELECT * FROM workspaces w where id in (select m.workspace_id from members m where m.account_id = $1) order by w.name", id); err != nil {
 		return nil, err
 	}
 	return workspaces, nil
@@ -167,7 +165,7 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4"
 
 func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
-	if _, err := a.db.Exec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing); err != nil {
+	if _, err := a.tx.Exec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing); err != nil {
 		return nil, errors.Wrap(err, "something went wrong when storing workspace")
 	}
 
@@ -195,7 +193,7 @@ func (a *repo) GetAccount(id string) (*Account, error) {
 
 func (a *repo) GetAccountByEmail(email string) (*Account, error) {
 	acc := &Account{}
-	if err := a.db.Get(acc, "SELECT * FROM accounts WHERE email = $1", email); err != nil {
+	if err := a.tx.Get(acc, "SELECT * FROM accounts WHERE email = $1", email); err != nil {
 		return nil, errors.Wrap(err, "account not found")
 	}
 	return acc, nil

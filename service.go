@@ -12,21 +12,32 @@ import (
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/jmoiron/sqlx"
 )
 
 // Service ...
 type Service interface {
 	// Technical
+	
+	SetURL(x string) 
+ SetAccountObject(a *Account) 
+ SetMemberObject(m *Member) 
+ SetRepoObject(m Repository) 
+SetAuth(x *jwtauth.JWTAuth) 
+ SetMg(x *mailgun.MailgunImpl) 
+ SetWorkspaceObject(a *Workspace) 
+ SetSubscriptionObject(x *Subscription)
+ 
+	GetDBObject() *sqlx.DB
+	GetRepoObject() Repository
 	GetMemberObject() *Member
-	SetMemberObject(m *Member)
-	SetSubscriptionObject(s *Subscription)
-	GetSubscriptionObject()  *Subscription	
-	SendEmail(recipient string, subject string, body string) error
-	GetAccountObject() *Account
-	SetAccountObject(a *Account)
+	GetAccountObject() *Account	
 	GetWorkspaceObject() *Workspace
-	SetWorkspaceObject(m *Workspace)
+	GetSubscriptionObject() *Subscription
 
+
+	SendEmail(recipient string, subject string, body string) error
+	
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
@@ -122,48 +133,38 @@ type service struct {
 }
 
 // NewFeatmapService ...
-func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo Repository, auth *jwtauth.JWTAuth, mg *mailgun.MailgunImpl) Service {
-	return &service{
-		appSiteURL: appSiteURL,
-		Acc:        account,
-		Member:     member,		
-		r:          repo,
-		auth:       auth,
-		mg:         mg,
-	}
+// func NewFeatmapService(appSiteURL string, account *Account, member *Member, repo Repository, auth *jwtauth.JWTAuth, mg *mailgun.MailgunImpl) Service {
+// 	return &service{
+// 		appSiteURL: appSiteURL,
+// 		Acc:        account,
+// 		Member:     member,		
+// 		r:          repo,
+// 		auth:       auth,
+// 		mg:         mg,
+// 	}
+// }
+
+
+func NewFeatmapService() Service {
+	return &service{}	
 }
 
-func (s *service) GetSubscriptionObject() *Subscription {
-	return s.Subscription
-}
+func (s *service) SetURL(x string) {s.appSiteURL = x}
+func (s *service) SetAccountObject(a *Account) { s.Acc = a }
+func (s *service) SetMemberObject(m *Member) { s.Member = m}
+func (s *service) SetRepoObject(m Repository) { s.r = m}
+func (s *service) SetAuth(x *jwtauth.JWTAuth) {s.auth = x}
+func (s *service) SetMg(x *mailgun.MailgunImpl) {s.mg = x}
+func (s *service) SetWorkspaceObject(a *Workspace) { s.ws = a }
+func (s *service) SetSubscriptionObject(x *Subscription) { s.Subscription = x }
 
-func (s *service) SetSubscriptionObject(x *Subscription) {
-	s.Subscription = x
-}
+func (s *service) GetDBObject() *sqlx.DB { return s.r.DB() }
+func (s *service) GetRepoObject() Repository { return s.r }
+func (s *service) GetAccountObject() *Account { return s.Acc }
+func (s *service) GetSubscriptionObject() *Subscription { return s.Subscription }
+func (s *service) GetMemberObject() *Member { return s.Member}
+func (s *service) GetWorkspaceObject() *Workspace { return s.ws }
 
-func (s *service) GetMemberObject() *Member {
-	return s.Member
-}
-
-func (s *service) SetMemberObject(m *Member) {
-	s.Member = m
-}
-
-func (s *service) GetAccountObject() *Account {
-	return s.Acc
-}
-
-func (s *service) SetAccountObject(a *Account) {
-	s.Acc = a
-}
-
-func (s *service) GetWorkspaceObject() *Workspace {
-	return s.ws
-}
-
-func (s *service) SetWorkspaceObject(a *Workspace) {
-	s.ws = a
-}
 
 func (s *service) Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error) {
 
@@ -801,8 +802,20 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 		return nil, errors.Wrap(err, "could not create")
 	}
 
+
+
 	return p, nil
 }
+
+func (s *service) LoadSampleCards(pid string) error {
+	// wsid := s.Member.WorkspaceID	
+	// accid := s.Acc.ID
+	// t := time.UTC()
+
+	// milestone1 := &Milestone{WorkspaceID: wsid, ProjectID: pid, ID: newUIID(), Title: "Proof-of-concept", Status: "OPEN",  }	
+	return nil
+}
+
 
 func (s *service) RenameProject(id string, title string) (*Project, error) {
 	title, err := validateTitle(title)
@@ -1675,4 +1688,8 @@ func levelIsValid(level string) bool {
 		return false
 	}
 	return true
+}
+
+func newUIID() string {
+	return uuid.Must(uuid.NewV4(), nil).String()
 }
