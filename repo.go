@@ -13,37 +13,34 @@ type Repository interface {
 
 	SetTx(tx *sqlx.Tx)
 
-	Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error
-	NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error
-
-	SaveWorkspace(x *Workspace) (*Workspace, error)
+	StoreWorkspace(x *Workspace)
 	GetWorkspace(workspaceID string) (*Workspace, error)
 	GetWorkspacesByAccount(id string) ([]*Workspace, error)
 	GetWorkspaceByName(name string) (*Workspace, error)
-	DeleteWorkspace(workspaceID string) error
+	DeleteWorkspace(workspaceID string)
 
 	GetAccount(id string) (*Account, error)
 	GetAccountByEmail(email string) (*Account, error)
 	GetAccountByConfirmationKey(key string) (*Account, error)
 	GetAccountByPasswordKey(key string) (*Account, error)
 	FindAccountsByWorkspace(id string) ([]*Account, error)
-	SaveAccount(x *Account) (*Account, error)
-	DeleteAccount(accountID string) error
+	StoreAccount(x *Account)
+	DeleteAccount(accountID string)
 
-	SaveMember(x *Member) (*Member, error)
+	StoreMember(x *Member)
 	GetMember(workspaceID string, id string) (*Member, error)
 	GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error)
 	GetMembersByAccount(id string) ([]*Member, error)
 	GetMemberByEmail(workspaceID string, email string) (*Member, error)
 	FindMembersByWorkspace(id string) ([]*Member, error)
-	DeleteMember(wsid string, id string) error
+	DeleteMember(wsid string, id string)
 
-	StoreSubscription(z *Subscription) (*Subscription, error)
+	StoreSubscription(z *Subscription)
 	FindSubscriptionsByWorkspace(id string) ([]*Subscription, error)
 	FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
 
-	StoreInvite(x *Invite) error
-	DeleteInvite(wsid string, id string) error
+	StoreInvite(x *Invite)
+	DeleteInvite(wsid string, id string)
 	GetInviteByCode(code string) (*Invite, error)
 	GetInviteByEmail(wsid string, email string) (*Invite, error)
 	GetInvite(workspaceID string, id string) (*Invite, error)
@@ -52,30 +49,30 @@ type Repository interface {
 	GetProjectByExternalLink(link string) (*Project, error)
 	GetProject(workspaceID string, projectID string) (*Project, error)
 	FindProjectsByWorkspace(workspaceID string) ([]*Project, error)
-	StoreProject(x *Project) (*Project, error)
-	DeleteProject(workspaceID string, projectID string) error
+	StoreProject(x *Project)
+	DeleteProject(workspaceID string, projectID string)
 
 	GetMilestone(workspaceID string, milestoneID string) (*Milestone, error)
 	FindMilestonesByProject(workspaceID string, projectID string) ([]*Milestone, error)
-	StoreMilestone(x *Milestone) (*Milestone, error)
-	DeleteMilestone(workspaceID string, milestoneID string) error
+	StoreMilestone(x *Milestone)
+	DeleteMilestone(workspaceID string, milestoneID string)
 
 	GetWorkflow(workspaceID string, workflowID string) (*Workflow, error)
 	FindWorkflowsByProject(workspaceID string, projectID string) ([]*Workflow, error)
-	StoreWorkflow(x *Workflow) (*Workflow, error)
-	DeleteWorkflow(workspaceID string, workflowID string) error
+	StoreWorkflow(x *Workflow)
+	DeleteWorkflow(workspaceID string, workflowID string)
 
 	GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error)
 	FindSubWorkflowsByProject(workspaceID string, projectID string) ([]*SubWorkflow, error)
 	FindSubWorkflowsByWorkflow(workspaceID string, workflowID string) ([]*SubWorkflow, error)
-	StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error)
-	DeleteSubWorkflow(workspaceID string, workflowID string) error
+	StoreSubWorkflow(x *SubWorkflow)
+	DeleteSubWorkflow(workspaceID string, workflowID string)
 
 	GetFeature(workspaceID string, featureID string) (*Feature, error)
 	FindFeaturesByProject(workspaceID string, projectID string) ([]*Feature, error)
 	FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid string, swid string) ([]*Feature, error)
-	StoreFeature(x *Feature) (*Feature, error)
-	DeleteFeature(workspaceID string, workflowID string) error
+	StoreFeature(x *Feature)
+	DeleteFeature(workspaceID string, workflowID string)
 }
 
 type repo struct {
@@ -118,24 +115,6 @@ func (a *repo) SetTx(tx *sqlx.Tx) {
 	a.tx = tx
 }
 
-// Transactions needed
-
-func (a *repo) Register(ws *Workspace, acc *Account, sub *Subscription, memb *Member) error {
-	a.tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
-	a.tx.MustExec(saveAccountQuery, acc.ID, acc.Email, acc.Password, acc.CreatedAt, acc.EmailConfirmationSentTo, acc.EmailConfirmed, acc.EmailConfirmationKey, acc.EmailConfirmationPending, acc.PasswordResetKey, acc.Name)
-	a.tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
-	a.tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
-
-	return nil
-}
-
-func (a *repo) NewWorkspace(ws *Workspace, sub *Subscription, memb *Member) error {
-	a.tx.MustExec(saveWorkspaceQuery, ws.ID, ws.Name, ws.CreatedAt, ws.AllowExternalSharing)
-	a.tx.MustExec(storeSubQuery, sub.ID, sub.WorkspaceID, sub.Level, sub.NumberOfEditors, sub.FromDate, sub.ExpirationDate, sub.CreatedByName, sub.CreatedAt, sub.LastModified, sub.LastModifiedByName)
-	a.tx.MustExec(saveMemberQuery, memb.ID, memb.WorkspaceID, memb.AccountID, memb.Level, memb.CreatedAt)
-	return nil
-}
-
 // Workspaces
 
 func (a *repo) GetWorkspace(id string) (*Workspace, error) {
@@ -164,16 +143,12 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 
 const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4"
 
-func (a *repo) SaveWorkspace(x *Workspace) (*Workspace, error) {
+func (a *repo) StoreWorkspace(x *Workspace) {
 	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing)
-
-	return x, nil
 }
 
-func (a *repo) DeleteWorkspace(workspaceID string) error {
+func (a *repo) DeleteWorkspace(workspaceID string) {
 	a.tx.MustExec("DELETE FROM workspaces WHERE id=$1", workspaceID)
-
-	return nil
 }
 
 // Accounts
@@ -216,9 +191,9 @@ func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
 
 const saveAccountQuery = "INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10"
 
-func (a *repo) SaveAccount(x *Account) (*Account, error) {
+func (a *repo) StoreAccount(x *Account) {
 	a.tx.MustExec(saveAccountQuery, x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name)
-	return x, nil
+
 }
 
 func (a *repo) FindAccountsByWorkspace(id string) ([]*Account, error) {
@@ -229,24 +204,21 @@ func (a *repo) FindAccountsByWorkspace(id string) ([]*Account, error) {
 	return accounts, nil
 }
 
-func (a *repo) DeleteAccount(accountID string) error {
+func (a *repo) DeleteAccount(accountID string) {
 	a.tx.MustExec("DELETE FROM accounts WHERE id=$1", accountID)
-	return nil
 }
 
 // Members
 
 const saveMemberQuery = "INSERT INTO members (id, workspace_id, account_id, level, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $4"
 
-func (a *repo) SaveMember(x *Member) (*Member, error) {
+func (a *repo) StoreMember(x *Member) {
 	a.tx.MustExec(saveMemberQuery, x.ID, x.WorkspaceID, x.AccountID, x.Level, x.CreatedAt)
-	return x, nil
 }
 
-func (a *repo) DeleteMember(wsid string, id string) error {
+func (a *repo) DeleteMember(wsid string, id string) {
 	a.tx.MustExec("DELETE FROM members WHERE workspace_id = $1 AND id = $2", wsid, id)
 
-	return nil
 }
 
 func (a *repo) GetMemberByAccountAndWorkspace(accountID string, workspaceID string) (*Member, error) {
@@ -295,9 +267,8 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
 
-func (a *repo) StoreSubscription(x *Subscription) (*Subscription, error) {
+func (a *repo) StoreSubscription(x *Subscription) {
 	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName)
-	return x, nil
 }
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
@@ -324,16 +295,12 @@ func (a *repo) FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
 
 // IVITES
 
-func (a *repo) StoreInvite(x *Invite) error {
+func (a *repo) StoreInvite(x *Invite) {
 	a.tx.MustExec("INSERT INTO invites (workspace_id, id, email, level, code, created_by, created_by_name, created_at, created_by_email, workspace_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)", x.WorkspaceID, x.ID, x.Email, x.Level, x.Code, x.CreatedBy, x.CreatedByName, x.CreatedAt, x.CreatedByEmail, x.WorkspaceName)
-
-	return nil
 }
 
-func (a *repo) DeleteInvite(wsid string, id string) error {
+func (a *repo) DeleteInvite(wsid string, id string) {
 	a.tx.MustExec("DELETE FROM invites WHERE workspace_id = $1 AND id = $2", wsid, id)
-
-	return nil
 }
 
 func (a *repo) GetInviteByCode(code string) (*Invite, error) {
@@ -399,16 +366,12 @@ func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
 	return x, nil
 }
 
-func (a *repo) StoreProject(x *Project) (*Project, error) {
-
+func (a *repo) StoreProject(x *Project) {
 	a.tx.MustExec("INSERT INTO projects (workspace_id, id, title, created_by, created_at,created_by_name, description, last_modified, last_modified_by_name, external_link) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3, description = $7, last_modified = $8, last_modified_by_name = $9, external_link = $10", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.ExternalLink)
-
-	return x, nil
 }
 
-func (a *repo) DeleteProject(workspaceID string, projectID string) error {
+func (a *repo) DeleteProject(workspaceID string, projectID string) {
 	a.tx.MustExec("DELETE FROM projects WHERE workspace_id=$1 AND id=$2", workspaceID, projectID)
-	return nil
 }
 
 // Milestones
@@ -430,17 +393,12 @@ func (a *repo) FindMilestonesByProject(workspaceID string, projectID string) ([]
 	return x, nil
 }
 
-func (a *repo) StoreMilestone(x *Milestone) (*Milestone, error) {
-
+func (a *repo) StoreMilestone(x *Milestone) {
 	a.tx.MustExec("INSERT INTO milestones (workspace_id, project_id, id, rank, title, created_by, created_at,created_by_name, description, last_modified, last_modified_by_name,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11, $12) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11, status = $12", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Status)
-
-	return x, nil
 }
 
-func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) error {
+func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) {
 	a.tx.MustExec("DELETE FROM milestones WHERE workspace_id=$1 AND id=$2", workspaceID, milestoneID)
-
-	return nil
 }
 
 // Workflows
@@ -462,15 +420,12 @@ func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*
 	return x, nil
 }
 
-func (a *repo) StoreWorkflow(x *Workflow) (*Workflow, error) {
+func (a *repo) StoreWorkflow(x *Workflow) {
 	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_by, created_at, created_by_name, description,last_modified,last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName)
-	return x, nil
 }
 
-func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) error {
+func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) {
 	a.tx.MustExec("DELETE FROM workflows WHERE workspace_id=$1 AND id=$2", workspaceID, workflowID)
-
-	return nil
 }
 
 // SubWorkflows
@@ -502,14 +457,12 @@ func (a *repo) FindSubWorkflowsByWorkflow(workspaceID string, workflowID string)
 
 }
 
-func (a *repo) StoreSubWorkflow(x *SubWorkflow) (*SubWorkflow, error) {
+func (a *repo) StoreSubWorkflow(x *SubWorkflow) {
 	a.tx.MustExec("INSERT INTO subworkflows (workspace_id, workflow_id, id, rank, title, created_by, created_at,created_by_name, description, last_modified,last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11", x.WorkspaceID, x.WorkflowID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName)
-	return x, nil
 }
 
-func (a *repo) DeleteSubWorkflow(workspaceID string, subWorkflowID string) error {
+func (a *repo) DeleteSubWorkflow(workspaceID string, subWorkflowID string) {
 	a.tx.MustExec("DELETE FROM subworkflows WHERE workspace_id=$1 AND id=$2", workspaceID, subWorkflowID)
-	return nil
 }
 
 // Features
@@ -540,13 +493,10 @@ func (a *repo) FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid str
 	return x, nil
 }
 
-func (a *repo) StoreFeature(x *Feature) (*Feature, error) {
+func (a *repo) StoreFeature(x *Feature) {
 	a.tx.MustExec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, rank, title, created_by, created_at, description, created_by_name, last_modified,last_modified_by_name, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,rank = $5, title = $6,  description = $9, last_modified = $11, last_modified_by_name = $12, status = $13 ", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.Description, x.CreatedByName, x.LastModified, x.LastModifiedByName, x.Status)
-
-	return x, nil
 }
 
-func (a *repo) DeleteFeature(workspaceID string, featureID string) error {
+func (a *repo) DeleteFeature(workspaceID string, featureID string) {
 	a.tx.MustExec("DELETE FROM features WHERE workspace_id=$1 AND id=$2", workspaceID, featureID)
-	return nil
 }

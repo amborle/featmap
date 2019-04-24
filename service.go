@@ -132,6 +132,7 @@ type service struct {
 	ws         *Workspace
 }
 
+// NewFeatmapService
 func NewFeatmapService() Service {
 	return &service{}	
 }
@@ -232,11 +233,11 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		CreatedAt:   t,
 	}
 
-	err = s.r.Register(workspace, acc, sub, member)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
+	s.r.StoreWorkspace(workspace)
+	s.r.StoreAccount(acc)
+	s.r.StoreSubscription(sub)
+	s.r.StoreMember(member)
+		
 	body, err := WelcomeBody(welcome{s.appSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
 		return nil, nil, nil, err
@@ -258,7 +259,9 @@ func (s *service) DeleteAccount() error {
 			return errors.New("Cannot delete account if owner of workspace. ")
 		}
 	}
-	return s.r.DeleteAccount(s.Acc.ID)
+	s.r.DeleteAccount(s.Acc.ID)
+
+	return nil
 }
 
 func (s *service) Login(email string, password string) (*Account, error) {
@@ -361,10 +364,9 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		CreatedAt:   t,
 	}
 
-	err := s.r.NewWorkspace(workspace, subscription, member)
-	if err != nil {
-		return nil, nil, nil, err
-	}
+	s.r.StoreWorkspace(workspace) 
+	s.r.StoreSubscription(subscription) 
+	s.r.StoreMember(member)
 
 	return workspace, subscription, member, nil
 }
@@ -435,10 +437,8 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 
 	member.Level = level
 
-	if _, err := s.r.SaveMember(member); err != nil {
-		return nil, err
-	}
-
+	s.r.StoreMember(member)
+	
 	return member, nil
 }
 
@@ -457,10 +457,8 @@ func (s *service) DeleteMember(id string) error {
 		return errors.New("admins not allowed to remove membership of owner ")
 	}
 
-	if err := s.r.DeleteMember(s.Member.WorkspaceID, id); err != nil {
-		return err
-	}
-
+	s.r.DeleteMember(s.Member.WorkspaceID, id)
+		
 	return nil
 }
 
@@ -499,12 +497,9 @@ func (s *service) CreateMember(workspaceID string, accountID string, level strin
 		CreatedAt:   time.Now().UTC(),
 	}
 
-	m, err := s.r.SaveMember(member)
-	if err != nil {
-		return nil, err
-	}
-
-	return m, err
+	s.r.StoreMember(member)
+	
+	return member, nil
 }
 
 func (s *service) GetMember(accountID string, workspaceID string) (*Member, error) {
@@ -551,9 +546,9 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 
 	w.AllowExternalSharing = value
 
-	 _, err := s.r.SaveWorkspace(w)
+	  s.r.StoreWorkspace(w)
 	
-	return err
+	return nil
 }
 
 
@@ -605,10 +600,8 @@ func (s *service) CreateInvite(email string, level string) (*Invite, error) {
 		WorkspaceName:  ws.Name,
 	}
 
-	if err := s.r.StoreInvite(x); err != nil {
-		return nil, err
-	}
-
+	 s.r.StoreInvite(x)
+	
 	if err := s.SendInvitationMail(x.ID); err != nil {
 		return nil, err
 	}
@@ -659,8 +652,10 @@ func (s *service) DeleteInvite(id string) error {
 	if s.Member.Level == "ADMIN" && m.Level == "OWNER" {
 		return errors.New("admins are not allowed to cancel invite to owner")
 	}
+	
+	s.r.DeleteInvite(s.Member.WorkspaceID, id)
 
-	return s.r.DeleteInvite(s.Member.WorkspaceID, id)
+	return  nil
 }
 
 func (s *service) Leave() error {
@@ -668,12 +663,15 @@ func (s *service) Leave() error {
 	if s.Member.Level == "OWNER" {
 		return errors.New("owners cannot not themselves leave a workspace")
 	}
+	
+	s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)
 
-	return s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)
+	return  nil
 }
 
 func (s *service) DeleteWorkspace() error {
-	return s.r.DeleteWorkspace(s.Member.WorkspaceID)
+	s.r.DeleteWorkspace(s.Member.WorkspaceID)
+	return  nil
 }
 
 func (s *service) GetInvitesByWorkspace() []*Invite {
@@ -701,10 +699,8 @@ func (s *service) AcceptInvite(code string) error {
 		return err
 	}
 
-	if err := s.r.DeleteInvite(invite.WorkspaceID, invite.ID); err != nil {
-		return err
-	}
-
+	s.r.DeleteInvite(invite.WorkspaceID, invite.ID)
+		
 	return nil
 }
 
@@ -784,13 +780,8 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 	p.LastModified = time.Now().UTC()
 	p.LastModifiedByName = s.Acc.Name
 
-	p, err = s.r.StoreProject(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create")
-	}
-
-
-
+	s.r.StoreProject(p)
+	
 	return p, nil
 }
 
@@ -818,11 +809,7 @@ func (s *service) RenameProject(id string, title string) (*Project, error) {
 	p.Title = title
 	p.LastModified = time.Now().UTC()
 	p.LastModifiedByName = s.Acc.Name
-	p, err = s.r.StoreProject(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
-
+	s.r.StoreProject(p)
 	return p, nil
 }
 
@@ -835,16 +822,14 @@ func (s *service) UpdateProjectDescription(id string, d string) (*Project, error
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
-	x, err = s.r.StoreProject(x)
-	if err != nil {
-		return nil, err
-	}
-
+ s.r.StoreProject(x)
+	
 	return x, nil
 }
 
 func (s *service) DeleteProject(id string) error {
-	return s.r.DeleteProject(s.Member.WorkspaceID, id)
+	s.r.DeleteProject(s.Member.WorkspaceID, id)
+	return nil
 }
 
 func (s *service) GetProjects() []*Project {
@@ -893,11 +878,8 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
-	p, err = s.r.StoreMilestone(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create")
-	}
-
+	 s.r.StoreMilestone(p)
+	
 	return p, nil
 }
 
@@ -941,10 +923,7 @@ func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
 	m.LastModifiedByName = s.Acc.Name
 	m.LastModified = time.Now().UTC()
 
-	m, err = s.r.StoreMilestone(m)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	 s.r.StoreMilestone(m)
 
 	return m, nil
 }
@@ -965,16 +944,14 @@ func (s *service) RenameMilestone(id string, title string) (*Milestone, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreMilestone(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	s.r.StoreMilestone(p)
 
 	return p, nil
 }
 
 func (s *service) DeleteMilestone(id string) error {
-	return s.r.DeleteMilestone(s.Member.WorkspaceID, id)
+	s.r.DeleteMilestone(s.Member.WorkspaceID, id)
+	return nil
 }
 
 func (s *service) GetMilestonesByProject(id string) []*Milestone {
@@ -994,10 +971,7 @@ func (s *service) UpdateMilestoneDescription(id string, d string) (*Milestone, e
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
-	x, err = s.r.StoreMilestone(x)
-	if err != nil {
-		return nil, err
-	}
+	s.r.StoreMilestone(x)
 
 	return x, nil
 }
@@ -1012,10 +986,7 @@ func (s *service) CloseMilestone(id string) (*Milestone, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreMilestone(p)
-	if err != nil {
-		return nil, err
-	}
+	s.r.StoreMilestone(p)
 
 	return p, nil
 }
@@ -1030,11 +1001,8 @@ func (s *service) OpenMilestone(id string) (*Milestone, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreMilestone(p)
-	if err != nil {
-		return nil, err
-	}
-
+	 s.r.StoreMilestone(p)
+	
 	return p, nil
 }
 
@@ -1077,10 +1045,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreWorkflow(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create")
-	}
+	s.r.StoreWorkflow(p)
 
 	return p, nil
 }
@@ -1125,10 +1090,7 @@ func (s *service) MoveWorkflow(id string, index int) (*Workflow, error) {
 	m.LastModifiedByName = s.Acc.Name
 	m.LastModified = time.Now().UTC()
 
-	m, err = s.r.StoreWorkflow(m)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	s.r.StoreWorkflow(m)
 
 	return m, nil
 }
@@ -1149,16 +1111,14 @@ func (s *service) RenameWorkflow(id string, title string) (*Workflow, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreWorkflow(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	s.r.StoreWorkflow(p)
 
 	return p, nil
 }
 
 func (s *service) DeleteWorkflow(id string) error {
-	return s.r.DeleteWorkflow(s.Member.WorkspaceID, id)
+	s.r.DeleteWorkflow(s.Member.WorkspaceID, id)
+	return nil
 }
 
 func (s *service) GetWorkflowsByProject(id string) []*Workflow {
@@ -1178,10 +1138,7 @@ func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, err
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
-	x, err = s.r.StoreWorkflow(x)
-	if err != nil {
-		return nil, err
-	}
+	s.r.StoreWorkflow(x)
 
 	return x, nil
 }
@@ -1220,13 +1177,10 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		p.Rank = rank
 	}
 
-	p, err = s.r.StoreSubWorkflow(p)
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
+	s.r.StoreSubWorkflow(p)
 
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create")
-	}
 
 	return p, nil
 }
@@ -1272,10 +1226,7 @@ func (s *service) MoveSubWorkflow(id string, toWorkflowID string, index int) (*S
 	m.LastModifiedByName = s.Acc.Name
 	m.LastModified = time.Now().UTC()
 
-	m, err = s.r.StoreSubWorkflow(m)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	s.r.StoreSubWorkflow(m)
 
 	return m, nil
 }
@@ -1296,17 +1247,14 @@ func (s *service) RenameSubWorkflow(id string, title string) (*SubWorkflow, erro
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreSubWorkflow(p)
-
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	s.r.StoreSubWorkflow(p)
 
 	return p, nil
 }
 
 func (s *service) DeleteSubWorkflow(id string) error {
-	return s.r.DeleteSubWorkflow(s.Member.WorkspaceID, id)
+	s.r.DeleteSubWorkflow(s.Member.WorkspaceID, id)
+	return nil
 }
 
 func (s *service) GetSubWorkflowsByProject(id string) []*SubWorkflow {
@@ -1326,10 +1274,7 @@ func (s *service) UpdateSubWorkflowDescription(id string, d string) (*SubWorkflo
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
-	x, err = s.r.StoreSubWorkflow(x)
-	if err != nil {
-		return nil, err
-	}
+	s.r.StoreSubWorkflow(x)
 
 	return x, nil
 }
@@ -1376,17 +1321,14 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreFeature(p)
-
-	if err != nil {
-		return nil, errors.Wrap(err, "could not create")
-	}
+	s.r.StoreFeature(p)
 
 	return p, nil
 }
 
 func (s *service) DeleteFeature(id string) error {
-	return s.r.DeleteFeature(s.Member.WorkspaceID, id)
+	s.r.DeleteFeature(s.Member.WorkspaceID, id)
+	return nil
 }
 
 func (s *service) RenameFeature(id string, title string) (*Feature, error) {
@@ -1405,10 +1347,7 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreFeature(p)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	 s.r.StoreFeature(p)
 
 	return p, nil
 }
@@ -1423,10 +1362,7 @@ func (s *service) CloseFeature(id string) (*Feature, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreFeature(p)
-	if err != nil {
-		return nil, err
-	}
+	 s.r.StoreFeature(p)
 
 	return p, nil
 }
@@ -1441,10 +1377,7 @@ func (s *service) OpenFeature(id string) (*Feature, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	p, err = s.r.StoreFeature(p)
-	if err != nil {
-		return nil, err
-	}
+	s.r.StoreFeature(p)
 
 	return p, nil
 }
@@ -1490,10 +1423,7 @@ func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID s
 	m.LastModifiedByName = s.Acc.Name
 	m.LastModified = time.Now().UTC()
 
-	m, err = s.r.StoreFeature(m)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not store")
-	}
+	s.r.StoreFeature(m)
 
 	return m, nil
 }
@@ -1515,10 +1445,7 @@ func (s *service) UpdateFeatureDescription(id string, d string) (*Feature, error
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
-	x, err = s.r.StoreFeature(x)
-	if err != nil {
-		return nil, err
-	}
+	s.r.StoreFeature(x)
 
 	return x, nil
 }
@@ -1557,10 +1484,7 @@ func (s *service) ConfirmEmail(key string) error {
 	a.Email = a.EmailConfirmationSentTo
 	a.EmailConfirmationPending = false
 
-	_, err = s.r.SaveAccount(a)
-	if err != nil {
-		return errors.New("save_error")
-	}
+	 s.r.StoreAccount(a)
 
 	return nil
 }
@@ -1577,14 +1501,11 @@ func (s *service) UpdateEmail(email string) error {
 	a.EmailConfirmationKey = uuid.Must(uuid.NewV4(), nil).String()
 	a.EmailConfirmationPending = true
 
-	_, err := s.r.SaveAccount(a)
-	if err != nil {
-		return errors.New("save_error")
-	}
+	s.r.StoreAccount(a)
 
 	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err = s.SendEmail(email, "FeatMap: verify your email adress", body)
+	err := s.SendEmail(email, "FeatMap: verify your email adress", body)
 	if err != nil {
 		return errors.New("send_error")
 	}
@@ -1603,10 +1524,7 @@ func (s *service) UpdateName(name string) error {
 
 	a.Name = name
 
-	_, err := s.r.SaveAccount(a)
-	if err != nil {
-		return errors.New("save_error")
-	}
+	 s.r.StoreAccount(a)
 
 	return nil
 } 
@@ -1662,10 +1580,7 @@ func (s *service) SetPassword(password string, key string) error {
 		return errors.New("encrypt_password")
 	}
 
-	_, err = s.r.SaveAccount(a)
-	if err != nil {
-		return errors.New("save_error")
-	}
+	 s.r.StoreAccount(a)
 
 	return nil
 }
