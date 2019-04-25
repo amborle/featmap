@@ -96,6 +96,7 @@ SetAuth(x *jwtauth.JWTAuth)
 	UpdateMilestoneDescription(id string, d string) (*Milestone, error)
 	CloseMilestone(id string) (*Milestone, error)
 	OpenMilestone(id string) (*Milestone, error)
+	ChangeColorOnMilestone(id string, color string) (*Milestone, error)
 
 	GetWorkflowsByProject(id string) []*Workflow
 	MoveWorkflow(id string, index int) (*Workflow, error)
@@ -103,6 +104,8 @@ SetAuth(x *jwtauth.JWTAuth)
 	RenameWorkflow(id string, title string) (*Workflow, error)
 	DeleteWorkflow(id string) error
 	UpdateWorkflowDescription(id string, d string) (*Workflow, error)
+	ChangeColorOnWorkflow(id string, color string) (*Workflow, error)
+	
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
 	MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error)
@@ -110,6 +113,8 @@ SetAuth(x *jwtauth.JWTAuth)
 	RenameSubWorkflow(id string, title string) (*SubWorkflow, error)
 	DeleteSubWorkflow(id string) error
 	UpdateSubWorkflowDescription(id string, d string) (*SubWorkflow, error)
+	ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflow, error)
+
 
 	GetFeaturesByProject(id string) []*Feature
 	MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error)
@@ -119,6 +124,7 @@ SetAuth(x *jwtauth.JWTAuth)
 	UpdateFeatureDescription(id string, d string) (*Feature, error)
 	CloseFeature(id string) (*Feature, error)
 	OpenFeature(id string) (*Feature, error)
+	ChangeColorOnFeature(id string, color string) (*Feature, error)
 }
 
 type service struct {
@@ -132,7 +138,7 @@ type service struct {
 	ws         *Workspace
 }
 
-// NewFeatmapService
+// NewFeatmapService ...
 func NewFeatmapService() Service {
 	return &service{}	
 }
@@ -237,6 +243,13 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	s.r.StoreAccount(acc)
 	s.r.StoreSubscription(sub)
 	s.r.StoreMember(member)
+
+	s.SetWorkspaceObject(workspace)
+	s.SetAccountObject(acc)
+	s.SetSubscriptionObject(sub)
+	s.SetMemberObject(member)
+
+	s.generateSampleProject()
 		
 	body, err := WelcomeBody(welcome{s.appSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
@@ -249,6 +262,19 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	}
 
 	return workspace, acc, member, nil
+}
+
+func (s *service) generateSampleProject()  {
+	// p,_:=s.CreateProjectWithID(newUUID(), "Web")
+	// release1,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Release 1")
+	// release2,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Release 2")
+	// backlog,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Backlog")
+
+	// release1,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Release 1")
+
+
+
+	// s.CreateMilestoneWithID(newUUID(), p.ID, "Alpha")
 }
 
 func (s *service) DeleteAccount() error {
@@ -864,7 +890,8 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
-		CreatedByName: s.Acc.Name,
+		CreatedByName: s.Acc.Name, 
+		Color: "",		
 	}
 
 	n := len(mm)
@@ -1006,6 +1033,26 @@ func (s *service) OpenMilestone(id string) (*Milestone, error) {
 	return p, nil
 }
 
+func (s *service) ChangeColorOnMilestone(id string, color string) (*Milestone, error) {
+	
+	if !colorIsValid(color) {
+		return nil, errors.New("invalid color")
+	}
+
+	p, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Color = color
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreMilestone(p)
+
+	return p, nil
+}
+
 // Workflow
 
 func (s *service) CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error) {
@@ -1031,6 +1078,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
+		Color: "",		
 	}
 
 	n := len(ww)
@@ -1143,6 +1191,26 @@ func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, err
 	return x, nil
 }
 
+func (s *service) ChangeColorOnWorkflow(id string, color string) (*Workflow, error) {
+	
+	if !colorIsValid(color) {
+		return nil, errors.New("invalid color")
+	}
+
+	p, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Color = color
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreWorkflow(p)
+
+	return p, nil
+}
+
 // SubWorkflow
 func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error) {
 
@@ -1166,7 +1234,9 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
-		CreatedByName: s.Acc.Name}
+		CreatedByName: s.Acc.Name,
+		Color: "",		
+	}
 
 	n := len(mm)
 	if n == 0 {
@@ -1279,6 +1349,26 @@ func (s *service) UpdateSubWorkflowDescription(id string, d string) (*SubWorkflo
 	return x, nil
 }
 
+func (s *service) ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflow, error) {
+	
+	if !colorIsValid(color) {
+		return nil, errors.New("invalid color")
+	}
+
+	p, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Color = color
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreSubWorkflow(p)
+
+	return p, nil
+}
+
 // Features
 
 func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error) {
@@ -1307,7 +1397,9 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		Status:        "OPEN",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
-		CreatedByName: s.Acc.Name}
+		CreatedByName: s.Acc.Name,
+		Color: "NONE",		
+	}
 
 	n := len(mm)
 	if n == 0 {
@@ -1374,6 +1466,26 @@ func (s *service) OpenFeature(id string) (*Feature, error) {
 	}
 
 	p.Status = "OPEN"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreFeature(p)
+
+	return p, nil
+}
+
+func (s *service) ChangeColorOnFeature(id string, color string) (*Feature, error) {
+	
+	if !colorIsValid(color) {
+		return nil, errors.New("invalid color")
+	}
+
+	p, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Color = color
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
@@ -1586,12 +1698,25 @@ func (s *service) SetPassword(password string, key string) error {
 }
 
 func levelIsValid(level string) bool {
-	if !(level == "VIEWER" || level == "EDITOR" || level == "ADMIN" || level == "OWNER") {
-		return false
-	}
-	return true
+	return (level == "VIEWER" || level == "EDITOR" || level == "ADMIN" || level == "OWNER") 
 }
 
-func newUIID() string {
+func newUUID() string {
 	return uuid.Must(uuid.NewV4(), nil).String()
+}
+
+
+func colorIsValid(color string) bool {
+	return (
+		color == "WHITE" || 		
+		color == "RED" || 
+		color == "ORANGE" || 
+		color == "YELLOW" || 
+		color == "GREEN" || 
+		color == "TEAL" || 
+		color == "BLUE" || 
+		color == "INDIGO" || 
+		color == "PURPLE" || 
+		color == "PINK" || 		
+		color == "NONE") 
 }

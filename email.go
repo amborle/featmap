@@ -29,11 +29,11 @@ func WelcomeBody(w welcome) (string, error) {
 	return buf.String(), nil
 }
 
-type emailBody struct {
+type emailBody struct { 
 	AppSiteURL string
 	Email      string
 	Key        string
-}
+} 
 
 // ChangeEmailBody ...
 func ChangeEmailBody(w emailBody) (string, error) {

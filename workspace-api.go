@@ -103,6 +103,7 @@ func api(r chi.Router) {
 					r.Post("/description", updateMilestoneDescription)
 					r.Post("/open", openMilestone)
 					r.Post("/close", closeMilestone)
+					r.Post("/color", changeColorOnMilestone)
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
@@ -113,6 +114,7 @@ func api(r chi.Router) {
 					r.Post("/rename", renameWorkflow)
 					r.Post("/move", moveWorkflow)
 					r.Post("/description", updateWorkflowDescription)
+					r.Post("/color", changeColorOnWorkflow)
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
@@ -123,6 +125,7 @@ func api(r chi.Router) {
 					r.Delete("/", deleteSubWorkflow)
 					r.Post("/move", moveSubWorkflow)
 					r.Post("/description", updateSubWorkflowDescription)
+					r.Post("/color", changeColorOnSubWorkflow)
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
@@ -135,9 +138,10 @@ func api(r chi.Router) {
 					r.Post("/description", updateFeatureDescription)
 					r.Post("/open", openFeature)
 					r.Post("/close", closeFeature)
+					r.Post("/color", changeColorOnFeature)
 				})
 			})
-	})
+	}) 
 }
 
 // Workspaces
@@ -491,6 +495,23 @@ func openMilestone(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, f)
 }
 
+func changeColorOnMilestone(w http.ResponseWriter, r *http.Request) {
+	data := &changeColorRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.ChangeColorOnMilestone(id, data.Color)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
 // Workflows
 
 type createWorkflowRequest struct {
@@ -584,6 +605,23 @@ func updateWorkflowDescription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, r, m)
+}
+
+func changeColorOnWorkflow(w http.ResponseWriter, r *http.Request) {
+	data := &changeColorRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.ChangeColorOnWorkflow(id, data.Color)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
 }
 
 // SubWorkflows
@@ -680,6 +718,23 @@ func moveSubWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, r, m)
+}
+
+func changeColorOnSubWorkflow(w http.ResponseWriter, r *http.Request) {
+	data := &changeColorRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.ChangeColorOnSubWorkflow(id, data.Color)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
 }
 
 // Features
@@ -802,6 +857,22 @@ func openFeature(w http.ResponseWriter, r *http.Request) {
 	}
 	render.JSON(w, r, f)
 }
+func changeColorOnFeature(w http.ResponseWriter, r *http.Request) {
+	data := &changeColorRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.ChangeColorOnFeature(id, data.Color)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
 
 // Common
 
@@ -818,5 +889,13 @@ type updateDescriptionRequest struct {
 }
 
 func (p *updateDescriptionRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+type changeColorRequest struct {
+	Color string `json:"color"`
+}
+
+func (p *changeColorRequest) Bind(r *http.Request) error {
 	return nil
 }

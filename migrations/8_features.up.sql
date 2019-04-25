@@ -12,6 +12,7 @@ CREATE TABLE features (
 	created_at TIMESTAMP WITH TIME ZONE not null,			
 	last_modified TIMESTAMP WITH TIME ZONE not null,		
 	last_modified_by_name varchar not null,				
+	color varchar NOT NULL,	
 	CONSTRAINT "PK_features" PRIMARY KEY (workspace_id,id),
 	CONSTRAINT "UN_features_1" UNIQUE (workspace_id,milestone_id,subworkflow_id, rank),	
 	CONSTRAINT "FK_features_1" FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE,

@@ -91,6 +91,7 @@ type Milestone struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	Color              string    `db:"color" json:"color"`
 }
 
 // Workflow ...
@@ -106,6 +107,7 @@ type Workflow struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	Color              string    `db:"color" json:"color"`
 }
 
 // SubWorkflow ...
@@ -121,6 +123,7 @@ type SubWorkflow struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	Color              string    `db:"color" json:"color"`
 }
 
 // Feature ...
@@ -138,4 +141,5 @@ type Feature struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	Color              string    `db:"color" json:"color"`
 }
