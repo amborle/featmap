@@ -891,7 +891,7 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name, 
-		Color: "",		
+		Color: "WHITE",		
 	}
 
 	n := len(mm)
@@ -1078,7 +1078,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
-		Color: "",		
+		Color: "WHITE",		
 	}
 
 	n := len(ww)
@@ -1235,7 +1235,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
-		Color: "",		
+		Color: "WHITE",		
 	}
 
 	n := len(mm)
@@ -1398,7 +1398,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
-		Color: "NONE",		
+		Color: "WHITE",		
 	}
 
 	n := len(mm)
@@ -1709,6 +1709,7 @@ func newUUID() string {
 func colorIsValid(color string) bool {
 	return (
 		color == "WHITE" || 		
+		color == "GREY" || 		
 		color == "RED" || 
 		color == "ORANGE" || 
 		color == "YELLOW" || 
@@ -1717,6 +1718,5 @@ func colorIsValid(color string) bool {
 		color == "BLUE" || 
 		color == "INDIGO" || 
 		color == "PURPLE" || 
-		color == "PINK" || 		
-		color == "NONE") 
+		color == "PINK") 
 }
