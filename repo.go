@@ -180,9 +180,7 @@ func (a *repo) GetAccountByConfirmationKey(key string) (*Account, error) {
 }
 
 func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
-	acc := &Account{}
-	log.Println("KEY")
-	log.Println(key)
+	acc := &Account{}	
 	if err := a.tx.Get(acc, "SELECT * FROM accounts WHERE password_reset_key = $1", key); err != nil {
 		return nil, errors.Wrap(err, "account not found")
 	}

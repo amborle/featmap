@@ -1,1 +1,13 @@
-migrate -source file://migrations  -database postgresql://featmap:featmap@localhost:5432/featmap?sslmode=disable up
+#### TODO
+
+* Landing page
+* Setup contact mail
+* Setup demo board
+* Contact information on site
+* Fix board on mobile
+* Paid subscriptions
+* Release managment
+* Push changes
+* Logs
+
+

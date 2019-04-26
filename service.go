@@ -122,7 +122,7 @@ SetAuth(x *jwtauth.JWTAuth)
 	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
 	UpdateFeatureDescription(id string, d string) (*Feature, error)
-	CloseFeature(id string) (*Feature, error)
+	CloseFeature(id string) (*Feature, error) 
 	OpenFeature(id string) (*Feature, error)
 	ChangeColorOnFeature(id string, color string) (*Feature, error)
 }
@@ -224,7 +224,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		Level:              "TRIAL",
 		NumberOfEditors:    2,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 30),
+		ExpirationDate:     t.AddDate(0, 0, 14),
 		CreatedByName:      acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
@@ -1652,6 +1652,8 @@ func (s *service) ResendEmail() error {
 	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
 	err := s.SendEmail(a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
+	log.Println("mail")
+	log.Println(err)
 	if err != nil {
 		return errors.New("send_error")
 	}
