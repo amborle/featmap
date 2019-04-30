@@ -1,5 +1,7 @@
 #### TODO
 
+
+* Select title when editing
 * Landing page
 * Setup contact mail
 * Setup demo board
