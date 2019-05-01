@@ -36,7 +36,9 @@ SetAuth(x *jwtauth.JWTAuth)
 	GetSubscriptionObject() *Subscription
 
 
-	SendEmail(recipient string, subject string, body string) error
+	SendEmail(from string, recipient string, subject string, body string) error
+
+	Contact(subject string, body string, from string) error
 	
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
@@ -256,7 +258,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		return nil, nil, nil, err
 	}
 
-	err = s.SendEmail(acc.EmailConfirmationSentTo, "Welcome to Featmap!", body)
+	err = s.SendEmail("contact@featmap.com", acc.EmailConfirmationSentTo, "Welcome to Featmap!", body)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -661,7 +663,7 @@ func (s *service) SendInvitationMail(invitationID string) error {
 		return err
 	}
 
-	err = s.SendEmail(invite.Email, "Featmap: invitation to join a workspace", body)
+	err = s.SendEmail("contact@featmap.com", invite.Email, "Featmap: invitation to join a workspace", body)
 	if err != nil {
 		return err
 	}
@@ -1617,7 +1619,7 @@ func (s *service) UpdateEmail(email string) error {
 
 	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err := s.SendEmail(email, "FeatMap: verify your email adress", body)
+	err := s.SendEmail("contact@featmap.com", email, "FeatMap: verify your email adress", body)
 	if err != nil {
 		return errors.New("send_error")
 	}
@@ -1651,7 +1653,7 @@ func (s *service) ResendEmail() error {
 
 	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err := s.SendEmail(a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
+	err := s.SendEmail("contact@featmap.com", a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
 	log.Println("mail")
 	log.Println(err)
 	if err != nil {
@@ -1669,13 +1671,46 @@ func (s *service) SendResetEmail(email string) error {
 
 	body, _ := ResetPasswordBody(resetPasswordBody{s.appSiteURL, email, a.PasswordResetKey})
 
-	err = s.SendEmail(email, "Featmap: request to reset password", body)
+	err = s.SendEmail("contact@featmap.com", email, "Featmap: request to reset password", body)
 
 	if err != nil {
 		return errors.New("send_error")
 	}
 	return nil
 }
+
+func (s *service)  Contact(topic string, body string, from string) error {
+
+	var recipient string
+	switch topic {
+	case "sales":
+		recipient = "sales@featmap.com"		
+	case "general":
+		recipient = "contact@featmap.com"		
+	case "support":
+		recipient = "support@featmap.com"		
+	default:
+		return errors.New("invalid topic")		
+	}
+	if len(body) < 1 {
+		return errors.New("message too short")
+	}
+	if len(body) > 10000 {
+		return errors.New("message too long")
+	}
+
+	if !govalidator.IsEmail(from) {
+		return  errors.New("email invalid")
+	}
+ 
+	err := s.SendEmail(from, recipient, "Featmap (" + topic +")", body)
+
+	if err != nil {
+		return errors.New("send error")
+	}
+	return nil
+}
+
 
 func (s *service) SetPassword(password string, key string) error {
 

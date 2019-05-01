@@ -50,9 +50,9 @@ func ChangeEmailBody(w emailBody) (string, error) {
 	return buf.String(), nil
 }
 
-func (s *service) SendEmail(recipient string, subject string, body string) error {
+func (s *service) SendEmail(from string, recipient string, subject string, body string) error {
 
-	message := s.mg.NewMessage("noreply@featmap.com", subject, body, recipient)
+	message := s.mg.NewMessage(from, subject, body, recipient)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
