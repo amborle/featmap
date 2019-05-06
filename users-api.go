@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"github.com/pkg/errors"
-
 )
 
 func usersAPI(r chi.Router) {
@@ -201,10 +200,6 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type response struct {
-		message string
-	}
-
 	return
 }
 
@@ -233,9 +228,9 @@ func acceptInvite(w http.ResponseWriter, r *http.Request) {
 
 // ContactRequest ...
 type ContactRequest struct {
-	Topic      string `json:"topic"`
-	Body string `json:"body"` 
-	Sender string `json:"sender"` 
+	Topic  string `json:"topic"`
+	Body   string `json:"body"`
+	Sender string `json:"sender"`
 }
 
 // Bind ...
@@ -244,13 +239,13 @@ func (p *ContactRequest) Bind(r *http.Request) error {
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
-	data :=   &ContactRequest{}
+	data := &ContactRequest{}
 	if err := render.Bind(r, data); err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
-	} 
-	
-	err := GetEnv(r).Service.Contact(data.Topic,data.Body,data.Sender)  
+	}
+
+	err := GetEnv(r).Service.Contact(data.Topic, data.Body, data.Sender)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
@@ -259,7 +254,7 @@ func contact(w http.ResponseWriter, r *http.Request) {
 }
 
 func stripeWebhook(w http.ResponseWriter, r *http.Request) {
-	
+
 	err := GetEnv(r).Service.StripeWebhook(r)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))

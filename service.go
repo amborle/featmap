@@ -2,53 +2,52 @@ package main
 
 import (
 	"log"
-	"time"
 	"net/http"
+	"time"
 
 	"github.com/amborle/featmap/lexorank"
 
+	"encoding/json"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
+	"github.com/jmoiron/sqlx"
 	"github.com/mailgun/mailgun-go/v3"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/crypto/bcrypt"
-	"github.com/jmoiron/sqlx"
+	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/webhook"
-   "io/ioutil"
-   "github.com/stripe/stripe-go"   
-    "encoding/json"
+	"golang.org/x/crypto/bcrypt"
+	"io/ioutil"
 )
 
 // Service ...
 type Service interface {
 	// Technical
-	
-	SetURL(x string) 
-	SetStripeKey(x string) 
-	SetStripeWebhookSecret(x string) 
- SetAccountObject(a *Account) 
- SetMemberObject(m *Member) 
- SetRepoObject(m Repository) 
-SetAuth(x *jwtauth.JWTAuth) 
- SetMg(x *mailgun.MailgunImpl) 
- SetWorkspaceObject(a *Workspace) 
- SetSubscriptionObject(x *Subscription)
- 
+
+	SetURL(x string)
+	SetStripeKey(x string)
+	SetStripeWebhookSecret(x string)
+	SetAccountObject(a *Account)
+	SetMemberObject(m *Member)
+	SetRepoObject(m Repository)
+	SetAuth(x *jwtauth.JWTAuth)
+	SetMg(x *mailgun.MailgunImpl)
+	SetWorkspaceObject(a *Workspace)
+	SetSubscriptionObject(x *Subscription)
+
 	GetDBObject() *sqlx.DB
 	GetRepoObject() Repository
 	GetMemberObject() *Member
-	GetAccountObject() *Account	
+	GetAccountObject() *Account
 	GetWorkspaceObject() *Workspace
 	GetSubscriptionObject() *Subscription
-
 
 	SendEmail(from string, recipient string, subject string, body string) error
 
 	Contact(subject string, body string, from string) error
 
 	StripeWebhook(r *http.Request) error
-	
+
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
@@ -80,7 +79,7 @@ SetAuth(x *jwtauth.JWTAuth)
 	DeleteMember(memberID string) error
 	CreateMember(workspaceID string, accountID string, level string) (*Member, error)
 	Leave() error
-	
+
 	ChangeAllowExternalSharing(value bool) error
 
 	GetInvitesByWorkspace() []*Invite
@@ -116,7 +115,6 @@ SetAuth(x *jwtauth.JWTAuth)
 	DeleteWorkflow(id string) error
 	UpdateWorkflowDescription(id string, d string) (*Workflow, error)
 	ChangeColorOnWorkflow(id string, color string) (*Workflow, error)
-	
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
 	MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error)
@@ -126,54 +124,52 @@ SetAuth(x *jwtauth.JWTAuth)
 	UpdateSubWorkflowDescription(id string, d string) (*SubWorkflow, error)
 	ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflow, error)
 
-
 	GetFeaturesByProject(id string) []*Feature
 	MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error)
 	CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error)
 	RenameFeature(id string, title string) (*Feature, error)
 	DeleteFeature(id string) error
 	UpdateFeatureDescription(id string, d string) (*Feature, error)
-	CloseFeature(id string) (*Feature, error) 
+	CloseFeature(id string) (*Feature, error)
 	OpenFeature(id string) (*Feature, error)
 	ChangeColorOnFeature(id string, color string) (*Feature, error)
 }
 
 type service struct {
-	appSiteURL string
+	appSiteURL          string
 	stripeWebhookSecret string
-	stripeKey string
-	Acc        *Account
-	Member     *Member
-	Subscription  *Subscription
-	r          Repository 
-	auth       *jwtauth.JWTAuth
-	mg         *mailgun.MailgunImpl
-	ws         *Workspace
+	stripeKey           string
+	Acc                 *Account
+	Member              *Member
+	Subscription        *Subscription
+	r                   Repository
+	auth                *jwtauth.JWTAuth
+	mg                  *mailgun.MailgunImpl
+	ws                  *Workspace
 }
 
 // NewFeatmapService ...
 func NewFeatmapService() Service {
-	return &service{}	
+	return &service{}
 }
 
-func (s *service) SetURL(x string) {s.appSiteURL = x}
-func (s *service) SetStripeKey(x string) {s.stripeKey = x}
-func (s *service) SetStripeWebhookSecret(x string) {s.stripeWebhookSecret = x}
-func (s *service) SetAccountObject(a *Account) { s.Acc = a }
-func (s *service) SetMemberObject(m *Member) { s.Member = m}
-func (s *service) SetRepoObject(m Repository) { s.r = m}
-func (s *service) SetAuth(x *jwtauth.JWTAuth) {s.auth = x}
-func (s *service) SetMg(x *mailgun.MailgunImpl) {s.mg = x}
-func (s *service) SetWorkspaceObject(a *Workspace) { s.ws = a }
+func (s *service) SetURL(x string)                       { s.appSiteURL = x }
+func (s *service) SetStripeKey(x string)                 { s.stripeKey = x }
+func (s *service) SetStripeWebhookSecret(x string)       { s.stripeWebhookSecret = x }
+func (s *service) SetAccountObject(a *Account)           { s.Acc = a }
+func (s *service) SetMemberObject(m *Member)             { s.Member = m }
+func (s *service) SetRepoObject(m Repository)            { s.r = m }
+func (s *service) SetAuth(x *jwtauth.JWTAuth)            { s.auth = x }
+func (s *service) SetMg(x *mailgun.MailgunImpl)          { s.mg = x }
+func (s *service) SetWorkspaceObject(a *Workspace)       { s.ws = a }
 func (s *service) SetSubscriptionObject(x *Subscription) { s.Subscription = x }
 
-func (s *service) GetDBObject() *sqlx.DB { return s.r.DB() }
-func (s *service) GetRepoObject() Repository { return s.r }
-func (s *service) GetAccountObject() *Account { return s.Acc }
+func (s *service) GetDBObject() *sqlx.DB                { return s.r.DB() }
+func (s *service) GetRepoObject() Repository            { return s.r }
+func (s *service) GetAccountObject() *Account           { return s.Acc }
 func (s *service) GetSubscriptionObject() *Subscription { return s.Subscription }
-func (s *service) GetMemberObject() *Member { return s.Member}
-func (s *service) GetWorkspaceObject() *Workspace { return s.ws }
-
+func (s *service) GetMemberObject() *Member             { return s.Member }
+func (s *service) GetWorkspaceObject() *Workspace       { return s.ws }
 
 func (s *service) Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error) {
 
@@ -213,9 +209,9 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	t := time.Now().UTC()
 
 	workspace := &Workspace{
-		ID:        uuid.Must(uuid.NewV4(), nil).String(),
-		Name:      workspaceName,
-		CreatedAt: t,
+		ID:                   uuid.Must(uuid.NewV4(), nil).String(),
+		Name:                 workspaceName,
+		CreatedAt:            t,
 		AllowExternalSharing: true,
 	}
 
@@ -236,14 +232,15 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	sub := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
-		Level:              "TRIAL",
-		NumberOfEditors:    2,
+		Level:              "PRO",
+		NumberOfEditors:    100,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 14),
+		ExpirationDate:     t.AddDate(0, 0, 7),
 		CreatedByName:      acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: acc.Name,
+		ExternalStatus:     "TRIAL",
 	}
 
 	member := &Member{
@@ -265,7 +262,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	s.SetMemberObject(member)
 
 	s.generateSampleProject()
-		
+
 	body, err := WelcomeBody(welcome{s.appSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
 		return nil, nil, nil, err
@@ -279,17 +276,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	return workspace, acc, member, nil
 }
 
-func (s *service) generateSampleProject()  {
-	// p,_:=s.CreateProjectWithID(newUUID(), "Web")
-	// release1,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Release 1")
-	// release2,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Release 2")
-	// backlog,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Backlog")
-
-	// release1,_:= s.CreateMilestoneWithID(newUUID(), p.ID, "Release 1")
-
-
-
-	// s.CreateMilestoneWithID(newUUID(), p.ID, "Alpha")
+func (s *service) generateSampleProject() {
 }
 
 func (s *service) DeleteAccount() error {
@@ -365,7 +352,7 @@ func workspaceNameIsValid(name string) bool {
 	return !(len(name) < 2 || len(name) > 200 || !govalidator.IsAlphanumeric(name) || name == "account" || name == "link")
 }
 
-func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error) { // todo: put in transaction
+func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Member, error) {
 	name = govalidator.Trim(name, "")
 
 	if !workspaceNameIsValid(name) {
@@ -377,25 +364,25 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		return nil, nil, nil, errors.New("workspace_taken")
 	}
 
-
 	t := time.Now().UTC()
 	workspace := &Workspace{
-		ID:        uuid.Must(uuid.NewV4(), nil).String(),
-		Name:      name,
-		CreatedAt: t,
+		ID:                   uuid.Must(uuid.NewV4(), nil).String(),
+		Name:                 name,
+		CreatedAt:            t,
 		AllowExternalSharing: true,
 	}
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
-		Level:              "TRIAL",
-		NumberOfEditors:    2,
+		Level:              "PRO",
+		NumberOfEditors:    100,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 30),
+		ExpirationDate:     t.AddDate(0, 0, 7),
 		CreatedByName:      s.Acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
+		ExternalStatus:     "TRIAL",
 	}
 	member := &Member{
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
@@ -405,8 +392,8 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		CreatedAt:   t,
 	}
 
-	s.r.StoreWorkspace(workspace) 
-	s.r.StoreSubscription(subscription) 
+	s.r.StoreWorkspace(workspace)
+	s.r.StoreSubscription(subscription)
 	s.r.StoreMember(member)
 
 	return workspace, subscription, member, nil
@@ -470,7 +457,7 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 			}
 		}
 
-		if (!isEditor(member.Level)) &&  (n + 1  > sub.NumberOfEditors) {
+		if (!isEditor(member.Level)) && (n+1 > sub.NumberOfEditors) {
 			return nil, errors.New("subscription exceeded - please contact the owner of the workspace")
 		}
 
@@ -479,7 +466,7 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 	member.Level = level
 
 	s.r.StoreMember(member)
-	
+
 	return member, nil
 }
 
@@ -499,7 +486,7 @@ func (s *service) DeleteMember(id string) error {
 	}
 
 	s.r.DeleteMember(s.Member.WorkspaceID, id)
-		
+
 	return nil
 }
 
@@ -525,7 +512,7 @@ func (s *service) CreateMember(workspaceID string, accountID string, level strin
 		}
 
 		if n >= sub.NumberOfEditors {
-			return nil, errors.New("subscription exceeded - please contact the owner of the workspace") 
+			return nil, errors.New("subscription exceeded - please contact the owner of the workspace")
 		}
 	}
 
@@ -539,7 +526,7 @@ func (s *service) CreateMember(workspaceID string, accountID string, level strin
 	}
 
 	s.r.StoreMember(member)
-	
+
 	return member, nil
 }
 
@@ -587,12 +574,10 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 
 	w.AllowExternalSharing = value
 
-	  s.r.StoreWorkspace(w)
-	
+	s.r.StoreWorkspace(w)
+
 	return nil
 }
-
-
 
 // INVITES
 
@@ -641,8 +626,8 @@ func (s *service) CreateInvite(email string, level string) (*Invite, error) {
 		WorkspaceName:  ws.Name,
 	}
 
-	 s.r.StoreInvite(x)
-	
+	s.r.StoreInvite(x)
+
 	if err := s.SendInvitationMail(x.ID); err != nil {
 		return nil, err
 	}
@@ -693,10 +678,10 @@ func (s *service) DeleteInvite(id string) error {
 	if s.Member.Level == "ADMIN" && m.Level == "OWNER" {
 		return errors.New("admins are not allowed to cancel invite to owner")
 	}
-	
+
 	s.r.DeleteInvite(s.Member.WorkspaceID, id)
 
-	return  nil
+	return nil
 }
 
 func (s *service) Leave() error {
@@ -704,15 +689,15 @@ func (s *service) Leave() error {
 	if s.Member.Level == "OWNER" {
 		return errors.New("owners cannot not themselves leave a workspace")
 	}
-	
+
 	s.r.DeleteMember(s.Member.WorkspaceID, s.Member.ID)
 
-	return  nil
+	return nil
 }
 
 func (s *service) DeleteWorkspace() error {
 	s.r.DeleteWorkspace(s.Member.WorkspaceID)
-	return  nil
+	return nil
 }
 
 func (s *service) GetInvitesByWorkspace() []*Invite {
@@ -724,14 +709,14 @@ func (s *service) GetInvitesByWorkspace() []*Invite {
 	return invites
 }
 
-func (s *service) AcceptInvite(code string) error { 
+func (s *service) AcceptInvite(code string) error {
 	invite, err := s.r.GetInviteByCode(code)
 
 	if err != nil {
 		return errors.New("invite not found")
 	}
 
-	acc, err := s.r.GetAccountByEmail(invite.Email) 
+	acc, err := s.r.GetAccountByEmail(invite.Email)
 	if err != nil {
 		return errors.New("Please create an account first  (using " + invite.Email + ") and then accept again.")
 	}
@@ -741,7 +726,7 @@ func (s *service) AcceptInvite(code string) error {
 	}
 
 	s.r.DeleteInvite(invite.WorkspaceID, invite.ID)
-		
+
 	return nil
 }
 
@@ -768,22 +753,32 @@ func (s *service) GetProject(id string) *Project {
 }
 
 func (s *service) GetProjectByExternalLink(link string) (*Project, error) {
-	return  s.r.GetProjectByExternalLink(link)
-	
+	return s.r.GetProjectByExternalLink(link)
+
 }
 
 func (s *service) GetProjectExtendedByExternalLink(link string) (*projectResponse, error) {
 	project, err := s.r.GetProjectByExternalLink(link)
-	if err != nil { return nil, err}
-	
-	milestones, err :=  s.r.FindMilestonesByProject(project.WorkspaceID,project.ID)
-	if err != nil { return nil, err }
-	workflows, err :=  s.r.FindWorkflowsByProject(project.WorkspaceID,project.ID)
-	if err != nil { return nil, err }
-	subworkflows, err :=  s.r.FindSubWorkflowsByProject(project.WorkspaceID,project.ID)
-	if err != nil { return nil, err }
-	features, err :=  s.r.FindFeaturesByProject(project.WorkspaceID,project.ID)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
+
+	milestones, err := s.r.FindMilestonesByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
+	workflows, err := s.r.FindWorkflowsByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
+	subworkflows, err := s.r.FindSubWorkflowsByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
+	features, err := s.r.FindFeaturesByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &projectResponse{
 		Project:      project,
@@ -792,7 +787,7 @@ func (s *service) GetProjectExtendedByExternalLink(link string) (*projectRespons
 		SubWorkflows: subworkflows,
 		Features:     features,
 	}
-	
+
 	return resp, nil
 }
 
@@ -822,19 +817,18 @@ func (s *service) CreateProjectWithID(id string, title string) (*Project, error)
 	p.LastModifiedByName = s.Acc.Name
 
 	s.r.StoreProject(p)
-	
+
 	return p, nil
 }
 
 func (s *service) LoadSampleCards(pid string) error {
-	// wsid := s.Member.WorkspaceID	
+	// wsid := s.Member.WorkspaceID
 	// accid := s.Acc.ID
 	// t := time.UTC()
 
-	// milestone1 := &Milestone{WorkspaceID: wsid, ProjectID: pid, ID: newUIID(), Title: "Proof-of-concept", Status: "OPEN",  }	
+	// milestone1 := &Milestone{WorkspaceID: wsid, ProjectID: pid, ID: newUIID(), Title: "Proof-of-concept", Status: "OPEN",  }
 	return nil
 }
-
 
 func (s *service) RenameProject(id string, title string) (*Project, error) {
 	title, err := validateTitle(title)
@@ -863,8 +857,8 @@ func (s *service) UpdateProjectDescription(id string, d string) (*Project, error
 	x.Description = d
 	x.LastModified = time.Now().UTC()
 	x.LastModifiedByName = s.Acc.Name
- s.r.StoreProject(x)
-	
+	s.r.StoreProject(x)
+
 	return x, nil
 }
 
@@ -905,8 +899,8 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 		Rank:          "",
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
-		CreatedByName: s.Acc.Name, 
-		Color: "WHITE",		
+		CreatedByName: s.Acc.Name,
+		Color:         "WHITE",
 	}
 
 	n := len(mm)
@@ -920,8 +914,8 @@ func (s *service) CreateMilestoneWithID(id string, projectID string, title strin
 
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
-	 s.r.StoreMilestone(p)
-	
+	s.r.StoreMilestone(p)
+
 	return p, nil
 }
 
@@ -965,7 +959,7 @@ func (s *service) MoveMilestone(id string, index int) (*Milestone, error) {
 	m.LastModifiedByName = s.Acc.Name
 	m.LastModified = time.Now().UTC()
 
-	 s.r.StoreMilestone(m)
+	s.r.StoreMilestone(m)
 
 	return m, nil
 }
@@ -1043,13 +1037,13 @@ func (s *service) OpenMilestone(id string) (*Milestone, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	 s.r.StoreMilestone(p)
-	
+	s.r.StoreMilestone(p)
+
 	return p, nil
 }
 
 func (s *service) ChangeColorOnMilestone(id string, color string) (*Milestone, error) {
-	
+
 	if !colorIsValid(color) {
 		return nil, errors.New("invalid color")
 	}
@@ -1093,7 +1087,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
-		Color: "WHITE",		
+		Color:         "WHITE",
 	}
 
 	n := len(ww)
@@ -1207,7 +1201,7 @@ func (s *service) UpdateWorkflowDescription(id string, d string) (*Workflow, err
 }
 
 func (s *service) ChangeColorOnWorkflow(id string, color string) (*Workflow, error) {
-	
+
 	if !colorIsValid(color) {
 		return nil, errors.New("invalid color")
 	}
@@ -1250,7 +1244,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
-		Color: "WHITE",		
+		Color:         "WHITE",
 	}
 
 	n := len(mm)
@@ -1265,7 +1259,6 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 	s.r.StoreSubWorkflow(p)
-
 
 	return p, nil
 }
@@ -1365,7 +1358,7 @@ func (s *service) UpdateSubWorkflowDescription(id string, d string) (*SubWorkflo
 }
 
 func (s *service) ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflow, error) {
-	
+
 	if !colorIsValid(color) {
 		return nil, errors.New("invalid color")
 	}
@@ -1413,7 +1406,7 @@ func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestone
 		CreatedBy:     s.Member.ID,
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
-		Color: "WHITE",		
+		Color:         "WHITE",
 	}
 
 	n := len(mm)
@@ -1454,7 +1447,7 @@ func (s *service) RenameFeature(id string, title string) (*Feature, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	 s.r.StoreFeature(p)
+	s.r.StoreFeature(p)
 
 	return p, nil
 }
@@ -1469,7 +1462,7 @@ func (s *service) CloseFeature(id string) (*Feature, error) {
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
-	 s.r.StoreFeature(p)
+	s.r.StoreFeature(p)
 
 	return p, nil
 }
@@ -1490,7 +1483,7 @@ func (s *service) OpenFeature(id string) (*Feature, error) {
 }
 
 func (s *service) ChangeColorOnFeature(id string, color string) (*Feature, error) {
-	
+
 	if !colorIsValid(color) {
 		return nil, errors.New("invalid color")
 	}
@@ -1611,7 +1604,7 @@ func (s *service) ConfirmEmail(key string) error {
 	a.Email = a.EmailConfirmationSentTo
 	a.EmailConfirmationPending = false
 
-	 s.r.StoreAccount(a)
+	s.r.StoreAccount(a)
 
 	return nil
 }
@@ -1651,10 +1644,10 @@ func (s *service) UpdateName(name string) error {
 
 	a.Name = name
 
-	 s.r.StoreAccount(a)
+	s.r.StoreAccount(a)
 
 	return nil
-} 
+}
 
 func (s *service) ResendEmail() error {
 
@@ -1692,18 +1685,18 @@ func (s *service) SendResetEmail(email string) error {
 	return nil
 }
 
-func (s *service)  Contact(topic string, body string, from string) error {
+func (s *service) Contact(topic string, body string, from string) error {
 
 	var recipient string
 	switch topic {
 	case "sales":
-		recipient = "sales@featmap.com"		
+		recipient = "sales@featmap.com"
 	case "general":
-		recipient = "contact@featmap.com"		
+		recipient = "contact@featmap.com"
 	case "support":
-		recipient = "support@featmap.com"		
+		recipient = "support@featmap.com"
 	default:
-		return errors.New("invalid topic")		
+		return errors.New("invalid topic")
 	}
 	if len(body) < 1 {
 		return errors.New("message too short")
@@ -1713,10 +1706,10 @@ func (s *service)  Contact(topic string, body string, from string) error {
 	}
 
 	if !govalidator.IsEmail(from) {
-		return  errors.New("email invalid")
+		return errors.New("email invalid")
 	}
- 
-	err := s.SendEmail(from, recipient, "Featmap (" + topic +")", body)
+
+	err := s.SendEmail(from, recipient, "Featmap ("+topic+")", body)
 
 	if err != nil {
 		return errors.New("send error")
@@ -1732,39 +1725,38 @@ func (s *service) StripeWebhook(r *http.Request) error {
 	}
 
 	endpointSecret := s.stripeWebhookSecret
-    event, err := webhook.ConstructEvent(body, r.Header.Get("Stripe-Signature"),
+	event, err := webhook.ConstructEvent(body, r.Header.Get("Stripe-Signature"),
 		endpointSecret)
-	
-		if err != nil {
+
+	if err != nil {
 		return err
 	}
 
 	stripe.Key = s.stripeKey
 
 	switch event.Type {
-    case "checkout.session.completed":
+	case "checkout.session.completed":
 		var session stripe.CheckoutSession
-        err := json.Unmarshal(event.Data.Raw, &session)
-        if err != nil {
-            return err
-        }
+		err := json.Unmarshal(event.Data.Raw, &session)
+		if err != nil {
+			return err
+		}
 		err = s.handleCheckoutSession(&session)
 		if err != nil {
-            return err
-        }
+			return err
+		}
 
-    default:
-        return errors.New("unexpected event type")
-    } 
-	
-	return nil 
+	default:
+		return errors.New("unexpected event type")
+	}
+
+	return nil
 }
 
 func (s *service) handleCheckoutSession(session *stripe.CheckoutSession) error {
 
 	return nil
 }
-
 
 func (s *service) SetPassword(password string, key string) error {
 
@@ -1783,33 +1775,25 @@ func (s *service) SetPassword(password string, key string) error {
 		return errors.New("encrypt_password")
 	}
 
-	 s.r.StoreAccount(a)
+	s.r.StoreAccount(a)
 
 	return nil
 }
 
 func levelIsValid(level string) bool {
-	return (level == "VIEWER" || level == "EDITOR" || level == "ADMIN" || level == "OWNER") 
+	return level == "VIEWER" || level == "EDITOR" || level == "ADMIN" || level == "OWNER"
 }
-
-func newUUID() string {
-	return uuid.Must(uuid.NewV4(), nil).String()
-}
-
-
-
 
 func colorIsValid(color string) bool {
-	return (
-		color == "WHITE" || 		
-		color == "GREY" || 		
-		color == "RED" || 
-		color == "ORANGE" || 
-		color == "YELLOW" || 
-		color == "GREEN" || 
-		color == "TEAL" || 
-		color == "BLUE" || 
-		color == "INDIGO" || 
-		color == "PURPLE" || 
-		color == "PINK") 
+	return color == "WHITE" ||
+		color == "GREY" ||
+		color == "RED" ||
+		color == "ORANGE" ||
+		color == "YELLOW" ||
+		color == "GREEN" ||
+		color == "TEAL" ||
+		color == "BLUE" ||
+		color == "INDIGO" ||
+		color == "PURPLE" ||
+		color == "PINK"
 }

@@ -8,6 +8,7 @@ type Workspace struct {
 	Name                 string    `db:"name" json:"name"`
 	CreatedAt            time.Time `db:"created_at" json:"createdAt"`
 	AllowExternalSharing bool      `db:"allow_external_sharing" json:"allowExternalSharing"`
+	ExternalCustomerID   string    `db:"external_customer_id" json:"-"`
 }
 
 // Account ...
@@ -36,6 +37,9 @@ type Subscription struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	ExternalCustomerID string    `db:"external_customer_id" json:"-"`
+	ExternalPlanID     string    `db:"external_plan_id" json:"-"`
+	ExternalStatus     string    `db:"external_status" json:"externalStatus"`
 }
 
 // Member ...

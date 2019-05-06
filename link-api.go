@@ -10,6 +10,7 @@ import (
 
 func linkAPI(r chi.Router) {
 	r.Group(func(r chi.Router) {
+
 		r.Route("/{LINK}",
 			func(r chi.Router) {
 				r.Get("/", getLink)
@@ -31,6 +32,12 @@ func getLink(w http.ResponseWriter, r *http.Request) {
 	ws, _ := s.GetWorkspace(project.WorkspaceID)
 	if !ws.AllowExternalSharing {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
+		return
+	}
+
+	sub := s.GetSubscriptionByWorkspace(ws.ID)
+	if subHasExpired(sub) {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New("subscription has expired")))
 		return
 	}
 

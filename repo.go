@@ -90,10 +90,10 @@ func txnDo(db *sqlx.DB, f txnFunc) (err error) {
 	}
 	defer func() {
 		if p := recover(); p != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(p)
 		} else if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 		} else {
 			err = tx.Commit()
 		}
@@ -141,10 +141,10 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
-const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4"
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing, external_customer_id) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4, external_customer_id = $5"
 
 func (a *repo) StoreWorkspace(x *Workspace) {
-	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing)
+	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing, x.ExternalCustomerID)
 }
 
 func (a *repo) DeleteWorkspace(workspaceID string) {
@@ -180,7 +180,7 @@ func (a *repo) GetAccountByConfirmationKey(key string) (*Account, error) {
 }
 
 func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
-	acc := &Account{}	
+	acc := &Account{}
 	if err := a.tx.Get(acc, "SELECT * FROM accounts WHERE password_reset_key = $1", key); err != nil {
 		return nil, errors.Wrap(err, "account not found")
 	}
@@ -263,10 +263,10 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 // Subscriptions
 
-const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
+const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, external_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)"
 
 func (a *repo) StoreSubscription(x *Subscription) {
-	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName)
+	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.ExternalStatus)
 }
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {

@@ -19,13 +19,13 @@ import (
 
 // Configuration ...
 type Configuration struct {
-	AppSiteURL         string
-	DbConnectionString string
-	JWTSecret          string
-	Port               string
-	MailServer         string
-	MailAPIKey         string
-	StripeKey string
+	AppSiteURL          string
+	DbConnectionString  string
+	JWTSecret           string
+	Port                string
+	MailServer          string
+	MailAPIKey          string
+	StripeKey           string
 	StripeWebhookSecret string
 }
 
@@ -57,10 +57,15 @@ func main() {
 	}
 
 	db, err := sqlx.Connect("postgres", config.DbConnectionString)
-	defer db.Close()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatalln(err)
+		}
+	}()
 
 	mg := mailgun.NewMailgun(config.MailServer, config.MailAPIKey)
 
@@ -68,7 +73,7 @@ func main() {
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	r.Use(jwtauth.Verifier(auth))
-	r.Use(ContextSkeleton(config.AppSiteURL))	
+	r.Use(ContextSkeleton(config.AppSiteURL))
 	r.Use(Transaction(db))
 	r.Use(Stripe(config.StripeKey, config.StripeWebhookSecret))
 	r.Use(Mailgun(mg))
@@ -83,11 +88,11 @@ func main() {
 
 	// In case somebody visits the root, show simple homepage
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Featmap"))
+		_, _ = w.Write([]byte("Featmap"))
 	})
 
-	r.Route("/v1/link", linkAPI)       // Nothing is needed
 	r.Route("/v1/users", usersAPI)     // Nothing is needed
+	r.Route("/v1/link", linkAPI)       // Subscription is needed
 	r.Route("/v1/account", accountAPI) // Account needed
 	r.Route("/v1/", api)               // Account + workspace is needed
 

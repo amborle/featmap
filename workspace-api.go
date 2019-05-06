@@ -141,7 +141,7 @@ func api(r chi.Router) {
 					r.Post("/color", changeColorOnFeature)
 				})
 			})
-	}) 
+	})
 }
 
 // Workspaces

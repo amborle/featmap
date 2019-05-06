@@ -16,46 +16,20 @@ type Response struct {
 }
 
 // NewSuccess creates a blag successful response
-func NewSuccess() *Response {
-	return NewResponse("success", "")
-}
 
 // NewSuccessWithData creates a blag successful response with data
-func NewSuccessWithData(key string, data interface{}) *Response {
-	resp := NewResponse("success", "")
-	resp.AddData(key, data)
-	return resp
-}
 
 // NewFail creates a blag response with status = fail
-func NewFail() *Response {
-	return NewResponse("fail", "")
-}
 
 // NewFailWithMessage creates a blag response with status = fail and a message
-func NewFailWithMessage(message string) *Response {
-	return NewResponse("fail", message)
-}
 
 // NewBad ...
-func NewBad() *Response {
-	return NewResponse("fail", "Bad data.")
-}
 
 // NewInvalid ...
-func NewInvalid() *Response {
-	return NewResponse("fail", "Invalid data.")
-}
 
 // NewError creates a blag respone  with status = error
-func NewError() *Response {
-	return NewResponse("error", "")
-}
 
 // NewResponse ...
-func NewResponse(status string, message string) *Response {
-	return &Response{Status: status, Message: message, Data: make(map[string]interface{})}
-}
 
 // AddMessage adds a message to the response
 func (r *Response) AddMessage(message string) {
@@ -88,14 +62,6 @@ func ErrInvalidRequest(err error) render.Renderer {
 }
 
 // ErrInternal ...
-func ErrInternal(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: 500,
-		StatusText:     "",
-		ErrorText:      err.Error(),
-	}
-}
 
 // ErrResponse ...
 type ErrResponse struct {

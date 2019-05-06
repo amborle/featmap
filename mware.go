@@ -48,7 +48,7 @@ func Transaction(db *sqlx.DB) func(next http.Handler) http.Handler {
 
 			s := GetEnv(r).Service
 
-			txnDo(db, func(tx *sqlx.Tx) error {
+			_ = txnDo(db, func(tx *sqlx.Tx) error {
 				repo := NewFeatmapRepository(db)
 				repo.SetTx(tx)
 				s.SetRepoObject(repo)
@@ -79,7 +79,7 @@ func Stripe(sk string, wh string) func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			s := GetEnv(r).Service
 			s.SetStripeKey(sk)
-			s.SetStripeWebhookSecret(wh) 
+			s.SetStripeWebhookSecret(wh)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
@@ -196,8 +196,8 @@ func RequireOwner() func(next http.Handler) http.Handler {
 func RequireSubscription() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			level := GetEnv(r).Service.GetSubscriptionObject().Level
-			if isReadOnlySubscription(level) {
+			s := GetEnv(r).Service.GetSubscriptionObject()
+			if subHasExpired(s) {
 				http.Error(w, http.StatusText(401), 401)
 				return
 			}
