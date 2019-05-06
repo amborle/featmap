@@ -25,6 +25,8 @@ type Configuration struct {
 	Port               string
 	MailServer         string
 	MailAPIKey         string
+	StripeKey string
+	StripeWebhookSecret string
 }
 
 func main() {
@@ -66,8 +68,9 @@ func main() {
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	r.Use(jwtauth.Verifier(auth))
-	r.Use(ContextSkeleton(config.AppSiteURL))
+	r.Use(ContextSkeleton(config.AppSiteURL))	
 	r.Use(Transaction(db))
+	r.Use(Stripe(config.StripeKey, config.StripeWebhookSecret))
 	r.Use(Mailgun(mg))
 	r.Use(Auth(auth))
 

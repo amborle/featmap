@@ -33,6 +33,7 @@ func ContextSkeleton(url string) func(next http.Handler) http.Handler {
 
 			s := NewFeatmapService()
 			s.SetURL(url)
+			s.SetURL(url)
 			ctx := context.WithValue(r.Context(), contextKey, &Env{Service: s})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
@@ -66,6 +67,19 @@ func Mailgun(mg *mailgun.MailgunImpl) func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			s := GetEnv(r).Service
 			s.SetMg(mg)
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+// Stripe service ...
+func Stripe(sk string, wh string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			s := GetEnv(r).Service
+			s.SetStripeKey(sk)
+			s.SetStripeWebhookSecret(wh) 
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)

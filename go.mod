@@ -14,6 +14,8 @@ require (
 	github.com/mailgun/mailgun-go/v3 v3.3.1
 	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0
+	github.com/stretchr/testify v1.3.0 // indirect
+	github.com/stripe/stripe-go v60.10.0+incompatible
 
 	golang.org/x/crypto v0.0.0-20190422183909-d864b10871cd
 	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6 // indirect

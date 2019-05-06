@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"time"
+	"net/http"
 
 	"github.com/amborle/featmap/lexorank"
 
@@ -13,6 +14,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/jmoiron/sqlx"
+	"github.com/stripe/stripe-go/webhook"
+   "io/ioutil"
+   "github.com/stripe/stripe-go"   
+    "encoding/json"
 )
 
 // Service ...
@@ -20,6 +25,8 @@ type Service interface {
 	// Technical
 	
 	SetURL(x string) 
+	SetStripeKey(x string) 
+	SetStripeWebhookSecret(x string) 
  SetAccountObject(a *Account) 
  SetMemberObject(m *Member) 
  SetRepoObject(m Repository) 
@@ -39,6 +46,8 @@ SetAuth(x *jwtauth.JWTAuth)
 	SendEmail(from string, recipient string, subject string, body string) error
 
 	Contact(subject string, body string, from string) error
+
+	StripeWebhook(r *http.Request) error
 	
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
@@ -131,6 +140,8 @@ SetAuth(x *jwtauth.JWTAuth)
 
 type service struct {
 	appSiteURL string
+	stripeWebhookSecret string
+	stripeKey string
 	Acc        *Account
 	Member     *Member
 	Subscription  *Subscription
@@ -146,6 +157,8 @@ func NewFeatmapService() Service {
 }
 
 func (s *service) SetURL(x string) {s.appSiteURL = x}
+func (s *service) SetStripeKey(x string) {s.stripeKey = x}
+func (s *service) SetStripeWebhookSecret(x string) {s.stripeWebhookSecret = x}
 func (s *service) SetAccountObject(a *Account) { s.Acc = a }
 func (s *service) SetMemberObject(m *Member) { s.Member = m}
 func (s *service) SetRepoObject(m Repository) { s.r = m}
@@ -1711,6 +1724,47 @@ func (s *service)  Contact(topic string, body string, from string) error {
 	return nil
 }
 
+func (s *service) StripeWebhook(r *http.Request) error {
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	endpointSecret := s.stripeWebhookSecret
+    event, err := webhook.ConstructEvent(body, r.Header.Get("Stripe-Signature"),
+		endpointSecret)
+	
+		if err != nil {
+		return err
+	}
+
+	stripe.Key = s.stripeKey
+
+	switch event.Type {
+    case "checkout.session.completed":
+		var session stripe.CheckoutSession
+        err := json.Unmarshal(event.Data.Raw, &session)
+        if err != nil {
+            return err
+        }
+		err = s.handleCheckoutSession(&session)
+		if err != nil {
+            return err
+        }
+
+    default:
+        return errors.New("unexpected event type")
+    } 
+	
+	return nil 
+}
+
+func (s *service) handleCheckoutSession(session *stripe.CheckoutSession) error {
+
+	return nil
+}
+
 
 func (s *service) SetPassword(password string, key string) error {
 
@@ -1741,6 +1795,8 @@ func levelIsValid(level string) bool {
 func newUUID() string {
 	return uuid.Must(uuid.NewV4(), nil).String()
 }
+
+
 
 
 func colorIsValid(color string) bool {
