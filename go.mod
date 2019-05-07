@@ -3,25 +3,30 @@ module github.com/amborle/featmap
 go 1.12
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
+	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/jwtauth v3.3.0+incompatible
 	github.com/go-chi/render v1.0.1
+	github.com/go-sql-driver/mysql v1.4.1 // indirect
+	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/lib/pq v1.0.0
-	github.com/mailgun/mailgun-go/v3 v3.3.1
+	github.com/lib/pq v1.1.1
+	github.com/mailgun/mailgun-go/v3 v3.4.0
+	github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983 // indirect
+	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0
-	github.com/stretchr/testify v1.3.0 // indirect
-	github.com/stripe/stripe-go v60.10.0+incompatible
+	github.com/stretchr/objx v0.2.0 // indirect
+	github.com/stripe/stripe-go v60.12.2+incompatible
 
-	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734
+	golang.org/x/crypto v0.0.0-20190506204251-e1dfcc566284
 	golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c // indirect
-	golang.org/x/sys v0.0.0-20190502175342-a43fa875dd82 // indirect
+	golang.org/x/sys v0.0.0-20190506115046-ca7f33d4116e // indirect
 	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20190503185657-3b6f9c0030f7 // indirect
-	google.golang.org/appengine v1.3.0 // indirect
-	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 // indirect
+	golang.org/x/tools v0.0.0-20190506145303-2d16b83fe98c // indirect
+	google.golang.org/appengine v1.5.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func api(r chi.Router) {
+func workspaceApi(r chi.Router) {
 
 	r.Use(RequireAccount())
 	r.Use(RequireMember())

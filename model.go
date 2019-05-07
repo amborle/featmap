@@ -38,7 +38,7 @@ type Subscription struct {
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	ExternalCustomerID string    `db:"external_customer_id" json:"-"`
-	ExternalPlanID     string    `db:"external_plan_id" json:"-"`
+	ExternalPlanID     string    `db:"external_plan_id" json:"externalPlanId"`
 	ExternalStatus     string    `db:"external_status" json:"externalStatus"`
 }
 

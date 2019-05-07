@@ -7,26 +7,20 @@ import (
 
 	"github.com/amborle/featmap/lexorank"
 
-	"encoding/json"
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
 	"github.com/mailgun/mailgun-go/v3"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/webhook"
 	"golang.org/x/crypto/bcrypt"
-	"io/ioutil"
 )
 
 // Service ...
 type Service interface {
 	// Technical
 
-	SetURL(x string)
-	SetStripeKey(x string)
-	SetStripeWebhookSecret(x string)
+	SetConfig(x Configuration)
 	SetAccountObject(a *Account)
 	SetMemberObject(m *Member)
 	SetRepoObject(m Repository)
@@ -46,8 +40,6 @@ type Service interface {
 
 	Contact(subject string, body string, from string) error
 
-	StripeWebhook(r *http.Request) error
-
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
 	Token(accountID string) string
@@ -61,6 +53,8 @@ type Service interface {
 	GetAccountsByWorkspace() []*Account
 	DeleteWorkspace() error
 
+	StripeWebhook(r *http.Request) error
+	GetSubscriptionPlanSession(plan string, quantity int64) (string, error)
 	GetSubscriptionByWorkspace(id string) *Subscription
 	GetSubscriptionsByAccount() []*Subscription
 
@@ -136,16 +130,14 @@ type Service interface {
 }
 
 type service struct {
-	appSiteURL          string
-	stripeWebhookSecret string
-	stripeKey           string
-	Acc                 *Account
-	Member              *Member
-	Subscription        *Subscription
-	r                   Repository
-	auth                *jwtauth.JWTAuth
-	mg                  *mailgun.MailgunImpl
-	ws                  *Workspace
+	config       Configuration
+	Acc          *Account
+	Member       *Member
+	Subscription *Subscription
+	r            Repository
+	auth         *jwtauth.JWTAuth
+	mg           *mailgun.MailgunImpl
+	ws           *Workspace
 }
 
 // NewFeatmapService ...
@@ -153,9 +145,8 @@ func NewFeatmapService() Service {
 	return &service{}
 }
 
-func (s *service) SetURL(x string)                       { s.appSiteURL = x }
-func (s *service) SetStripeKey(x string)                 { s.stripeKey = x }
-func (s *service) SetStripeWebhookSecret(x string)       { s.stripeWebhookSecret = x }
+func (s *service) SetConfig(x Configuration) { s.config = x }
+
 func (s *service) SetAccountObject(a *Account)           { s.Acc = a }
 func (s *service) SetMemberObject(m *Member)             { s.Member = m }
 func (s *service) SetRepoObject(m Repository)            { s.r = m }
@@ -240,7 +231,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: acc.Name,
-		ExternalStatus:     "TRIAL",
+		ExternalStatus:     "trialing",
 	}
 
 	member := &Member{
@@ -263,7 +254,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 
 	s.generateSampleProject()
 
-	body, err := WelcomeBody(welcome{s.appSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
+	body, err := WelcomeBody(welcome{s.config.AppSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -382,7 +373,7 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
-		ExternalStatus:     "TRIAL",
+		ExternalStatus:     "trialing",
 	}
 	member := &Member{
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
@@ -648,7 +639,7 @@ func (s *service) SendInvitationMail(invitationID string) error {
 	}
 
 	i := InviteStruct{
-		AppSiteURL:     s.appSiteURL,
+		AppSiteURL:     s.config.AppSiteURL,
 		WorkspaceName:  ws.Name,
 		Email:          invite.Email,
 		Code:           invite.Code,
@@ -1623,7 +1614,7 @@ func (s *service) UpdateEmail(email string) error {
 
 	s.r.StoreAccount(a)
 
-	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
+	body, _ := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
 	err := s.SendEmail("contact@featmap.com", email, "FeatMap: verify your email adress", body)
 	if err != nil {
@@ -1657,7 +1648,7 @@ func (s *service) ResendEmail() error {
 		return errors.New("already confirmed")
 	}
 
-	body, _ := ChangeEmailBody(emailBody{s.appSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
+	body, _ := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
 	err := s.SendEmail("contact@featmap.com", a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
 	log.Println("mail")
@@ -1675,7 +1666,7 @@ func (s *service) SendResetEmail(email string) error {
 		return errors.New("email_not_found")
 	}
 
-	body, _ := ResetPasswordBody(resetPasswordBody{s.appSiteURL, email, a.PasswordResetKey})
+	body, _ := ResetPasswordBody(resetPasswordBody{s.config.AppSiteURL, email, a.PasswordResetKey})
 
 	err = s.SendEmail("contact@featmap.com", email, "Featmap: request to reset password", body)
 
@@ -1714,47 +1705,6 @@ func (s *service) Contact(topic string, body string, from string) error {
 	if err != nil {
 		return errors.New("send error")
 	}
-	return nil
-}
-
-func (s *service) StripeWebhook(r *http.Request) error {
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-
-	endpointSecret := s.stripeWebhookSecret
-	event, err := webhook.ConstructEvent(body, r.Header.Get("Stripe-Signature"),
-		endpointSecret)
-
-	if err != nil {
-		return err
-	}
-
-	stripe.Key = s.stripeKey
-
-	switch event.Type {
-	case "checkout.session.completed":
-		var session stripe.CheckoutSession
-		err := json.Unmarshal(event.Data.Raw, &session)
-		if err != nil {
-			return err
-		}
-		err = s.handleCheckoutSession(&session)
-		if err != nil {
-			return err
-		}
-
-	default:
-		return errors.New("unexpected event type")
-	}
-
-	return nil
-}
-
-func (s *service) handleCheckoutSession(session *stripe.CheckoutSession) error {
-
 	return nil
 }
 

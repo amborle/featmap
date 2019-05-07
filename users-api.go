@@ -32,8 +32,6 @@ func usersAPI(r chi.Router) {
 					r.Post("/", acceptInvite)
 				})
 				r.Post("/contact", contact)
-
-				r.Post("/stripe-webhook", stripeWebhook)
 			})
 	})
 }
@@ -246,16 +244,6 @@ func contact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := GetEnv(r).Service.Contact(data.Topic, data.Body, data.Sender)
-	if err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(err))
-		return
-	}
-	return
-}
-
-func stripeWebhook(w http.ResponseWriter, r *http.Request) {
-
-	err := GetEnv(r).Service.StripeWebhook(r)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

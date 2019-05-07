@@ -263,10 +263,10 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 // Subscriptions
 
-const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, external_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)"
+const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, external_status, external_customer_id, external_plan_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, external_status = $11, external_customer_id = $12, external_plan_id = $13"
 
 func (a *repo) StoreSubscription(x *Subscription) {
-	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.ExternalStatus)
+	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.ExternalStatus, x.ExternalCustomerID, x.ExternalPlanID)
 }
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {

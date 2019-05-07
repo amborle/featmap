@@ -27,6 +27,8 @@ type Configuration struct {
 	MailAPIKey          string
 	StripeKey           string
 	StripeWebhookSecret string
+	StripeBasicPlan     string
+	StripeProPlan       string
 }
 
 func main() {
@@ -60,7 +62,6 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Fatalln(err)
@@ -73,9 +74,8 @@ func main() {
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	r.Use(jwtauth.Verifier(auth))
-	r.Use(ContextSkeleton(config.AppSiteURL))
+	r.Use(ContextSkeleton(config))
 	r.Use(Transaction(db))
-	r.Use(Stripe(config.StripeKey, config.StripeWebhookSecret))
 	r.Use(Mailgun(mg))
 	r.Use(Auth(auth))
 
@@ -91,10 +91,11 @@ func main() {
 		_, _ = w.Write([]byte("Featmap"))
 	})
 
-	r.Route("/v1/users", usersAPI)     // Nothing is needed
-	r.Route("/v1/link", linkAPI)       // Subscription is needed
-	r.Route("/v1/account", accountAPI) // Account needed
-	r.Route("/v1/", api)               // Account + workspace is needed
+	r.Route("/v1/users", usersAPI)               // Nothing is needed
+	r.Route("/v1/link", linkAPI)                 // Nothing is needed
+	r.Route("/v1/account", accountAPI)           // Account needed
+	r.Route("/v1/subscription", subscriptionApi) // Nothing is needed
+	r.Route("/v1/", workspaceApi)                // Account + workspace is needed
 
 	fmt.Println("Serving on port " + config.Port)
 	_ = http.ListenAndServe(":"+config.Port, r)

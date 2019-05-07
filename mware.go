@@ -27,13 +27,12 @@ type key int
 const contextKey key = 0
 
 // ContextSkeleton ...
-func ContextSkeleton(url string) func(next http.Handler) http.Handler {
+func ContextSkeleton(c Configuration) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 
 			s := NewFeatmapService()
-			s.SetURL(url)
-			s.SetURL(url)
+			s.SetConfig(c)
 			ctx := context.WithValue(r.Context(), contextKey, &Env{Service: s})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
@@ -67,19 +66,6 @@ func Mailgun(mg *mailgun.MailgunImpl) func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			s := GetEnv(r).Service
 			s.SetMg(mg)
-			next.ServeHTTP(w, r)
-		}
-		return http.HandlerFunc(fn)
-	}
-}
-
-// Stripe service ...
-func Stripe(sk string, wh string) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			s := GetEnv(r).Service
-			s.SetStripeKey(sk)
-			s.SetStripeWebhookSecret(wh)
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
@@ -196,11 +182,24 @@ func RequireOwner() func(next http.Handler) http.Handler {
 func RequireSubscription() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
+
 			s := GetEnv(r).Service.GetSubscriptionObject()
-			if subHasExpired(s) {
+
+			switch s.ExternalStatus {
+
+			case "active":
+				break
+			case "incomplete", "incomplete_expired", "past_due", "canceled":
 				http.Error(w, http.StatusText(401), 401)
 				return
+			case "trialing":
+				if subHasExpired(s) {
+					http.Error(w, http.StatusText(401), 401)
+					return
+				}
+				break
 			}
+
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
