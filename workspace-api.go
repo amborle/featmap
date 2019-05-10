@@ -19,6 +19,7 @@ func workspaceApi(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireOwner())
+		r.Use(RequireDeleteableWorkspace())
 		r.Post("/delete", deleteWorkspace)
 	})
 
@@ -53,6 +54,12 @@ func workspaceApi(r chi.Router) {
 		r.Use(RequireAdmin())
 		r.Use(RequireSubscription())
 		r.Post("/settings/allow-external-sharing", changeExternalSharingRequest)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireOwner())
+		r.Use(RequireSubscription())
+		r.Post("/settings/general-info", changeGeneralInfo)
 	})
 
 	r.Group(func(r chi.Router) {
@@ -267,6 +274,29 @@ func changeExternalSharingRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := GetEnv(r).Service.ChangeAllowExternalSharing(data.Value)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
+type changeGeneralInfoRequest struct {
+	Country string `json:"country"`
+	EUVAT   string `json:"euVat"`
+}
+
+func (p *changeGeneralInfoRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func changeGeneralInfo(w http.ResponseWriter, r *http.Request) {
+	data := &changeGeneralInfoRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	err := GetEnv(r).Service.ChangeGeneralInfo(data.Country, data.EUVAT)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

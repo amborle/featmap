@@ -58,6 +58,8 @@ type Service interface {
 	GetSubscriptionByWorkspace(id string) *Subscription
 	GetSubscriptionsByAccount() []*Subscription
 
+	ChangeSubscription(plan string, quantity int64) error
+
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
 	UpdateName(name string) error
@@ -75,6 +77,7 @@ type Service interface {
 	Leave() error
 
 	ChangeAllowExternalSharing(value bool) error
+	ChangeGeneralInfo(country string, EUVAT string) error
 
 	GetInvitesByWorkspace() []*Invite
 	CreateInvite(email string, level string) (*Invite, error)
@@ -204,6 +207,9 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		Name:                 workspaceName,
 		CreatedAt:            t,
 		AllowExternalSharing: true,
+		IsCompany:            true,
+		EUVAT:                "",
+		Country:              "US",
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -361,6 +367,9 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		Name:                 name,
 		CreatedAt:            t,
 		AllowExternalSharing: true,
+		IsCompany:            true,
+		EUVAT:                "",
+		Country:              "US",
 	}
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
@@ -564,6 +573,32 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 	w := s.GetWorkspaceByContext()
 
 	w.AllowExternalSharing = value
+
+	s.r.StoreWorkspace(w)
+
+	return nil
+}
+
+func (s *service) ChangeGeneralInfo(country string, EUVAT string) error {
+
+	w := s.GetWorkspaceByContext()
+
+	log.Println("Country")
+	log.Println(country)
+
+	var validCountry bool
+	for _, v := range countries {
+		if country == v {
+			validCountry = true
+		}
+	}
+
+	if !validCountry {
+		return errors.New("invalid country")
+	}
+
+	w.Country = country
+	w.EUVAT = EUVAT
 
 	s.r.StoreWorkspace(w)
 

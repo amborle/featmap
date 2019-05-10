@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"github.com/go-chi/render"
+	"github.com/pkg/errors"
 	"net/http"
 
 	"github.com/go-chi/jwtauth"
@@ -198,6 +200,45 @@ func RequireSubscription() func(next http.Handler) http.Handler {
 					return
 				}
 				break
+			}
+
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+func RequireChangeableSubscription() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			s := GetEnv(r).Service.GetSubscriptionObject()
+
+			switch s.ExternalStatus {
+			case "active", "past_due":
+				break
+			default:
+				http.Error(w, http.StatusText(401), 401)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(fn)
+	}
+}
+
+func RequireDeleteableWorkspace() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+
+			s := GetEnv(r).Service.GetSubscriptionObject()
+
+			switch s.ExternalStatus {
+			case "active", "past_due":
+				_ = render.Render(w, r, ErrInvalidRequest(errors.New("cannot delete workspace with an active subscription - cancel subscription first")))
+				return
+			default:
 			}
 
 			next.ServeHTTP(w, r)

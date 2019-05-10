@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stripe/stripe-go"
 	"log"
 	"net/http"
 	"os"
@@ -75,11 +76,14 @@ func main() {
 
 	r.Use(jwtauth.Verifier(auth))
 	r.Use(ContextSkeleton(config))
+
 	r.Use(Transaction(db))
 	r.Use(Mailgun(mg))
 	r.Use(Auth(auth))
 
 	r.Use(User())
+
+	stripe.Key = config.StripeKey
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
