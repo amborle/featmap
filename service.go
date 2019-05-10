@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/customer"
 	"log"
 	"net/http"
 	"time"
@@ -77,7 +79,7 @@ type Service interface {
 	Leave() error
 
 	ChangeAllowExternalSharing(value bool) error
-	ChangeGeneralInfo(country string, EUVAT string) error
+	ChangeGeneralInfo(country string, EUVAT string, externalBillingEmail string) error
 
 	GetInvitesByWorkspace() []*Invite
 	CreateInvite(email string, level string) (*Invite, error)
@@ -210,6 +212,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		IsCompany:            true,
 		EUVAT:                "",
 		Country:              "US",
+		ExternalBillingEmail: email,
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -370,6 +373,7 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		IsCompany:            true,
 		EUVAT:                "",
 		Country:              "US",
+		ExternalBillingEmail: s.Acc.Email,
 	}
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
@@ -468,6 +472,19 @@ func (s *service) UpdateMemberLevel(memberID string, level string) (*Member, err
 	s.r.StoreMember(member)
 
 	return member, nil
+}
+
+func (s *service) numberOfEditors() int {
+	members := s.GetMembers()
+
+	n := 0
+	for _, m := range members {
+		if isEditor(m.Level) {
+			n++
+		}
+	}
+
+	return n
 }
 
 func (s *service) DeleteMember(id string) error {
@@ -579,12 +596,9 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 	return nil
 }
 
-func (s *service) ChangeGeneralInfo(country string, EUVAT string) error {
+func (s *service) ChangeGeneralInfo(country string, EUVAT string, externalBillingInfo string) error {
 
 	w := s.GetWorkspaceByContext()
-
-	log.Println("Country")
-	log.Println(country)
 
 	var validCountry bool
 	for _, v := range countries {
@@ -597,8 +611,22 @@ func (s *service) ChangeGeneralInfo(country string, EUVAT string) error {
 		return errors.New("invalid country")
 	}
 
+	if !govalidator.IsEmail(externalBillingInfo) {
+		return errors.New("invalid email")
+	}
+
 	w.Country = country
 	w.EUVAT = EUVAT
+	w.ExternalBillingEmail = externalBillingInfo
+
+	if len(w.ExternalCustomerID) > 0 {
+		params := &stripe.CustomerParams{}
+		params.Email = stripe.String(externalBillingInfo)
+		_, err := customer.Update(w.ExternalCustomerID, params)
+		if err != nil {
+			return err
+		}
+	}
 
 	s.r.StoreWorkspace(w)
 

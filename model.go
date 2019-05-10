@@ -12,6 +12,7 @@ type Workspace struct {
 	IsCompany            bool      `db:"is_company" json:"isCompany"`
 	EUVAT                string    `db:"eu_vat" json:"euVat"`
 	Country              string    `db:"country" json:"country"`
+	ExternalBillingEmail string    `db:"external_billing_email" json:"externalBillingEmail"`
 }
 
 // Account ...

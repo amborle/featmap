@@ -58,7 +58,6 @@ func workspaceApi(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireOwner())
-		r.Use(RequireSubscription())
 		r.Post("/settings/general-info", changeGeneralInfo)
 	})
 
@@ -281,8 +280,9 @@ func changeExternalSharingRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 type changeGeneralInfoRequest struct {
-	Country string `json:"country"`
-	EUVAT   string `json:"euVat"`
+	Country              string `json:"country"`
+	EUVAT                string `json:"euVat"`
+	ExternalBillingEmail string `json:"externalBillingEmail"`
 }
 
 func (p *changeGeneralInfoRequest) Bind(r *http.Request) error {
@@ -296,7 +296,7 @@ func changeGeneralInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := GetEnv(r).Service.ChangeGeneralInfo(data.Country, data.EUVAT)
+	err := GetEnv(r).Service.ChangeGeneralInfo(data.Country, data.EUVAT, data.ExternalBillingEmail)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

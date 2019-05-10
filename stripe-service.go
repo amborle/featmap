@@ -53,6 +53,17 @@ func (s *service) StripeWebhook(r *http.Request) error {
 			return err
 		}
 
+	case "customer.subscription.deleted":
+		var subscription stripe.Subscription
+		err := json.Unmarshal(event.Data.Raw, &subscription)
+		if err != nil {
+			return err
+		}
+		err = s.handleSubscriptionUpdate(&subscription)
+		if err != nil {
+			return err
+		}
+
 	default:
 		return errors.New("unexpected event type")
 	}
@@ -102,6 +113,8 @@ func (s *service) handleCheckoutSession(ses *stripe.CheckoutSession) error {
 
 	s.r.StoreSubscription(newSubscription)
 	workspace.ExternalCustomerID = stripeSub.Customer.ID
+	workspace.ExternalBillingEmail = ses.CustomerEmail
+
 	s.r.StoreWorkspace(workspace)
 
 	return nil
@@ -149,12 +162,17 @@ func (s *service) handleChangeSubscription(externalPlanID string, quantity int64
 		return errors.New("invalid quantity")
 	}
 
+	if int(quantity) < s.numberOfEditors() {
+		return errors.New("quantity must not be less than the current number of editors ")
+	}
+
 	localSub := s.Subscription
 
 	params := &stripe.SubscriptionParams{
 		Items: []*stripe.SubscriptionItemsParams{
 			{ID: stripe.String(localSub.ExternalSubscriptionItemID), Plan: stripe.String(externalPlanID), Quantity: stripe.Int64(quantity)},
 		},
+		Prorate: stripe.Bool(true),
 	}
 
 	externalSub, err := sub.Update(localSub.ExternalSubscriptionID, params)
@@ -212,6 +230,10 @@ func (s *service) GetSubscriptionPlanSession(plan string, quantity int64) (strin
 		return "", errors.New("invalid quantity")
 	}
 
+	if int(quantity) < s.numberOfEditors() {
+		return "", errors.New("quantity must not be less than the current number of editors ")
+	}
+
 	subscription := s.GetSubscriptionByWorkspace(s.ws.ID)
 
 	switch subscription.ExternalStatus {
@@ -238,8 +260,8 @@ func (s *service) GetSubscriptionPlanSession(plan string, quantity int64) (strin
 		SuccessURL:        stripe.String("https://app.featmap.com/account/success"),
 		CancelURL:         stripe.String("https://app.featmap.com/account/cancel"),
 		ClientReferenceID: stripe.String(s.ws.ID),
-		CustomerEmail:     stripe.String(s.Acc.Email),
-		Customer:          stripe.String(s.ws.ExternalCustomerID),
+		CustomerEmail:     stripe.String(s.ws.ExternalBillingEmail),
+		// Customer:          stripe.String(s.ws.ExternalCustomerID),
 	}
 
 	ses, err := session.New(params)

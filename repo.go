@@ -142,10 +142,10 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
-const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing, external_customer_id, is_company, eu_vat, country) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4, external_customer_id = $5, is_company = $6, eu_vat = $7, country = $8"
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing, external_customer_id, is_company, eu_vat, country, external_billing_email) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4, external_customer_id = $5, is_company = $6, eu_vat = $7, country = $8, external_billing_email = $9"
 
 func (a *repo) StoreWorkspace(x *Workspace) {
-	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing, x.ExternalCustomerID, x.IsCompany, x.EUVAT, x.Country)
+	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing, x.ExternalCustomerID, x.IsCompany, x.EUVAT, x.Country, x.ExternalBillingEmail)
 }
 
 func (a *repo) DeleteWorkspace(workspaceID string) {
