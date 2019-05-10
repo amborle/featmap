@@ -1,2 +1,2 @@
-alter table workspaces 
-drop column external_customer_id;
+alter table workspaces
+    drop column external_customer_id;
