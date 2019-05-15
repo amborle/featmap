@@ -28,8 +28,6 @@ func (s *service) StripeWebhook(r *http.Request) error {
 		return err
 	}
 
-	stripe.Key = s.config.StripeKey
-
 	switch event.Type {
 	case "checkout.session.completed":
 		var ses stripe.CheckoutSession
@@ -90,7 +88,6 @@ func (s *service) handleCheckoutSession(ses *stripe.CheckoutSession) error {
 		return errors.New("workspace not found")
 	}
 
-	stripe.Key = s.config.StripeKey
 	stripeSub, _ := sub.Get(ses.Subscription.ID, nil)
 
 	newSubscription := &Subscription{
@@ -243,8 +240,6 @@ func (s *service) GetSubscriptionPlanSession(plan string, quantity int64) (strin
 		return "", errors.New("already have active subscription")
 	}
 
-	stripe.Key = s.config.StripeKey
-
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{
 			"card",
@@ -257,8 +252,8 @@ func (s *service) GetSubscriptionPlanSession(plan string, quantity int64) (strin
 				},
 			},
 		},
-		SuccessURL:        stripe.String("https://app.featmap.com/account/success"),
-		CancelURL:         stripe.String("https://app.featmap.com/account/cancel"),
+		SuccessURL:        stripe.String(s.config.AppSiteURL + "account/success"),
+		CancelURL:         stripe.String(s.config.AppSiteURL + "account/cancel"),
 		ClientReferenceID: stripe.String(s.ws.ID),
 		CustomerEmail:     stripe.String(s.ws.ExternalBillingEmail),
 		// Customer:          stripe.String(s.ws.ExternalCustomerID),
