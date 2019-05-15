@@ -177,6 +177,10 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		return nil, nil, nil, errors.New("email_invalid")
 	}
 
+	if s.config.Environment == "test" && name != "test" {
+		return nil, nil, nil, errors.New("workspace_invalid")
+	}
+
 	if !workspaceNameIsValid(workspaceName) {
 		return nil, nil, nil, errors.New("workspace_invalid")
 	}

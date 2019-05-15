@@ -20,6 +20,7 @@ import (
 
 // Configuration ...
 type Configuration struct {
+	Environment         string
 	AppSiteURL          string
 	DbConnectionString  string
 	JWTSecret           string
