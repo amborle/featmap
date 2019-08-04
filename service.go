@@ -237,14 +237,14 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
 		Level:              "PRO",
-		NumberOfEditors:    100,
+		NumberOfEditors:    1000,
 		FromDate:           t,
 		ExpirationDate:     t.AddDate(0, 0, 30),
 		CreatedByName:      acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: acc.Name,
-		ExternalStatus:     "trialing",
+		ExternalStatus:     "active",
 	}
 
 	member := &Member{
@@ -383,14 +383,14 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
 		Level:              "PRO",
-		NumberOfEditors:    100,
+		NumberOfEditors:    1000,
 		FromDate:           t,
 		ExpirationDate:     t.AddDate(0, 0, 30),
 		CreatedByName:      s.Acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
-		ExternalStatus:     "trialing",
+		ExternalStatus:     "active",
 	}
 	member := &Member{
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
