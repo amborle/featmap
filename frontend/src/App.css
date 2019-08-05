@@ -1,0 +1,64 @@
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+h3 {
+  margin: 5px 0;
+  font-weight: 500;
+}
+h4 {
+  margin: 5px 0;
+  font-weight: 500;
+}
+
+a {
+    color: inherit;    
+    text-decoration: none;
+    
+  }
+
+  a.link {
+    color: inherit;    
+    text-decoration: underline;
+    
+  }
+
+.delete-child {
+  visibility: hidden;  
+}
+
+.delete-parent:hover .delete-child {
+    display: block;
+    visibility: visible;
+}
+
+button:focus{outline:none;}
+
+.nice {
+  background-color: #f6f4ee;
+}
+
+
+.markdown p {
+  margin: 10px 0;
+  line-height: 23px;
+  font-size: 14px;
+}
+
+.markdown a {
+  text-decoration: underline;
+}
+
+.markdown textarea {
+  line-height: 23px;
+}
+
+
+.fm-max-dialog {   
+   height: calc(100vh - 40px)    
+} 
+
+p {
+  margin: 5px 0 0 0;
+}
+
