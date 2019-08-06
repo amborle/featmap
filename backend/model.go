@@ -31,21 +31,17 @@ type Account struct {
 
 // Subscription ...
 type Subscription struct {
-	WorkspaceID                string    `db:"workspace_id" json:"workspaceId"`
-	ID                         string    `db:"id" json:"id"`
-	Level                      string    `db:"level" json:"level"`
-	NumberOfEditors            int       `db:"number_of_editors" json:"numberOfEditors"`
-	FromDate                   time.Time `db:"from_date" json:"fromDate"`
-	ExpirationDate             time.Time `db:"expiration_date" json:"expirationDate"`
-	CreatedByName              string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt                  time.Time `db:"created_at" json:"createdAt"`
-	LastModified               time.Time `db:"last_modified" json:"lastModified"`
-	LastModifiedByName         string    `db:"last_modified_by_name" json:"lastModifiedByName"`
-	ExternalStatus             string    `db:"external_status" json:"externalStatus"`
-	ExternalCustomerID         string    `db:"external_customer_id" json:"-"`
-	ExternalPlanID             string    `db:"external_plan_id" json:"-"`
-	ExternalSubscriptionID     string    `db:"external_subscription_id" json:"-"`
-	ExternalSubscriptionItemID string    `db:"external_subscription_item_id" json:"-"`
+	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
+	ID                 string    `db:"id" json:"id"`
+	Level              string    `db:"level" json:"level"`
+	NumberOfEditors    int       `db:"number_of_editors" json:"numberOfEditors"`
+	FromDate           time.Time `db:"from_date" json:"fromDate"`
+	ExpirationDate     time.Time `db:"expiration_date" json:"expirationDate"`
+	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
+	LastModified       time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	Status             string    `db:"status" json:"status" `
 }
 
 // Member ...

@@ -1,10 +1,7 @@
 package backend
 
 import (
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/customer"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/amborle/featmap/lexorank"
@@ -55,12 +52,8 @@ type Service interface {
 	GetAccountsByWorkspace() []*Account
 	DeleteWorkspace() error
 
-	StripeWebhook(r *http.Request) error
-	GetSubscriptionPlanSession(plan string, quantity int64) (string, error)
 	GetSubscriptionByWorkspace(id string) *Subscription
 	GetSubscriptionsByAccount() []*Subscription
-
-	ChangeSubscription(plan string, quantity int64) error
 
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
@@ -79,7 +72,6 @@ type Service interface {
 	Leave() error
 
 	ChangeAllowExternalSharing(value bool) error
-	ChangeGeneralInfo(country string, EUVAT string, externalBillingEmail string) error
 
 	GetInvitesByWorkspace() []*Invite
 	CreateInvite(email string, level string) (*Invite, error)
@@ -244,7 +236,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: acc.Name,
-		ExternalStatus:     "active",
+		Status:             "active",
 	}
 
 	member := &Member{
@@ -390,7 +382,7 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
-		ExternalStatus:     "active",
+		Status:             "active",
 	}
 	member := &Member{
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
@@ -594,43 +586,6 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 	w := s.GetWorkspaceByContext()
 
 	w.AllowExternalSharing = value
-
-	s.r.StoreWorkspace(w)
-
-	return nil
-}
-
-func (s *service) ChangeGeneralInfo(country string, EUVAT string, externalBillingInfo string) error {
-
-	w := s.GetWorkspaceByContext()
-
-	var validCountry bool
-	for _, v := range countries {
-		if country == v {
-			validCountry = true
-		}
-	}
-
-	if !validCountry {
-		return errors.New("invalid country")
-	}
-
-	if !govalidator.IsEmail(externalBillingInfo) {
-		return errors.New("invalid email")
-	}
-
-	w.Country = country
-	w.EUVAT = EUVAT
-	w.ExternalBillingEmail = externalBillingInfo
-
-	if len(w.ExternalCustomerID) > 0 {
-		params := &stripe.CustomerParams{}
-		params.Email = stripe.String(externalBillingInfo)
-		_, err := customer.Update(w.ExternalCustomerID, params)
-		if err != nil {
-			return err
-		}
-	}
 
 	s.r.StoreWorkspace(w)
 

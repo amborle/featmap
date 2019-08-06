@@ -96,11 +96,10 @@ func main() {
 		_, _ = w.Write([]byte("Featmap"))
 	})
 
-	r.Route("/v1/users", usersAPI)               // Nothing is needed
-	r.Route("/v1/link", linkAPI)                 // Nothing is needed
-	r.Route("/v1/account", accountAPI)           // Account needed
-	r.Route("/v1/subscription", subscriptionApi) // Nothing is needed
-	r.Route("/v1/", workspaceApi)                // Account + workspace is needed
+	r.Route("/v1/users", usersAPI)     // Nothing is needed
+	r.Route("/v1/link", linkAPI)       // Nothing is needed
+	r.Route("/v1/account", accountAPI) // Account needed
+	r.Route("/v1/", workspaceApi)      // Account + workspace is needed
 
 	fmt.Println("Serving on port " + config.Port)
 	_ = http.ListenAndServe(":"+config.Port, r)

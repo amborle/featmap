@@ -38,7 +38,6 @@ type Repository interface {
 	StoreSubscription(z *Subscription)
 	FindSubscriptionsByWorkspace(id string) ([]*Subscription, error)
 	FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
-	FindSubscriptionByExernalID(externalSubID string) (*Subscription, error)
 
 	StoreInvite(x *Invite)
 	DeleteInvite(wsid string, id string)
@@ -263,10 +262,10 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 // Subscriptions
 
-const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, external_status, external_customer_id, external_plan_id, external_subscription_id,external_subscription_item_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, external_status = $11, external_customer_id = $12, external_plan_id = $13,  external_subscription_id = $14, external_subscription_item_id = $15"
+const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, external_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, status = $11"
 
 func (a *repo) StoreSubscription(x *Subscription) {
-	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.ExternalStatus, x.ExternalCustomerID, x.ExternalPlanID, x.ExternalSubscriptionID, x.ExternalSubscriptionItemID)
+	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.Status)
 }
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
@@ -291,15 +290,7 @@ func (a *repo) FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
 	return x, nil
 }
 
-func (a *repo) FindSubscriptionByExernalID(externalSubID string) (*Subscription, error) {
-	x := &Subscription{}
-	if err := a.tx.Get(x, "SELECT * FROM subscriptions  WHERE external_subscription_id = $1", externalSubID); err != nil {
-		return nil, errors.Wrap(err, "no subscription found")
-	}
-	return x, nil
-}
-
-// IVITES
+// INVITES
 
 func (a *repo) StoreInvite(x *Invite) {
 	a.tx.MustExec("INSERT INTO invites (workspace_id, id, email, level, code, created_by, created_by_name, created_at, created_by_email, workspace_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)", x.WorkspaceID, x.ID, x.Email, x.Level, x.Code, x.CreatedBy, x.CreatedByName, x.CreatedAt, x.CreatedByEmail, x.WorkspaceName)

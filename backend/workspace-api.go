@@ -19,7 +19,6 @@ func workspaceApi(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireOwner())
-		r.Use(RequireDeleteableWorkspace())
 		r.Post("/delete", deleteWorkspace)
 	})
 
@@ -34,7 +33,6 @@ func workspaceApi(r chi.Router) {
 
 		r.Route("/members/{ID}", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
-				r.Use(RequireSubscription())
 				r.Post("/level", updateMemberLevel)
 			})
 
@@ -46,19 +44,12 @@ func workspaceApi(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAdmin())
-		r.Use(RequireSubscription())
 		r.Post("/invites", createInvite)
 	})
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAdmin())
-		r.Use(RequireSubscription())
 		r.Post("/settings/allow-external-sharing", changeExternalSharingRequest)
-	})
-
-	r.Group(func(r chi.Router) {
-		r.Use(RequireOwner())
-		r.Post("/settings/general-info", changeGeneralInfo)
 	})
 
 	r.Group(func(r chi.Router) {
@@ -66,7 +57,6 @@ func workspaceApi(r chi.Router) {
 
 		r.Route("/invites/{ID}", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
-				r.Use(RequireSubscription())
 				r.Post("/resend", resendInvite)
 			})
 
@@ -90,7 +80,6 @@ func workspaceApi(r chi.Router) {
 					})
 
 					r.Group(func(r chi.Router) {
-						r.Use(RequireSubscription())
 						r.Use(RequireEditor())
 						r.Post("/", createProject)
 						r.Delete("/", deleteProject)
@@ -100,7 +89,6 @@ func workspaceApi(r chi.Router) {
 				})
 
 				r.Route("/milestones/{ID}", func(r chi.Router) {
-					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createMilestone)
 					r.Delete("/", deleteMilestone)
@@ -113,7 +101,6 @@ func workspaceApi(r chi.Router) {
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
-					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
@@ -124,7 +111,6 @@ func workspaceApi(r chi.Router) {
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
-					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createSubWorkflow)
 					r.Post("/rename", renameSubWorkflow)
@@ -135,7 +121,6 @@ func workspaceApi(r chi.Router) {
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
-					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createFeature)
 					r.Post("/rename", renameFeature)
@@ -287,20 +272,6 @@ type changeGeneralInfoRequest struct {
 
 func (p *changeGeneralInfoRequest) Bind(r *http.Request) error {
 	return nil
-}
-
-func changeGeneralInfo(w http.ResponseWriter, r *http.Request) {
-	data := &changeGeneralInfoRequest{}
-	if err := render.Bind(r, data); err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(err))
-		return
-	}
-
-	err := GetEnv(r).Service.ChangeGeneralInfo(data.Country, data.EUVAT, data.ExternalBillingEmail)
-	if err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(err))
-		return
-	}
 }
 
 // Projects
