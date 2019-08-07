@@ -13,7 +13,7 @@ You should install go and set up your go environment correctly.
 Start by cloning the repository
 
 ```bash
-go get -d -u code.gitea.io/gitea
+go get -d -u github.com/amborle/featmap/backend
 ```
 
 ### Backend
