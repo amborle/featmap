@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/amborle/featmap/backend/lexorank"
+	"github.com/amborle/featmap/featmap/lexorank"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
