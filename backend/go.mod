@@ -1,4 +1,4 @@
-module github.com/amborle/featmap
+module github.com/amborle/featmap/backend
 
 go 1.12
 
