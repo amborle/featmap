@@ -10,7 +10,7 @@ Featmap's backend is written in Go and uses PostgreSQL and the frontend is a Rea
 You should [install go](https://golang.org/doc/install) and set up your go environment correctly.
 
 ### Backend
-Start by cloning the repository
+Start by retrieving the source code. This is most easily done by using the Go tool.
 
 ```bash
 go get -d -u github.com/amborle/featmap/featmap
