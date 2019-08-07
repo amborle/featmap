@@ -14,8 +14,8 @@ import { IWorkflow } from '../store/workflows/types';
 import { IFeature } from '../store/features/types';
 import { projects, getProjectById } from '../store/projects/selectors';
 import { IProject } from '../store/projects/types';
-import { getWorkspaceByName, getMembership, application, getSubscription } from '../store/application/selectors';
-import { isEditor, subIsInactive } from '../core/misc';
+import { getWorkspaceByName, getMembership, application } from '../store/application/selectors';
+import { isEditor } from '../core/misc';
 
 const mapStateToProps = (state: AppState) => ({
   application: application(state),
@@ -75,8 +75,7 @@ class EntityDetailsPage extends Component<Props, State> {
   render() {
     const ws = getWorkspaceByName(this.props.application, this.props.match.params.workspaceName)!
     const member = getMembership(this.props.application, ws.id)
-    const s = getSubscription(this.props.application, ws.id)
-    const viewOnly = !isEditor(member.level) || subIsInactive(s)
+    const viewOnly = !isEditor(member.level)
 
     if (this.props.match.params.milestoneId) {
       const ms = getMilestone(this.props.milestones, this.props.match.params.milestoneId)

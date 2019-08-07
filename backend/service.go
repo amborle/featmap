@@ -1,4 +1,4 @@
-package backend
+package main
 
 import (
 	"log"
@@ -205,10 +205,6 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		Name:                 workspaceName,
 		CreatedAt:            t,
 		AllowExternalSharing: true,
-		IsCompany:            true,
-		EUVAT:                "",
-		Country:              "US",
-		ExternalBillingEmail: email,
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -366,10 +362,6 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		Name:                 name,
 		CreatedAt:            t,
 		AllowExternalSharing: true,
-		IsCompany:            true,
-		EUVAT:                "",
-		Country:              "US",
-		ExternalBillingEmail: s.Acc.Email,
 	}
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),

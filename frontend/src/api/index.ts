@@ -32,19 +32,6 @@ export const API_CHANGE_ALLOW_EXTERNAL_SHARING = async (workspaceId: string, val
 }
 
 
-export const API_CHANGE_GENERAL_INFORMATION = async (workspaceId: string, country: string, euVat: string, externalBillingEmail: string) => {
-
-    return await fetch(endpoint + "/settings/general-info", {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            "Workspace": workspaceId,
-        },
-        credentials: 'include',
-        body: JSON.stringify({ country, euVat, externalBillingEmail })
-    });
-}
 
 
 export const API_GET_EXTERNAL_LINK = async (code: string) => {
@@ -835,33 +822,5 @@ export const API_CONTACT = async (data: API_CONTACT) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data)
-    });
-}
-
-// SUBSCRIPTIONS
-
-export const API_GET_CHECKOUT_SESSION = async (workspaceId: string, plan: string, quantity: number) => {
-    return await fetch(endpoint + "/subscription/checkoutsession", {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            "Workspace": workspaceId
-        },
-        credentials: 'include',
-        body: JSON.stringify({ plan, quantity })
-    });
-}
-
-export const API_CHANGE_SUBSCRIPTION = async (workspaceId: string, plan: string, quantity: number) => {
-    return await fetch(endpoint + "/subscription/change", {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            "Workspace": workspaceId
-        },
-        credentials: 'include',
-        body: JSON.stringify({ plan, quantity })
     });
 }

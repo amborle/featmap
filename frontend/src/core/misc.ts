@@ -1,4 +1,4 @@
-import { ISubscription } from "../store/application/types";
+
 
 export enum Roles {
     VIEWER = "VIEWER",
@@ -18,39 +18,6 @@ export const isEditor = (level: Roles) => {
 }
 
 
-export const subIsInactive = (sub: ISubscription) => {
-    switch (sub.externalStatus) {
-
-        case "incomplete_expired":
-        case "incomplete":
-        case "past_due":
-        case "canceled":
-            return true
-        case "trialing":
-            return (new Date(sub.expirationDate)) < new Date()
-        case "active":
-            return false
-        default:
-            return true
-    }
-
-}
-
-export const mustCreateNewSub = (sub: ISubscription) => {
-    switch (sub.externalStatus) {
-        case "incomplete_expired":
-        case "incomplete":
-        case "trialing":
-        case "canceled":
-            return true
-        default:
-            return false
-    }
-}
-
-export const subIsTrial = (sub: ISubscription) => {
-    return sub.externalStatus === "trialing"
-}
 
 export const daysBetween = (fromDate: Date, toDate: Date) => {
     const oneDay = 24 * 60 * 60 * 1000

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Board from '../components/Board';
 import EntityDetailsPage from './EntityDetailsPage';
-import { application, getWorkspaceByName, getMembership, getSubscription } from '../store/application/selectors';
+import { application, getWorkspaceByName, getMembership } from '../store/application/selectors';
 import { projects, getProjectById } from '../store/projects/selectors';
 import { RouteComponentProps } from 'react-router'
 import { Route, Switch, Link } from 'react-router-dom'
@@ -23,7 +23,7 @@ import { IWorkflow } from '../store/workflows/types';
 import { loadSubWorkflows } from '../store/subworkflows/actions';
 import { loadFeatures } from '../store/features/actions';
 import { IFeature } from '../store/features/types';
-import { isEditor, subIsInactive } from '../core/misc';
+import { isEditor } from '../core/misc';
 import { Button } from '../components/elements';
 import queryString from 'query-string'
 
@@ -142,9 +142,8 @@ class ProjectPage extends Component<Props, State> {
         const ws = getWorkspaceByName(this.props.application, workspaceName)!
         const proj = getProjectById(this.props.projects, projectId)!
         const member = getMembership(this.props.application, ws.id)
-        const s = getSubscription(this.props.application, ws.id)
 
-        const viewOnly = !isEditor(member.level) || subIsInactive(s)
+        const viewOnly = !isEditor(member.level)
 
         return (
             proj ?
@@ -187,17 +186,17 @@ class ProjectPage extends Component<Props, State> {
                         </div>
 
                         <Board
-    showClosedMilstones={this.state.showClosedMilstones}
-    viewOnly={viewOnly}
-    url={this.props.match.url}
-    features={this.props.features}
-    workflows={filterWorkflowsOnProject(this.props.workflows, projectId)}
-    subWorkflows={this.props.subWorkflows}
-    milestones={filterMilestonesOnProject(this.props.milestones, projectId)}
-    projectId={projectId}
-    workspaceId={ws.id}
-    demo={this.state.demo}
-    />
+                            showClosedMilstones={this.state.showClosedMilstones}
+                            viewOnly={viewOnly}
+                            url={this.props.match.url}
+                            features={this.props.features}
+                            workflows={filterWorkflowsOnProject(this.props.workflows, projectId)}
+                            subWorkflows={this.props.subWorkflows}
+                            milestones={filterMilestonesOnProject(this.props.milestones, projectId)}
+                            projectId={projectId}
+                            workspaceId={ws.id}
+                            demo={this.state.demo}
+                        />
 
 
                         <Switch>

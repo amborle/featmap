@@ -1,9 +1,8 @@
-package backend
+package main
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stripe/stripe-go"
 	"log"
 	"net/http"
 	"os"
@@ -20,17 +19,13 @@ import (
 
 // Configuration ...
 type Configuration struct {
-	Environment         string
-	AppSiteURL          string
-	DbConnectionString  string
-	JWTSecret           string
-	Port                string
-	MailServer          string
-	MailAPIKey          string
-	StripeKey           string
-	StripeWebhookSecret string
-	StripeBasicPlan     string
-	StripeProPlan       string
+	Environment        string
+	AppSiteURL         string
+	DbConnectionString string
+	JWTSecret          string
+	Port               string
+	MailServer         string
+	MailgunAPIKey      string
 }
 
 func main() {
@@ -70,7 +65,7 @@ func main() {
 		}
 	}()
 
-	mg := mailgun.NewMailgun(config.MailServer, config.MailAPIKey)
+	mg := mailgun.NewMailgun(config.MailServer, config.MailgunAPIKey)
 
 	// Create JWTAuth object
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
@@ -83,8 +78,6 @@ func main() {
 	r.Use(Auth(auth))
 
 	r.Use(User())
-
-	stripe.Key = config.StripeKey
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
@@ -110,7 +103,7 @@ func readConfiguration() (Configuration, error) {
 
 	defer func() {
 		if err := file.Close(); err != nil {
-			// log etc
+			log.Println(err)
 		}
 	}()
 

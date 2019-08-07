@@ -24,10 +24,7 @@ export interface IWorkspace {
     name: string
     createdAt: string
     allowExternalSharing: boolean
-    isCompany: boolean
-    euVat: string
-    country: string
-    externalBillingEmail: string
+
 }
 
 export interface IAccount {
@@ -51,8 +48,7 @@ export interface ISubscription {
     createdAt: string
     lastModified: string
     lastModifiedByName: string
-    externalStatus: string
-    externalPlanId: string
+    status: string
 }
 
 export interface IInvite {

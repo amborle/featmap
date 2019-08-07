@@ -1,6 +1,7 @@
-package backend
+package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -141,10 +142,10 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
-const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing, external_customer_id, is_company, eu_vat, country, external_billing_email) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4, external_customer_id = $5, is_company = $6, eu_vat = $7, country = $8, external_billing_email = $9"
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4"
 
 func (a *repo) StoreWorkspace(x *Workspace) {
-	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing, x.ExternalCustomerID, x.IsCompany, x.EUVAT, x.Country, x.ExternalBillingEmail)
+	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing)
 }
 
 func (a *repo) DeleteWorkspace(workspaceID string) {
@@ -262,7 +263,7 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 // Subscriptions
 
-const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, external_status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, status = $11"
+const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, status = $11"
 
 func (a *repo) StoreSubscription(x *Subscription) {
 	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.Status)
@@ -270,6 +271,8 @@ func (a *repo) StoreSubscription(x *Subscription) {
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
 	x := []*Subscription{}
+	log.Println("DEBUG")
+
 	err := a.tx.Select(&x, "SELECT * FROM subscriptions WHERE workspace_id = $1 order by created_at desc", id)
 	if err != nil {
 		log.Println(err)
@@ -280,13 +283,15 @@ func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) 
 
 func (a *repo) FindSubscriptionsByAccount(accID string) ([]*Subscription, error) {
 	x := []*Subscription{}
-	log.Println(accID)
+
+	fmt.Println("JEE")
 
 	err := a.tx.Select(&x, "SELECT DISTINCT ON (s.workspace_id) * FROM subscriptions s WHERE s.workspace_id IN  (select m.workspace_id from members m where m.account_id = $1) order by s.workspace_id, s.from_date desc", accID)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.Wrap(err, "no subscriptions found")
 	}
+
 	return x, nil
 }
 

@@ -1,4 +1,4 @@
-package backend
+package main
 
 import "time"
 
@@ -8,11 +8,6 @@ type Workspace struct {
 	Name                 string    `db:"name" json:"name"`
 	CreatedAt            time.Time `db:"created_at" json:"createdAt"`
 	AllowExternalSharing bool      `db:"allow_external_sharing" json:"allowExternalSharing"`
-	ExternalCustomerID   string    `db:"external_customer_id" json:"-"`
-	IsCompany            bool      `db:"is_company" json:"isCompany"`
-	EUVAT                string    `db:"eu_vat" json:"euVat"`
-	Country              string    `db:"country" json:"country"`
-	ExternalBillingEmail string    `db:"external_billing_email" json:"externalBillingEmail"`
 }
 
 // Account ...
@@ -41,7 +36,7 @@ type Subscription struct {
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
-	Status             string    `db:"status" json:"status" `
+	Status             string    `db:"status" json:"status"`
 }
 
 // Member ...

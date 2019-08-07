@@ -2,7 +2,7 @@ import { Button, CardLayout } from '../components/elements'
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router'
 import { AppState } from '../store'
-import { application, getWorkspaceByName, getMembership, getSubscription } from '../store/application/selectors';
+import { application, getWorkspaceByName, getMembership } from '../store/application/selectors';
 import { connect } from 'react-redux'
 import { IApplication } from '../store/application/types';
 import { projects } from '../store/projects/selectors';
@@ -10,7 +10,7 @@ import { IProject } from '../store/projects/types';
 import { Link } from 'react-router-dom';
 import CreateProjectModal from '../components/CreateProjectModal'
 import TimeAgo from 'react-timeago'
-import { isEditor, subIsInactive } from '../core/misc';
+import { isEditor } from '../core/misc';
 
 const mapStateToProps = (state: AppState) => ({
     application: application(state),
@@ -66,15 +66,13 @@ class WorkspacePage extends Component<Props, State> {
 
         const ws = getWorkspaceByName(this.props.application, this.props.match.params.workspaceName)!
         const member = getMembership(this.props.application, ws.id)
-        const s = getSubscription(this.props.application, ws.id)
-        const viewOnly = !isEditor(member.level) || subIsInactive(s)
+        const viewOnly = !isEditor(member.level)
 
-        
         return (
             <div>
 
                 {this.state.showAddProjectModal ?
-                    <CreateProjectModal workspaceName={workspaceName} close={this.closeProjectModal}/>
+                    <CreateProjectModal workspaceName={workspaceName} close={this.closeProjectModal} />
                     : null
                 }
 

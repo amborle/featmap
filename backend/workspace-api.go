@@ -1,4 +1,4 @@
-package backend
+package main
 
 import (
 	"github.com/go-chi/render"
@@ -262,16 +262,6 @@ func changeExternalSharingRequest(w http.ResponseWriter, r *http.Request) {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-}
-
-type changeGeneralInfoRequest struct {
-	Country              string `json:"country"`
-	EUVAT                string `json:"euVat"`
-	ExternalBillingEmail string `json:"externalBillingEmail"`
-}
-
-func (p *changeGeneralInfoRequest) Bind(r *http.Request) error {
-	return nil
 }
 
 // Projects

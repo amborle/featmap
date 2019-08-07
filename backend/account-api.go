@@ -1,6 +1,7 @@
-package backend
+package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -35,6 +36,8 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s := GetEnv(r).Service
+
+	log.Println("JEE")
 	render.JSON(w, r, response{
 		Account:       s.GetAccountObject(),
 		Workspaces:    s.GetWorkspaces(),
