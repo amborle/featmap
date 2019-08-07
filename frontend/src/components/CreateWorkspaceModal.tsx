@@ -88,7 +88,7 @@ class CreateWorkspaceModal extends Component<Props, State> {
                   if (response.ok) {
                     response.json().then((data: IWorkspace) => {
                       // noinspection JSIgnoredPromiseFromCall
-                        this.props.getApp()
+                      this.props.getApp()
                       this.props.close()
                     })
                   } else {
@@ -128,22 +128,18 @@ class CreateWorkspaceModal extends Component<Props, State> {
 
                         <div className="flex flex-col">
                           <div className="flex flex-row items-center">
-                            <div className="mr-1 font-bold">
-                              featmap.com /
+                            <div className="mr-1 font-bold  whitespace-no-wrap">
+                              {process.env.REACT_APP_BASE_URL}  /
                            </div>
-
                             <div >
-                              <input autoFocus type="text" {...field} placeholder="Name" id="name" className="rounded p-2 border w-full	"/>
+                              <input autoFocus type="text" {...field} placeholder="Name" id="name" className="rounded p-2 border w-full	" />
                             </div>
-
                           </div>
                           <div className="p-1 text-red-500 text-xs font-bold">{form.touched.name && form.errors.name}</div>
                         </div>
-
                       )}
                     />
                   </div>
-
                   <div className="flex justify-end">
                     <div className="flex flex-row">
                       <div className="mr-1">
