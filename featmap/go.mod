@@ -20,7 +20,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/objx v0.2.0 // indirect
-	github.com/stripe/stripe-go v60.12.2+incompatible
 
 	golang.org/x/crypto v0.0.0-20190506204251-e1dfcc566284
 	golang.org/x/sys v0.0.0-20190506115046-ca7f33d4116e // indirect
