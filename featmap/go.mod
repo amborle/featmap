@@ -3,6 +3,7 @@ module github.com/amborle/featmap/featmap
 go 1.12
 
 require (
+	github.com/amborle/featmap v0.0.0-20190807085200-32486ac0b81a // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect

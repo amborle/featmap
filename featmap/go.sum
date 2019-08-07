@@ -1,3 +1,5 @@
+github.com/amborle/featmap v0.0.0-20190807085200-32486ac0b81a h1:UhoP0G7M3u5o0ba4bCowoMK54AMVs1+gb2KNLgpBxkM=
+github.com/amborle/featmap v0.0.0-20190807085200-32486ac0b81a/go.mod h1:ELsQALeeywXRSpZJS6sak4oIPf86UA2Dx4YoMceQXn4=
 github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf h1:eg0MeVzsP1G42dRafH3vf+al2vQIJU0YHX+1Tw87oco=
 github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4B6AGu/h5Sxe66HYVdqdGu2l9Iebqhi/AEoA=

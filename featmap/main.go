@@ -99,7 +99,10 @@ func main() {
 }
 
 func readConfiguration() (Configuration, error) {
-	file, _ := os.Open("conf.json")
+	file, err := os.Open("conf.json")
+	if err != nil {
+		log.Println(err)
+	}
 
 	defer func() {
 		if err := file.Close(); err != nil {
@@ -109,6 +112,6 @@ func readConfiguration() (Configuration, error) {
 
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
-	err := decoder.Decode(&configuration)
+	err = decoder.Decode(&configuration)
 	return configuration, err
 }
