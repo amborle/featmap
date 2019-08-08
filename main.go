@@ -20,7 +20,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/mailgun/mailgun-go/v3"
 
-	"github.com/amborle/featmap/featmap/migrations"
+	"github.com/amborle/featmap/migrations"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 )

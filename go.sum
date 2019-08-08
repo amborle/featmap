@@ -13,6 +13,8 @@ github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMx
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/amborle/featmap v0.0.0-20190808065245-dff8766c523c h1:5oaTwzW3VSHj7psRpfzUa1y7tyH3K3fRjP1j7+06RVY=
+github.com/amborle/featmap/featmap v0.0.0-20190808101947-044b2a832368 h1:Yl6UgXL+Lz7HfLRDL2NUvNOqUw40THs/jYeGKW0Fo34=
+github.com/amborle/featmap/featmap v0.0.0-20190808101947-044b2a832368/go.mod h1:fUp7hVEkQiDjCvl826QaqQpiuX2PC2XcZFFV/3x0l8o=
 github.com/apache/thrift v0.12.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a h1:idn718Q4B6AGu/h5Sxe66HYVdqdGu2l9Iebqhi/AEoA=
 github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a/go.mod h1:lB+ZfQJz7igIIfQNfa7Ml4HSf2uFQQRzpGGRXenZAgY=
