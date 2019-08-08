@@ -91,7 +91,7 @@ func User() func(next http.Handler) http.Handler {
 
 			s := GetEnv(r).Service
 			_, claims, _ := jwtauth.FromContext(r.Context())
-			accountID, aok := claims.Get("id")
+			accountID, aok := claims["id"]
 
 			var acc *Account
 			if aok {
