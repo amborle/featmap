@@ -262,7 +262,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 
 	err = s.SendEmail("contact@featmap.com", acc.EmailConfirmationSentTo, "Welcome to Featmap!", body)
 	if err != nil {
-		return nil, nil, nil, err
+		log.Println("error sending mail")
 	}
 
 	return workspace, acc, member, nil
@@ -668,7 +668,7 @@ func (s *service) SendInvitationMail(invitationID string) error {
 
 	err = s.SendEmail("contact@featmap.com", invite.Email, "Featmap: invitation to join a workspace", body)
 	if err != nil {
-		return err
+		log.Println("error sending mail")
 	}
 
 	return nil
@@ -1632,8 +1632,9 @@ func (s *service) UpdateEmail(email string) error {
 
 	err := s.SendEmail("contact@featmap.com", email, "FeatMap: verify your email adress", body)
 	if err != nil {
-		return errors.New("send_error")
+		log.Println("error sending mail")
 	}
+
 	return nil
 }
 
@@ -1665,10 +1666,8 @@ func (s *service) ResendEmail() error {
 	body, _ := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
 	err := s.SendEmail("contact@featmap.com", a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
-	log.Println("mail")
-	log.Println(err)
 	if err != nil {
-		return errors.New("send_error")
+		log.Println("error sending mail")
 	}
 	return nil
 }
@@ -1685,8 +1684,9 @@ func (s *service) SendResetEmail(email string) error {
 	err = s.SendEmail("contact@featmap.com", email, "Featmap: request to reset password", body)
 
 	if err != nil {
-		return errors.New("send_error")
+		log.Println("error sending mail")
 	}
+
 	return nil
 }
 
@@ -1717,7 +1717,7 @@ func (s *service) Contact(topic string, body string, from string) error {
 	err := s.SendEmail(from, recipient, "Featmap ("+topic+")", body)
 
 	if err != nil {
-		return errors.New("send error")
+		log.Println("error sending mail")
 	}
 	return nil
 }

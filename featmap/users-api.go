@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -165,9 +166,9 @@ func ResetEmail(w http.ResponseWriter, r *http.Request) {
 
 	s := GetEnv(r).Service
 	err := s.SendResetEmail(email)
+
 	if err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(err))
-		return
+		log.Println("error sending mail")
 	}
 	return
 }

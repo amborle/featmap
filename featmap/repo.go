@@ -271,8 +271,6 @@ func (a *repo) StoreSubscription(x *Subscription) {
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
 	x := []*Subscription{}
-	log.Println("DEBUG")
-
 	err := a.tx.Select(&x, "SELECT * FROM subscriptions WHERE workspace_id = $1 order by created_at desc", id)
 	if err != nil {
 		log.Println(err)

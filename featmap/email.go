@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"github.com/amborle/featmap/featmap/tmpl"
 	"html/template"
 	"time"
 )
@@ -17,7 +18,8 @@ type welcome struct {
 // WelcomeBody ...
 func WelcomeBody(w welcome) (string, error) {
 
-	t, err := template.ParseFiles("./tmpl/welcome.tmpl")
+	data, err := tmpl.Asset("welcome.tmpl")
+	t, err := template.New("").Parse(string(data))
 	if err != nil {
 		return "", err
 	}
@@ -38,7 +40,8 @@ type emailBody struct {
 // ChangeEmailBody ...
 func ChangeEmailBody(w emailBody) (string, error) {
 
-	t, err := template.ParseFiles("./tmpl/email.tmpl")
+	data, err := tmpl.Asset("email.tmpl")
+	t, err := template.New("").Parse(string(data))
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +73,9 @@ type resetPasswordBody struct {
 // ResetPasswordBody ...
 func ResetPasswordBody(w resetPasswordBody) (string, error) {
 
-	t, err := template.ParseFiles("./tmpl/reset.tmpl")
+	data, err := tmpl.Asset("reset.tmpl")
+	t, err := template.New("").Parse(string(data))
+
 	if err != nil {
 		return "", err
 	}
@@ -93,8 +98,8 @@ type InviteStruct struct {
 }
 
 func inviteBody(w InviteStruct) (string, error) {
-
-	t, err := template.ParseFiles("./tmpl/invite.tmpl")
+	data, err := tmpl.Asset("invite.tmpl")
+	t, err := template.New("").Parse(string(data))
 	if err != nil {
 		return "", err
 	}

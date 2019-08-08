@@ -1,8 +1,12 @@
+//go:generate go-bindata  -pkg migrations -o ./migrations/bindata.go  ./migrations/
+//go:generate go-bindata  -pkg tmpl -o ./tmpl/bindata.go  ./tmpl/
+
 package main
 
 import (
 	"encoding/json"
 	"fmt"
+	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +19,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/mailgun/mailgun-go/v3"
+
+	"github.com/amborle/featmap/featmap/migrations"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 )
 
 // Configuration ...
@@ -57,7 +65,7 @@ func main() {
 
 	db, err := sqlx.Connect("postgres", config.DbConnectionString)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("database error")
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
@@ -65,6 +73,27 @@ func main() {
 		}
 	}()
 
+	// Apply migrations
+	s := bindata.Resource(migrations.AssetNames(),
+		func(name string) ([]byte, error) {
+			return migrations.Asset(name)
+		})
+
+	d, err := bindata.WithInstance(s)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	m, err := migrate.NewWithSourceInstance("go-bindata", d, config.DbConnectionString)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := m.Up(); err != nil {
+		log.Println("No database migrations needed.")
+	}
+
+	// Mailgun
 	mg := mailgun.NewMailgun(config.MailServer, config.MailgunAPIKey)
 
 	// Create JWTAuth object
