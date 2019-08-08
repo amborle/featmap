@@ -128,10 +128,7 @@ class CreateWorkspaceModal extends Component<Props, State> {
 
                         <div className="flex flex-col">
                           <div className="flex flex-row items-center">
-                            <div className="mr-1 font-bold  whitespace-no-wrap">
-                              {process.env.REACT_APP_BASE_URL}  /
-                           </div>
-                            <div >
+                            <div className="w-full" >
                               <input autoFocus type="text" {...field} placeholder="Name" id="name" className="rounded p-2 border w-full	" />
                             </div>
                           </div>

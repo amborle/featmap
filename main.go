@@ -139,12 +139,12 @@ func main() {
 		Prefix:    "webapp/build/static",
 	}
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	FileServer(r, "/static", files)
+
+	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		index, _ := webapp.Asset("webapp/build/index.html")
 		http.ServeContent(w, r, "index.html", time.Now(), strings.NewReader(string(index)))
 	})
-
-	FileServer(r, "/static", files)
 
 	fmt.Println("Serving on port " + config.Port)
 	_ = http.ListenAndServe(":"+config.Port, r)

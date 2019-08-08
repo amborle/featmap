@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -281,8 +280,6 @@ func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) 
 
 func (a *repo) FindSubscriptionsByAccount(accID string) ([]*Subscription, error) {
 	x := []*Subscription{}
-
-	fmt.Println("JEE")
 
 	err := a.tx.Select(&x, "SELECT DISTINCT ON (s.workspace_id) * FROM subscriptions s WHERE s.workspace_id IN  (select m.workspace_id from members m where m.account_id = $1) order by s.workspace_id, s.from_date desc", accID)
 	if err != nil {

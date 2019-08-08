@@ -6,7 +6,7 @@ import { ISubWorkflow } from '../store/subworkflows/types';
 import { IFeature } from '../store/features/types';
 import { Color } from '../core/misc';
 
-const endpoint = process.env.REACT_APP_API_ENDPOINT
+const endpoint = process.env.REACT_APP_API_ENDPOINT ? process.env.REACT_APP_API_ENDPOINT : "/v1"
 
 export interface API_SIGN_UP_REQ {
     workspaceName: string
@@ -14,8 +14,6 @@ export interface API_SIGN_UP_REQ {
     email: string
     password: string
 }
-
-
 
 export const API_CHANGE_ALLOW_EXTERNAL_SHARING = async (workspaceId: string, value: boolean) => {
 
