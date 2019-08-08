@@ -19,13 +19,13 @@ import (
 
 // Configuration ...
 type Configuration struct {
-	Environment        string
-	AppSiteURL         string
-	DbConnectionString string
-	JWTSecret          string
-	Port               string
-	MailServer         string
-	MailgunAPIKey      string
+	Environment        string `json:"environment"`
+	AppSiteURL         string `json:"appSiteURL"`
+	DbConnectionString string `json:"dbConnectionString"`
+	JWTSecret          string `json:"jwtSecret"`
+	Port               string `json:"port"`
+	MailServer         string `json:"mailserver"`
+	MailgunAPIKey      string `json:"mailgunApiKey"`
 }
 
 func main() {
