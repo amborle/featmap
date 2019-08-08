@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"github.com/amborle/featmap/featmap/tmpl"
+	"github.com/amborle/featmap/tmpl"
 	"html/template"
 	"time"
 )
