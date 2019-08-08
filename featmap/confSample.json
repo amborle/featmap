@@ -1,9 +1,9 @@
 {
   "environment": "production",
-  "appSiteURL": "http://localhost:3000/",
+  "appSiteURL": "http://localhost/",
   "dbConnectionString": "postgresql://username:password@localhost:5432/db_name?sslmode=disable",
   "jwtSecret": "some_secret_key",
-  "port": "5000",
+  "port": "80",
   "mailserver": "some_mail_server",
   "mailgunApiKey": "some_mailgun_apikey"
 }

@@ -60,7 +60,15 @@ func main() {
 
 	config, err := readConfiguration()
 	if err != nil {
-		log.Fatalln(err)
+		config = Configuration{
+			Environment:        "production",
+			AppSiteURL:         "http://localhost",
+			DbConnectionString: "postgresql://username:password@localhost:5432/db_name?sslmode=disable",
+			JWTSecret:          "some_secret_key",
+			Port:               "80",
+			MailServer:         "some_mail_server",
+			MailgunAPIKey:      "some_mailgun_apikey",
+		}
 	}
 
 	db, err := sqlx.Connect("postgres", config.DbConnectionString)
@@ -129,9 +137,6 @@ func main() {
 
 func readConfiguration() (Configuration, error) {
 	file, err := os.Open("conf.json")
-	if err != nil {
-		log.Println(err)
-	}
 
 	defer func() {
 		if err := file.Close(); err != nil {
