@@ -503,7 +503,7 @@ func migrationsBindataGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "migrations/bindata.go", size: 53248, mode: os.FileMode(438), modTime: time.Unix(1565259382, 0)}
+	info := bindataFileInfo{name: "migrations/bindata.go", size: 53248, mode: os.FileMode(438), modTime: time.Unix(1565264921, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

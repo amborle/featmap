@@ -1,144 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bda026e3-f11c-4780-9c51-1e7a8c7f70d9" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/backend.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/featmap.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/watcherTasks.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/account-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/account-api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/confSample.json" beforeDir="false" afterPath="$PROJECT_DIR$/confSample.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/email.go" beforeDir="false" afterPath="$PROJECT_DIR$/email.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/lexorank/lexorank.go" beforeDir="false" afterPath="$PROJECT_DIR$/lexorank/lexorank.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/link-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/link-api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/10_invites.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/10_invites.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/10_invites.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/10_invites.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/1_workspaces.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/1_workspaces.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/1_workspaces.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/1_workspaces.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/2_accounts.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/2_accounts.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/2_accounts.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/2_accounts.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/3_members.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/3_members.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/3_members.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/3_members.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/4_projects.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/4_projects.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/4_projects.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/4_projects.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/5_milestones.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/5_milestones.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/5_milestones.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/5_milestones.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/6_workflows.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/6_workflows.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/6_workflows.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/6_workflows.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/7_subworkflows.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/7_subworkflows.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/7_subworkflows.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/7_subworkflows.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/8_features.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/8_features.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/8_features.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/8_features.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/9_subscriptions.down.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/9_subscriptions.down.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/9_subscriptions.up.sql" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/9_subscriptions.up.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/migrations/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/mware.go" beforeDir="false" afterPath="$PROJECT_DIR$/mware.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/repo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/response.go" beforeDir="false" afterPath="$PROJECT_DIR$/response.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/service_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/shared.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/tmpl/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/tmpl/email.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/email.tmpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/tmpl/invite.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/invite.tmpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/tmpl/reset.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/reset.tmpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/tmpl/welcome.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/welcome.tmpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/users-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/users-api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/.env.development" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/.env.development" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/android-chrome-192x192.png" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/android-chrome-192x192.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/android-chrome-512x512.png" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/android-chrome-512x512.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/apple-touch-icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/apple-touch-icon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/favicon-16x16.png" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/favicon-16x16.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/favicon-32x32.png" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/favicon-32x32.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/favicon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/favicon.ico" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/public/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/public/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/screenshot.png" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/screenshot.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/api/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/api/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/Board.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/Board.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/Card.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/Card.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/ContextMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/ContextMenu.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/CreateCardModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/CreateCardModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/CreateProjectModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/CreateProjectModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/CreateWorkspaceModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/CreateWorkspaceModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/EmptyCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/EmptyCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/EntityDetailsBody.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/EntityDetailsBody.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/EntityDetailsDescription.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/EntityDetailsDescription.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/EntityDetailsModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/EntityDetailsModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/EntityDetailsTitle.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/EntityDetailsTitle.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/Footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/Footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/Header.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/Messages.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/Messages.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/NewCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/NewCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/NewDimCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/NewDimCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/components/elements.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/elements.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/configureStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/configureStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/AcceptInvitePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/AcceptInvitePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/AccountPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/AccountPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/CancelPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/CancelPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ContactPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ContactPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/EntityDetailsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/EntityDetailsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ExternalEntityDetailsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ExternalEntityDetailsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ExternalLinkPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ExternalLinkPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/IndexPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/IndexPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/LogInPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/LogInPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/LogOutPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/LogOutPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/NotFound.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/NotFound.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ProjectPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ProjectPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ProjectsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ProjectsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ResetPasswordPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ResetPasswordPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/ResetPasswordWithKeyPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/ResetPasswordWithKeyPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/SignUpPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/SignUpPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/SuccessPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/SuccessPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/VerifyEmailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/VerifyEmailPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/WorkspacePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/WorkspacePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/WorkspaceSettingsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/WorkspaceSettingsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/pages/WorkspacesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/pages/WorkspacesPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/react-app-env.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/react-app-env.d.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/serviceWorker.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/serviceWorker.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/application/actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/application/actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/application/reducers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/application/reducers.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/application/selectors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/application/selectors.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/application/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/application/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/features/actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/features/actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/features/reducers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/features/reducers.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/features/selectors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/features/selectors.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/features/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/features/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/milestones/actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/milestones/actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/milestones/reducers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/milestones/reducers.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/milestones/selectors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/milestones/selectors.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/milestones/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/milestones/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/projects/actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/projects/actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/projects/reducers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/projects/reducers.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/projects/selectors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/projects/selectors.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/projects/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/projects/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/subworkflows/actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/subworkflows/actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/subworkflows/reducers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/subworkflows/reducers.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/subworkflows/selectors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/subworkflows/selectors.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/subworkflows/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/subworkflows/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/workflows/actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/workflows/actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/workflows/reducers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/workflows/reducers.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/workflows/selectors.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/workflows/selectors.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/src/store/workflows/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/store/workflows/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/webapp/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/tsconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/featmap/workspace-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/workspace-api.go" afterDir="false" />
+    <list default="true" id="bda026e3-f11c-4780-9c51-1e7a8c7f70d9" name="Default Changelist" comment="refactor">
+      <change afterPath="$PROJECT_DIR$/webapp/bindata.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/android-chrome-192x192.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/android-chrome-512x512.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/apple-touch-icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/asset-manifest.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/favicon-16x16.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/favicon-32x32.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/favicon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/manifest.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/precache-manifest.401da033ce20e911cfd75d17c557ebfd.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/service-worker.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/css/main.632c3b06.chunk.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/css/main.632c3b06.chunk.css.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/js/2.cec1d1a1.chunk.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/js/2.cec1d1a1.chunk.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/js/main.ec8c08d8.chunk.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/js/main.ec8c08d8.chunk.js.map" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/js/runtime~main.a8a9905a.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webapp/build/static/js/runtime~main.a8a9905a.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tmpl/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/.gitignore" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -161,39 +51,12 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/service.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="15" column="1" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
-              <folding>
-                <element signature="e#14#306#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/account-api.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="19" selection-start-line="19" selection-end-line="19" />
-              <folding>
-                <element signature="e#14#97#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/workspace-api.go">
-          <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="32">
-              <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-              <folding>
-                <element signature="e#14#91#0" expanded="true" />
-              </folding>
+              <caret line="15" column="1" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -201,8 +64,38 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="17" column="31" lean-forward="true" selection-start-line="17" selection-start-column="31" selection-end-line="17" selection-end-column="31" />
+            <state relative-caret-position="306">
+              <caret line="145" column="4" selection-start-line="145" selection-start-column="4" selection-end-line="145" selection-end-column="4" />
+              <folding>
+                <element signature="e#246#741#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Go/src/net/http/fs.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="454">
+              <caret line="150" column="97" lean-forward="true" selection-start-line="150" selection-start-column="97" selection-end-line="150" selection-end-column="97" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Go/src/io/io.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="262">
+              <caret line="144" column="5" selection-start-line="144" selection-start-column="5" selection-end-line="144" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/go/pkg/mod/github.com/elazarl/go-bindata-assetfs@v1.0.0/assetfs.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="914">
+              <caret line="142" column="36" selection-start-line="142" selection-start-column="36" selection-end-line="142" selection-end-column="36" />
             </state>
           </provider>
         </entry>
@@ -224,6 +117,8 @@
       <find>DEBUG</find>
       <find>email</find>
       <find>backend</find>
+      <find>webapp</find>
+      <find>json</find>
     </findStrings>
     <dirStrings>
       <dir>C:\Users\jense\work\featmap\backend</dir>
@@ -257,8 +152,9 @@
         <option value="$PROJECT_DIR$/conf.json" />
         <option value="$PROJECT_DIR$/confSample.json" />
         <option value="$PROJECT_DIR$/go.mod" />
-        <option value="$PROJECT_DIR$/main.go" />
         <option value="$PROJECT_DIR$/service.go" />
+        <option value="$PROJECT_DIR$/webapp/.gitignore" />
+        <option value="$PROJECT_DIR$/main.go" />
       </list>
     </option>
   </component>
@@ -274,6 +170,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -283,13 +180,28 @@
             </path>
             <path>
               <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
+              <item name="featmap" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+            <path>
+              <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go Modules &lt;github.com/amborle/featmap&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+            </path>
+            <path>
+              <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go Modules &lt;github.com/amborle/featmap&gt;" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="go-bindata-assetfs@v1.0.0" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -343,7 +255,7 @@
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21748401" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2196162" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -356,8 +268,9 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32959852" />
-      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.44351074" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.23996265" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
+      <window_info anchor="bottom" id="TypeScript" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -368,6 +281,8 @@
     <option name="version" value="1" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <ignored-roots>
       <path value="$PROJECT_DIR$/.." />
     </ignored-roots>
@@ -552,12 +467,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/service.go">
+    <entry file="file://$PROJECT_DIR$/webapp/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="15" column="1" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
+        <state relative-caret-position="256">
+          <caret line="16" column="15" lean-forward="true" selection-start-line="16" selection-start-column="15" selection-end-line="16" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/workspace-api.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="32">
+          <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
           <folding>
-            <element signature="e#14#306#0" expanded="true" />
+            <element signature="e#14#91#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -572,20 +494,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/workspace-api.go">
+    <entry file="file://$USER_HOME$/go/pkg/mod/github.com/elazarl/go-bindata-assetfs@v1.0.0/assetfs.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="914">
+          <caret line="142" column="36" selection-start-line="142" selection-start-column="36" selection-end-line="142" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="32">
-          <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-          <folding>
-            <element signature="e#14#91#0" expanded="true" />
-          </folding>
+          <caret line="15" column="1" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webapp/bindata.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22">
+          <caret line="554" column="5" selection-start-line="554" selection-start-column="5" selection-end-line="554" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/io/io.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="262">
+          <caret line="144" column="5" selection-start-line="144" selection-start-column="5" selection-end-line="144" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/net/http/fs.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="454">
+          <caret line="150" column="97" lean-forward="true" selection-start-line="150" selection-start-column="97" selection-end-line="150" selection-end-column="97" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="17" column="31" lean-forward="true" selection-start-line="17" selection-start-column="31" selection-end-line="17" selection-end-column="31" />
+        <state relative-caret-position="306">
+          <caret line="145" column="4" selection-start-line="145" selection-start-column="4" selection-end-line="145" selection-end-column="4" />
+          <folding>
+            <element signature="e#246#741#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

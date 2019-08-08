@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/amborle/featmap/featmap v0.0.0-20190808101947-044b2a832368
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
+	github.com/elazarl/go-bindata-assetfs v1.0.0
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/jwtauth v3.3.0+incompatible
