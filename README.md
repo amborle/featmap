@@ -10,14 +10,7 @@ Featmap is a simple user story mapping tool for product managers to build, plan 
 Featmap runs on top of [PostgreSQL](https://www.postgresql.org/), so make sure you have it running on your system.
 
 ### Downloading
-Download the Featmap binary for your respective platform and save it somewhere on your system. You can find releases here:
-
-https://github.com/amborle/featmap/releases
-
-
-*  [Linux](https://github.com/amborle/featmap/releases/download/v1.0.0/featmap-1.0.0-linux-amd64)
-*  [Windows](https://github.com/amborle/featmap/releases/download/v1.0.0/featmap-1.0.0-windows-amd64.exe)
-*  [Mac](https://github.com/amborle/featmap/releases/download/v1.0.0/featmap-1.0.0-windows-amd64.exe)
+[Download](https://github.com/amborle/featmap/releases) the Featmap binary for your respective platform and save it somewhere on your system. 
 
 ### Configuration
 In the directory where you placed the binary, create a file called ```conf.json```.
