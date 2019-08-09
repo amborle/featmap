@@ -87,7 +87,7 @@ func tmplBindataGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tmpl/bindata.go", size: 0, mode: os.FileMode(438), modTime: time.Unix(1565271685, 0)}
+	info := bindataFileInfo{name: "tmpl/bindata.go", size: 0, mode: os.FileMode(511), modTime: time.Unix(1565329953, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -107,7 +107,7 @@ func tmplEmailTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tmpl/email.tmpl", size: 130, mode: os.FileMode(438), modTime: time.Unix(1565255948, 0)}
+	info := bindataFileInfo{name: "tmpl/email.tmpl", size: 130, mode: os.FileMode(511), modTime: time.Unix(1565255948, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -127,7 +127,7 @@ func tmplInviteTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tmpl/invite.tmpl", size: 417, mode: os.FileMode(438), modTime: time.Unix(1565255956, 0)}
+	info := bindataFileInfo{name: "tmpl/invite.tmpl", size: 417, mode: os.FileMode(511), modTime: time.Unix(1565255956, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -147,7 +147,7 @@ func tmplResetTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tmpl/reset.tmpl", size: 260, mode: os.FileMode(438), modTime: time.Unix(1565255962, 0)}
+	info := bindataFileInfo{name: "tmpl/reset.tmpl", size: 260, mode: os.FileMode(511), modTime: time.Unix(1565255962, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -167,7 +167,7 @@ func tmplWelcomeTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tmpl/welcome.tmpl", size: 229, mode: os.FileMode(438), modTime: time.Unix(1565255966, 0)}
+	info := bindataFileInfo{name: "tmpl/welcome.tmpl", size: 229, mode: os.FileMode(511), modTime: time.Unix(1565255966, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
