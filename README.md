@@ -30,6 +30,8 @@ Here's a sample  ```conf.json```
 }
 ```
 
+It is possible to run Featmap without filling in the mail details, but recovery emails and workspace invites will not be available.
+
 ### Running
 Execute the binary.
 
