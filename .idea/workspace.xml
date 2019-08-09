@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bda026e3-f11c-4780-9c51-1e7a8c7f70d9" name="Default Changelist" comment="v1.0.0">
+    <list default="true" id="bda026e3-f11c-4780-9c51-1e7a8c7f70d9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/email.go" beforeDir="false" afterPath="$PROJECT_DIR$/email.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/migrations/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/service.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tmpl/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tmpl/email.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/email.tmpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/users-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/users-api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/bindata.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -52,38 +47,41 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/conf.json">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="170">
-              <caret line="10" column="1" lean-forward="true" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
+              <caret line="10" selection-start-line="10" selection-end-line="10" selection-end-column="1" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="34" column="31" selection-start-line="34" selection-start-column="31" selection-end-line="34" selection-end-column="31" />
+            <state relative-caret-position="400">
+              <caret line="88" column="24" lean-forward="true" selection-start-line="88" selection-start-column="24" selection-end-line="88" selection-end-column="24" />
+              <folding>
+                <element signature="e#246#790#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/repo.go">
+        <entry file="file://$USER_HOME$/go/pkg/mod/github.com/golang-migrate/migrate/v4@v4.5.0/source/go_bindata/go-bindata.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="102">
-              <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+              <caret line="14" column="5" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/email.go">
+        <entry file="file://$USER_HOME$/go/pkg/mod/github.com/golang-migrate/migrate/v4@v4.5.0/migrate.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="52" column="28" selection-start-line="52" selection-start-column="28" selection-end-line="52" selection-end-column="28" />
+            <state relative-caret-position="303">
+              <caret line="144" column="26" selection-start-line="144" selection-start-column="5" selection-end-line="144" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -154,17 +152,17 @@
         <option value="$PROJECT_DIR$/webapp/.gitignore" />
         <option value="$PROJECT_DIR$/repo.go" />
         <option value="$PROJECT_DIR$/tmpl/email.tmpl" />
-        <option value="$PROJECT_DIR$/main.go" />
         <option value="$PROJECT_DIR$/email.go" />
         <option value="$PROJECT_DIR$/service.go" />
         <option value="$PROJECT_DIR$/users-api.go" />
         <option value="$PROJECT_DIR$/conf.json" />
+        <option value="$PROJECT_DIR$/main.go" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-154" />
-    <option name="y" value="202" />
+    <option name="x" value="251" />
+    <option name="y" value="126" />
     <option name="width" value="1386" />
     <option name="height" value="794" />
   </component>
@@ -180,6 +178,11 @@
             <path>
               <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
               <item name="featmap" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
+              <item name="featmap" type="462c0819:PsiDirectoryNode" />
+              <item name="migrations" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
@@ -277,7 +280,8 @@
     </ignored-roots>
     <MESSAGE value="refactor" />
     <MESSAGE value="v1.0.0" />
-    <option name="LAST_COMMIT_MESSAGE" value="v1.0.0" />
+    <MESSAGE value="mail fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="mail fixes" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -344,20 +348,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/go/pkg/mod/github.com/golang-migrate/migrate/v4@v4.5.0/source/go_bindata/go-bindata.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="44" column="5" selection-start-line="44" selection-start-column="5" selection-end-line="44" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/go/pkg/mod/github.com/golang-migrate/migrate/v4@v4.5.0/migrate.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="257" column="5" lean-forward="true" selection-start-line="257" selection-start-column="5" selection-end-line="257" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/model.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="224">
@@ -394,24 +384,10 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bindata.go" />
-    <entry file="file://$PROJECT_DIR$/migrations/bindata.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-160">
-          <caret line="26" column="7" selection-start-line="26" selection-start-column="7" selection-end-line="26" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Go/src/builtin/builtin.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="183">
           <caret line="70" column="5" selection-start-line="70" selection-start-column="5" selection-end-line="70" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/confSample.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32">
-          <caret line="2" column="36" selection-start-line="2" selection-start-column="36" selection-end-line="2" selection-end-column="36" />
         </state>
       </provider>
     </entry>
@@ -498,13 +474,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="34" column="31" selection-start-line="34" selection-start-column="31" selection-end-line="34" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/repo.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -533,6 +502,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/confSample.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/users-api.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="368">
@@ -540,10 +516,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/go/pkg/mod/github.com/golang-migrate/migrate/v4@v4.5.0/migrate.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="303">
+          <caret line="144" column="26" selection-start-line="144" selection-start-column="5" selection-end-line="144" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/go/pkg/mod/github.com/golang-migrate/migrate/v4@v4.5.0/source/go_bindata/go-bindata.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="14" column="5" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/migrations/bindata.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1000">
+          <caret line="586" column="43" selection-start-line="586" selection-start-column="43" selection-end-line="586" selection-end-column="43" />
+          <folding>
+            <element signature="e#562#666#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/conf.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
-          <caret line="10" column="1" lean-forward="true" selection-start-line="10" selection-start-column="1" selection-end-line="10" selection-end-column="1" />
+          <caret line="10" selection-start-line="10" selection-end-line="10" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="88" column="24" lean-forward="true" selection-start-line="88" selection-start-column="24" selection-end-line="88" selection-end-column="24" />
+          <folding>
+            <element signature="e#246#790#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
