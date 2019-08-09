@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"github.com/amborle/featmap/tmpl"
 	"html/template"
-	"time"
+	"log"
+	"net/smtp"
 )
 
 type welcome struct {
@@ -18,7 +18,7 @@ type welcome struct {
 // WelcomeBody ...
 func WelcomeBody(w welcome) (string, error) {
 
-	data, err := tmpl.Asset("welcome.tmpl")
+	data, err := tmpl.Asset("tmpl/welcome.tmpl")
 	t, err := template.New("").Parse(string(data))
 	if err != nil {
 		return "", err
@@ -40,7 +40,7 @@ type emailBody struct {
 // ChangeEmailBody ...
 func ChangeEmailBody(w emailBody) (string, error) {
 
-	data, err := tmpl.Asset("email.tmpl")
+	data, err := tmpl.Asset("tmpl/email.tmpl")
 	t, err := template.New("").Parse(string(data))
 	if err != nil {
 		return "", err
@@ -53,14 +53,16 @@ func ChangeEmailBody(w emailBody) (string, error) {
 	return buf.String(), nil
 }
 
-func (s *service) SendEmail(from string, recipient string, subject string, body string) error {
+func (s *service) SendEmail(smtpServer string, smtpUser string, smtpPass string, from string, recipient string, subject string, body string) error {
+	err := smtp.SendMail(smtpServer+":587",
+		smtp.PlainAuth("", smtpUser, smtpPass, smtpServer),
+		from, []string{recipient}, []byte("Subject:"+subject+"\r\n"+body))
 
-	message := s.mg.NewMessage(from, subject, body, recipient)
+	if err != nil {
+		log.Printf("smtp error: %s", err)
+		return err
+	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-
-	_, _, err := s.mg.Send(ctx, message)
 	return err
 }
 
@@ -73,7 +75,7 @@ type resetPasswordBody struct {
 // ResetPasswordBody ...
 func ResetPasswordBody(w resetPasswordBody) (string, error) {
 
-	data, err := tmpl.Asset("reset.tmpl")
+	data, err := tmpl.Asset("tmpl/reset.tmpl")
 	t, err := template.New("").Parse(string(data))
 
 	if err != nil {
@@ -98,7 +100,7 @@ type InviteStruct struct {
 }
 
 func inviteBody(w InviteStruct) (string, error) {
-	data, err := tmpl.Asset("invite.tmpl")
+	data, err := tmpl.Asset("tmpl/invite.tmpl")
 	t, err := template.New("").Parse(string(data))
 	if err != nil {
 		return "", err

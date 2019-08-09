@@ -32,7 +32,6 @@ func usersAPI(r chi.Router) {
 					r.Get("/", getInvite)
 					r.Post("/", acceptInvite)
 				})
-				r.Post("/contact", contact)
 			})
 	})
 }
@@ -235,19 +234,4 @@ type ContactRequest struct {
 // Bind ...
 func (p *ContactRequest) Bind(r *http.Request) error {
 	return nil
-}
-
-func contact(w http.ResponseWriter, r *http.Request) {
-	data := &ContactRequest{}
-	if err := render.Bind(r, data); err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(err))
-		return
-	}
-
-	err := GetEnv(r).Service.Contact(data.Topic, data.Body, data.Sender)
-	if err != nil {
-		_ = render.Render(w, r, ErrInvalidRequest(err))
-		return
-	}
-	return
 }

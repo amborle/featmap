@@ -35,8 +35,10 @@ type Configuration struct {
 	DbConnectionString string `json:"dbConnectionString"`
 	JWTSecret          string `json:"jwtSecret"`
 	Port               string `json:"port"`
-	MailServer         string `json:"mailserver"`
-	MailgunAPIKey      string `json:"mailgunApiKey"`
+	EmailFrom          string `json:"emailFrom"`
+	SMTPServer         string `json:"smtpServer"`
+	SMTPUser           string `json:"smtpUser"`
+	SMTPPass           string `json:"smtpPass"`
 }
 
 func main() {
@@ -63,15 +65,7 @@ func main() {
 
 	config, err := readConfiguration()
 	if err != nil {
-		config = Configuration{
-			Environment:        "production",
-			AppSiteURL:         "http://localhost",
-			DbConnectionString: "postgresql://username:password@localhost:5432/db_name?sslmode=disable",
-			JWTSecret:          "some_secret_key",
-			Port:               "80",
-			MailServer:         "some_mail_server",
-			MailgunAPIKey:      "some_mailgun_apikey",
-		}
+		log.Fatalln("no conf.json found")
 	}
 
 	db, err := sqlx.Connect("postgres", config.DbConnectionString)
@@ -103,7 +97,7 @@ func main() {
 	m.Up()
 
 	// Mailgun
-	mg := mailgun.NewMailgun(config.MailServer, config.MailgunAPIKey)
+	mg := mailgun.NewMailgun("", "")
 
 	// Create JWTAuth object
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
@@ -121,11 +115,6 @@ func main() {
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
-
-	//// In case somebody visits the root, show simple homepage
-	//r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-	//	_, _ = w.Write([]byte("Featmap"))
-	//})
 
 	r.Route("/v1/users", usersAPI)     // Nothing is needed
 	r.Route("/v1/link", linkAPI)       // Nothing is needed

@@ -35,9 +35,7 @@ type Service interface {
 	GetWorkspaceObject() *Workspace
 	GetSubscriptionObject() *Subscription
 
-	SendEmail(from string, recipient string, subject string, body string) error
-
-	Contact(subject string, body string, from string) error
+	SendEmail(smtpServer string, smtpUser string, smtpPass string, from string, recipient string, subject string, body string) error
 
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
 	Login(email string, password string) (*Account, error)
@@ -257,10 +255,11 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 
 	body, err := WelcomeBody(welcome{s.config.AppSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
+		log.Println(err)
 		return nil, nil, nil, err
 	}
 
-	err = s.SendEmail("contact@featmap.com", acc.EmailConfirmationSentTo, "Welcome to Featmap!", body)
+	err = s.SendEmail(s.config.SMTPServer, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, acc.EmailConfirmationSentTo, "Welcome to Featmap!", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
@@ -666,7 +665,7 @@ func (s *service) SendInvitationMail(invitationID string) error {
 		return err
 	}
 
-	err = s.SendEmail("contact@featmap.com", invite.Email, "Featmap: invitation to join a workspace", body)
+	err = s.SendEmail(s.config.SMTPServer, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, invite.Email, "Featmap: invitation to join a workspace", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
@@ -1628,9 +1627,12 @@ func (s *service) UpdateEmail(email string) error {
 
 	s.r.StoreAccount(a)
 
-	body, _ := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
+	body, err := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
+	if err != nil {
+		log.Println(err)
+	}
 
-	err := s.SendEmail("contact@featmap.com", email, "FeatMap: verify your email adress", body)
+	err = s.SendEmail(s.config.SMTPServer, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, email, "Welcome to Featmap!", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
@@ -1665,7 +1667,7 @@ func (s *service) ResendEmail() error {
 
 	body, _ := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err := s.SendEmail("contact@featmap.com", a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
+	err := s.SendEmail(s.config.SMTPServer, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
@@ -1681,44 +1683,11 @@ func (s *service) SendResetEmail(email string) error {
 
 	body, _ := ResetPasswordBody(resetPasswordBody{s.config.AppSiteURL, email, a.PasswordResetKey})
 
-	err = s.SendEmail("contact@featmap.com", email, "Featmap: request to reset password", body)
-
+	err = s.SendEmail(s.config.SMTPServer, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, email, "Featmap: request to reset password", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
 
-	return nil
-}
-
-func (s *service) Contact(topic string, body string, from string) error {
-
-	var recipient string
-	switch topic {
-	case "sales":
-		recipient = "sales@featmap.com"
-	case "general":
-		recipient = "contact@featmap.com"
-	case "support":
-		recipient = "support@featmap.com"
-	default:
-		return errors.New("invalid topic")
-	}
-	if len(body) < 1 {
-		return errors.New("message too short")
-	}
-	if len(body) > 10000 {
-		return errors.New("message too long")
-	}
-
-	if !govalidator.IsEmail(from) {
-		return errors.New("email invalid")
-	}
-
-	err := s.SendEmail(from, recipient, "Featmap ("+topic+")", body)
-
-	if err != nil {
-		log.Println("error sending mail")
-	}
 	return nil
 }
 
