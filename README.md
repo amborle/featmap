@@ -31,12 +31,14 @@ Here's a sample  ```conf.json```
 ```
 
 ### Running
-Execute the binary and you are ready to go!
+Execute the binary.
 
 ```bash
 ./featmap-1.0.0-linux-amd64
 Serving on port 80
 ```
+
+Open a browser to http://localhost and you are ready to go!
 
 
 
