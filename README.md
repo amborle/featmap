@@ -21,7 +21,7 @@ Here's a sample  ```conf.json```
 {  
   "appSiteURL": "http://localhost/",
   "dbConnectionString": "postgresql://featmap:featmap@localhost:5432/featmap?sslmode=disable",
-  "jwtSecret": "some_secret",
+  "jwtSecret": "mC3qd44x5hr5YaRhaj5pM5L",  // replace by your own secret!
   "port": "80",
   "emailFrom" : "contact@example.com",
   "smtpServer" : "smtp.example.com",
@@ -29,6 +29,17 @@ Here's a sample  ```conf.json```
   "smtpPass": "some_smtp_password"
 }
 ```
+
+Setting | Description
+--- | --- 
+`appSiteURL` | The url to where you will be hosting the app.
+`dbConnectionString` | The connection string to the PostgreSQL database that Featmap should connect to.
+`jwtSecret` | This setting is used to secure the cookies produced by Featmap.
+`port` | The port that Featmap should run on.
+`emailFrom` | The email adress that should be used as sender when sending invitation and password reset mails.
+`smtpServer` | SMTP server for sending emails.
+`smtpUser` | SMTP server username.
+`smtpPass` | SMTP server password.
 
 It is possible to run Featmap without filling in the mail details, but recovery emails and workspace invites will not be available.
 
@@ -41,6 +52,47 @@ Serving on port 80
 ```
 
 Open a browser to http://localhost and you are ready to go!
+
+## Building
+
+### Requirements
+The following must be installed on your system in order to build
+* [Node.js](https://nodejs.org/)
+* [Go](https://golang.org/)
+* [go-bindata](https://github.com/jteeuwen/go-bindata)
+
+### Instructions
+Start by cloning the repository.
+
+```bash
+git clone https://github.com/amborle/featmap.git
+```
+
+Navigate to the repository.
+
+```bash
+cd featmap
+```
+
+Now let's build it (requires Bash).
+
+```bash
+./build/complete_build.sh
+```
+
+Binaries for Linux, Win and Mac are now available in the ```bin``` folder.
+
+```bash
+cd bin
+ls
+featmap-1.0.3-darwin-amd64  featmap-1.0.3-linux-amd64  featmap-1.0.3-windows-amd64.exe
+```
+
+
+
+
+
+
 
 
 
