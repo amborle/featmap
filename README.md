@@ -42,6 +42,46 @@ Serving on port 80
 
 Open a browser to http://localhost and you are ready to go!
 
+## Building
+
+### Requirements
+The following must be installed on your system in order to build
+* [Node.js](https://nodejs.org/)
+* [Go](https://golang.org/)
+* [go-bindata](https://github.com/jteeuwen/go-bindata).
+
+Start by cloning the repository.
+
+```bash
+git clone https://github.com/amborle/featmap.git
+```
+
+Navigate to the repository.
+
+```bash
+cd featmap
+```
+
+Now let's build it (requires Bash).
+
+```bash
+./build/complete_build.sh
+```
+
+Binaries for Linux, Win and Mac are now available in the ```bin``` folder.
+
+```bash
+cd bin
+ls
+featmap-1.0.3-darwin-amd64  featmap-1.0.3-linux-amd64  featmap-1.0.3-windows-amd64.exe
+```
+
+
+
+
+
+
+
 
 
 
