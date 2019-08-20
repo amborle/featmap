@@ -48,8 +48,9 @@ Open a browser to http://localhost and you are ready to go!
 The following must be installed on your system in order to build
 * [Node.js](https://nodejs.org/)
 * [Go](https://golang.org/)
-* [go-bindata](https://github.com/jteeuwen/go-bindata).
+* [go-bindata](https://github.com/jteeuwen/go-bindata)
 
+### Instructions
 Start by cloning the repository.
 
 ```bash
