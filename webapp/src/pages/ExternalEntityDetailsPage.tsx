@@ -74,6 +74,8 @@ class ExternalEntityDetailsPage extends Component<Props, State> {
   render() {
     const viewOnly = !this.props.demo
 
+
+
     if (this.props.match.params.milestoneId) {
       const ms = getMilestone(this.props.milestones, this.props.match.params.milestoneId)
       return (

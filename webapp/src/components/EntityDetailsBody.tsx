@@ -16,6 +16,7 @@ import CardDetailsTitle from './EntityDetailsTitle'
 import CardDetailsDescription from './EntityDetailsDescription';
 import { CardStatus, colorToBackgroundColorClass, Colors, colorToBorderColorClass, Color } from '../core/misc';
 import ContextMenu from './ContextMenu';
+import {RouteComponentProps, RouterProps} from "react-router";
 
 const mapStateToProps = (state: AppState) => ({
   application: application(state)
@@ -69,7 +70,9 @@ interface SelfProps {
   viewOnly: boolean
   demo: boolean
 }
-type Props = PropsFromState & PropsFromDispatch & SelfProps
+
+
+type Props = & PropsFromState & PropsFromDispatch & SelfProps
 
 interface State {
   copySuccess: boolean
@@ -382,9 +385,9 @@ class EntityDetailsBody extends Component<Props, State> {
                 Permalink
             </div>
               <div className="flex items-center flex-grow">
-                <div className="flex flex-grow " ><input onClick={() => this.urlRef.current!.select()} ref={this.urlRef} readOnly className="p-1 w-full  border mr-1" value={process.env.REACT_APP_BASE_URL + this.props.url} /></div>
+                <div className="flex flex-grow " ><input onClick={() => this.urlRef.current!.select()} ref={this.urlRef} readOnly className="p-1 w-full  border mr-1" value={ window.location.protocol + "//"  + window.location.host  + this.props.url} /></div>
                 <div>
-                  {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(process.env.REACT_APP_BASE_URL + this.props.url)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
+                  {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(window.location.protocol + "//"  + window.location.host  + this.props.url)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
                 </div>
                 <div >
                   <i style={{ fontSize: "16px" }} className={"material-icons  text-green-500" + (!this.state.copySuccess ? " invisible" : "")}>check_circle</i>
