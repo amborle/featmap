@@ -24,6 +24,7 @@ func getLink(w http.ResponseWriter, r *http.Request) {
 	s := GetEnv(r).Service
 
 	project, err := s.GetProjectByExternalLink(link)
+
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not found")))
 		return
@@ -32,12 +33,6 @@ func getLink(w http.ResponseWriter, r *http.Request) {
 	ws, _ := s.GetWorkspace(project.WorkspaceID)
 	if !ws.AllowExternalSharing {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
-		return
-	}
-
-	sub := s.GetSubscriptionByWorkspace(ws.ID)
-	if subHasExpired(sub) {
-		_ = render.Render(w, r, ErrInvalidRequest(errors.New("subscription has expired")))
 		return
 	}
 

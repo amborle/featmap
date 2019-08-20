@@ -2,7 +2,7 @@ scriptDir=$(dirname -- "$(readlink -f -- "$BASH_SOURCE")")
 cd "$scriptDir"
 cd ..
 
-VERSION=1.0.3
+VERSION=1.0.4
 
 export GO111MODULE=on
 
