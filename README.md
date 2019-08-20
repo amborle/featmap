@@ -21,7 +21,7 @@ Here's a sample  ```conf.json```
 {  
   "appSiteURL": "http://localhost/",
   "dbConnectionString": "postgresql://featmap:featmap@localhost:5432/featmap?sslmode=disable",
-  "jwtSecret": "some_secret",
+  "jwtSecret": "mC3qd44x5hr5YaRhaj5pM5L",  // replace by your own secret!
   "port": "80",
   "emailFrom" : "contact@example.com",
   "smtpServer" : "smtp.example.com",
@@ -29,6 +29,17 @@ Here's a sample  ```conf.json```
   "smtpPass": "some_smtp_password"
 }
 ```
+
+Setting | Description
+--- | --- 
+`appSiteURL` | The url to where you will be hosting the app.
+`dbConnectionString` | The connection string to the PostgreSQL database that Featmap should connect to.
+`jwtSecret` | This setting is used to secure the cookies produced by Featmap.
+`port` | The port that Featmap should run on.
+`emailFrom` | The email adress that should be used as sender when sending invitation and password reset mails.
+`smtpServer` | SMTP server for sending emails.
+`smtpUser` | SMTP server username.
+`smtpPass` | SMTP server password.
 
 It is possible to run Featmap without filling in the mail details, but recovery emails and workspace invites will not be available.
 
