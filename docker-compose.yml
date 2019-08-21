@@ -6,21 +6,25 @@ services:
                 volumes:
                         - ${PWD}/data:/var/lib/postgresql/data
                 environment:
-                        POSTGRES_USER: featmap
-                        POSTGRES_DB: featmap
-                        POSTGRES_PASSWORD: password
+                        POSTGRES_DB: ${FEATMAP_DB}
+                        POSTGRES_USER: ${FEATMAP_DB_USER}
+                        POSTGRES_PASSWORD: ${FEATMAP_DB_PASSWORD}
+                healthcheck:
+                        test: ["CMD-SHELL", "pg_isready -U postgres"]
+                        interval: 10s
+                        timeout: 5s
+                        retries: 5
         featmap:
-                image: amborle/featmap:v${FEATMAP_VERSION}
+                image: amborle/featmap
                 restart: always
                 build: 
                         context: .
                         dockerfile: Dockerfile
-                        args:
-                                - featmap_version=${FEATMAP_VERSION}
                 depends_on: 
-                        - postgres
+                    postgres:
+                        condition: service_healthy
                 ports:
-                        - 8086:80
+                        - ${FEATMAP_HTTP_PORT}:80
                 volumes:
                         - ${PWD}/config/conf.json:/opt/featmap/conf.json
 
