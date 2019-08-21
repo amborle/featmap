@@ -57,3 +57,5 @@ conf.json
 
 bindata.go
 .idea
+
+workspace.xml
