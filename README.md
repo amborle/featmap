@@ -35,7 +35,7 @@ Setting | Description
 --- | --- 
 `appSiteURL` | The url to where you will be hosting the app.
 `dbConnectionString` | The connection string to the PostgreSQL database that Featmap should connect to.
-`jwtSecret` | This setting is used to secure the cookies produced by Featmap. Generate a secure sting
+`jwtSecret` | This setting is used to secure the cookies produced by Featmap. Generate a random string and keep it safe! 
 `port` | The port that Featmap should run on.
 `emailFrom` | The email adress that should be used as sender when sending invitation and password reset mails.
 `smtpServer` | SMTP server for sending emails.
