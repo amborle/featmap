@@ -1,7 +1,3 @@
-//go:generate go-bindata  -pkg migrations -o ./migrations/bindata.go  ./migrations/
-//go:generate go-bindata  -pkg tmpl -o ./tmpl/bindata.go  ./tmpl/
-//go:generate go-bindata  -pkg webapp -o ./webapp/bindata.go  ./webapp/build/...
-
 package main
 
 import (

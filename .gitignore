@@ -55,7 +55,6 @@ conf.json
 /webapp/build
 /bin
 
-bindata.go
 .idea
 
 workspace.xml
