@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bda026e3-f11c-4780-9c51-1e7a8c7f70d9" name="Default Changelist" comment="adding build">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="bda026e3-f11c-4780-9c51-1e7a8c7f70d9" name="Default Changelist" comment="fix error with external sharing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/link-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/link-api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/migrations/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/bindata.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service_test.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mware.go" beforeDir="false" afterPath="$PROJECT_DIR$/mware.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/service.go" beforeDir="false" afterPath="$PROJECT_DIR$/service.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tmpl/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/tmpl/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/users-api.go" beforeDir="false" afterPath="$PROJECT_DIR$/users-api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/bindata.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,8 +36,35 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/service.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="226">
-              <caret line="758" column="38" selection-start-line="758" selection-start-column="38" selection-end-line="758" selection-end-column="38" />
+            <state relative-caret-position="345">
+              <caret line="85" column="28" lean-forward="true" selection-start-line="85" selection-start-column="28" selection-end-line="85" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/users-api.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="286">
+              <caret line="83" column="14" lean-forward="true" selection-start-line="83" selection-start-column="14" selection-end-line="83" selection-end-column="14" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mware.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="141" lean-forward="true" selection-start-line="141" selection-end-line="141" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://C:/Go/src/net/http/cookie.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="425">
+              <caret line="31" column="10" selection-start-line="31" selection-start-column="10" selection-end-line="31" selection-end-column="10" />
             </state>
           </provider>
         </entry>
@@ -44,8 +72,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/repo.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="311">
-              <caret line="350" column="36" selection-start-line="350" selection-start-column="36" selection-end-line="350" selection-end-column="36" />
+            <state relative-caret-position="260">
+              <caret line="350" column="76" selection-start-line="350" selection-start-column="76" selection-end-line="350" selection-end-column="76" />
             </state>
           </provider>
         </entry>
@@ -58,47 +86,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="159">
-              <caret line="119" column="28" selection-start-line="119" selection-start-column="28" selection-end-line="119" selection-end-column="28" />
+            <state relative-caret-position="264">
+              <caret line="99" column="23" selection-start-line="99" selection-start-column="23" selection-end-line="99" selection-end-column="23" />
               <folding>
                 <element signature="e#246#790#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/link-api.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="406">
-              <caret line="36" column="5" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/build/build_webapp.sh">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret selection-end-line="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/build/build_all_arch.sh">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/users-api.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="23" column="37" selection-start-line="23" selection-start-column="37" selection-end-line="23" selection-end-column="37" />
             </state>
           </provider>
         </entry>
@@ -131,6 +123,9 @@
       <find>contact</find>
       <find>EntityDetailsModal</find>
       <find>subscription has expired</find>
+      <find>Unauthorized</find>
+      <find>http</find>
+      <find>mailgun</find>
     </findStrings>
     <dirStrings>
       <dir>C:\Users\jense\work\featmap\backend</dir>
@@ -151,7 +146,6 @@
         <option value="$PROJECT_DIR$/migrations/9_subscriptions.up.sql" />
         <option value="$PROJECT_DIR$/workspace-api.go" />
         <option value="$PROJECT_DIR$/model.go" />
-        <option value="$PROJECT_DIR$/mware.go" />
         <option value="$PROJECT_DIR$/tmpl/invite.tmpl" />
         <option value="$PROJECT_DIR$/tmpl/reset.tmpl" />
         <option value="$PROJECT_DIR$/tmpl/welcome.tmpl" />
@@ -161,10 +155,7 @@
         <option value="$PROJECT_DIR$/webapp/.gitignore" />
         <option value="$PROJECT_DIR$/tmpl/email.tmpl" />
         <option value="$PROJECT_DIR$/email.go" />
-        <option value="$PROJECT_DIR$/service.go" />
-        <option value="$PROJECT_DIR$/users-api.go" />
         <option value="$PROJECT_DIR$/conf.json" />
-        <option value="$PROJECT_DIR$/main.go" />
         <option value="$PROJECT_DIR$/webapp/src/components/EntityDetailsModal.tsx" />
         <option value="$PROJECT_DIR$/webapp/src/components/EntityDetailsBody.tsx" />
         <option value="$PROJECT_DIR$/build/build_webapp.sh" />
@@ -175,6 +166,10 @@
         <option value="$PROJECT_DIR$/repo.go" />
         <option value="$PROJECT_DIR$/link-api.go" />
         <option value="$PROJECT_DIR$/build/build_all_arch.sh" />
+        <option value="$PROJECT_DIR$/main.go" />
+        <option value="$PROJECT_DIR$/users-api.go" />
+        <option value="$PROJECT_DIR$/service.go" />
+        <option value="$PROJECT_DIR$/mware.go" />
       </list>
     </option>
   </component>
@@ -202,6 +197,11 @@
               <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
               <item name="featmap" type="462c0819:PsiDirectoryNode" />
               <item name="build" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
+              <item name="featmap" type="462c0819:PsiDirectoryNode" />
+              <item name="migrations" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="featmap" type="b2602c69:ProjectViewProjectNode" />
@@ -265,7 +265,7 @@
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18869936" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19083156" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -277,8 +277,8 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
-      <window_info anchor="bottom" id="Version Control" order="9" visible="true" weight="0.340803" />
-      <window_info anchor="bottom" id="Terminal" order="10" weight="0.4098973" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.340803" />
+      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.4098973" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="TypeScript" order="12" />
       <window_info anchor="bottom" id="Messages" order="13" />
@@ -303,22 +303,13 @@
     <MESSAGE value="migrations fix" />
     <MESSAGE value="fix" />
     <MESSAGE value="adding build" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding build" />
+    <MESSAGE value="fix error with external sharing" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix error with external sharing" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/migrations/2_accounts.up.sql">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lexorank/lexorank.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/go/pkg/mod/github.com/satori/go.uuid@v1.2.0/generator.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
@@ -330,13 +321,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="224">
           <caret line="20" column="37" lean-forward="true" selection-start-line="20" selection-start-column="37" selection-end-line="20" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mware.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="61" selection-start-line="61" selection-end-line="61" />
         </state>
       </provider>
     </entry>
@@ -447,16 +431,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/confSample.json" />
-    <entry file="file://$PROJECT_DIR$/migrations/bindata.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1000">
-          <caret line="586" column="43" selection-start-line="586" selection-start-column="43" selection-end-line="586" selection-end-column="43" />
-          <folding>
-            <element signature="e#562#666#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/conf.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -587,32 +561,10 @@
     <entry file="file://$PROJECT_DIR$/screenshot.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/response.go">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/service_test.go">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/service_test.go" />
     <entry file="file://$PROJECT_DIR$/shared.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-2040" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/users-api.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="23" column="37" selection-start-line="23" selection-start-column="37" selection-end-line="23" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="119" column="28" selection-start-line="119" selection-start-column="28" selection-end-line="119" selection-end-column="28" />
-          <folding>
-            <element signature="e#246#790#0" expanded="true" />
-          </folding>
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
@@ -622,24 +574,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/repo.go">
+    <entry file="file://$PROJECT_DIR$/build/build_all_arch.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="350" column="36" selection-start-line="350" selection-start-column="36" selection-end-line="350" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/service.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="226">
-          <caret line="758" column="38" selection-start-line="758" selection-start-column="38" selection-end-line="758" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/link-api.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="406">
-          <caret line="36" column="5" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
+        <state relative-caret-position="289">
+          <caret line="17" column="19" lean-forward="true" selection-start-line="17" selection-start-column="19" selection-end-line="17" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -650,10 +588,72 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build/build_all_arch.sh">
+    <entry file="file://$USER_HOME$/go/pkg/mod/github.com/go-chi/jwtauth@v3.3.0+incompatible/jwtauth.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+        <state relative-caret-position="192">
+          <caret line="179" column="22" selection-start-line="179" selection-start-column="18" selection-end-line="179" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/link-api.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="508">
+          <caret line="42" column="5" selection-start-line="42" selection-start-column="5" selection-end-line="42" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/repo.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="350" column="76" selection-start-line="350" selection-start-column="76" selection-end-line="350" selection-end-column="76" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/response.go">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://C:/Go/src/net/http/cookie.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="31" column="10" selection-start-line="31" selection-start-column="10" selection-end-line="31" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/users-api.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="83" column="14" lean-forward="true" selection-start-line="83" selection-start-column="14" selection-end-line="83" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="99" column="23" selection-start-line="99" selection-start-column="23" selection-end-line="99" selection-end-column="23" />
+          <folding>
+            <element signature="e#246#790#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="85" column="28" lean-forward="true" selection-start-line="85" selection-start-column="28" selection-end-line="85" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/migrations/bindata.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="570">
+          <caret line="586" column="43" selection-start-line="586" selection-start-column="43" selection-end-line="586" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mware.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="141" lean-forward="true" selection-start-line="141" selection-end-line="141" />
         </state>
       </provider>
     </entry>

@@ -54,7 +54,7 @@ func UsersLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Return token
 	token := s.Token(acc.ID)
-	addCookie(w, "jwt", token)
+	addCookie(w, "jwt", token, s.GetConfig().Environment)
 
 	type response struct {
 		Token string `json:"token"`
@@ -85,7 +85,7 @@ func UsersSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	token := s.Token(acc.ID)
 
-	addCookie(w, "jwt", token)
+	addCookie(w, "jwt", token, s.GetConfig().Environment)
 
 	render.Status(r, http.StatusOK)
 	_ = render.Render(w, r, &TokenResponse{Token: token})
@@ -125,14 +125,20 @@ func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func addCookie(w http.ResponseWriter, name string, value string) {
+func addCookie(w http.ResponseWriter, name string, value string, env string) {
 	expire := time.Now().UTC().AddDate(10, 0, 0)
 	cookie := http.Cookie{
-		Name:    name,
-		Value:   value,
-		Expires: expire,
-		Path:    "/",
-		// Domain:  "false",
+		Name:     name,
+		Value:    value,
+		Expires:  expire,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+	}
+
+	if env == "development" {
+		cookie.Secure = false
+
 	}
 	http.SetCookie(w, &cookie)
 }

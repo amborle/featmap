@@ -15,17 +15,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/amborle/featmap/migrations"
+	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
-	"github.com/jmoiron/sqlx"
-	"github.com/mailgun/mailgun-go/v3"
-
-	"github.com/amborle/featmap/migrations"
-	"github.com/elazarl/go-bindata-assetfs"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/jmoiron/sqlx"
 )
 
 // Configuration ...
@@ -96,9 +94,6 @@ func main() {
 
 	m.Up()
 
-	// Mailgun
-	mg := mailgun.NewMailgun("", "")
-
 	// Create JWTAuth object
 	auth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
@@ -106,7 +101,6 @@ func main() {
 	r.Use(ContextSkeleton(config))
 
 	r.Use(Transaction(db))
-	r.Use(Mailgun(mg))
 	r.Use(Auth(auth))
 
 	r.Use(User())

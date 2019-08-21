@@ -9,7 +9,6 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
-	"github.com/mailgun/mailgun-go/v3"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -24,10 +23,10 @@ type Service interface {
 	SetMemberObject(m *Member)
 	SetRepoObject(m Repository)
 	SetAuth(x *jwtauth.JWTAuth)
-	SetMg(x *mailgun.MailgunImpl)
 	SetWorkspaceObject(a *Workspace)
 	SetSubscriptionObject(x *Subscription)
 
+	GetConfig() Configuration
 	GetDBObject() *sqlx.DB
 	GetRepoObject() Repository
 	GetMemberObject() *Member
@@ -131,7 +130,6 @@ type service struct {
 	Subscription *Subscription
 	r            Repository
 	auth         *jwtauth.JWTAuth
-	mg           *mailgun.MailgunImpl
 	ws           *Workspace
 }
 
@@ -146,10 +144,10 @@ func (s *service) SetAccountObject(a *Account)           { s.Acc = a }
 func (s *service) SetMemberObject(m *Member)             { s.Member = m }
 func (s *service) SetRepoObject(m Repository)            { s.r = m }
 func (s *service) SetAuth(x *jwtauth.JWTAuth)            { s.auth = x }
-func (s *service) SetMg(x *mailgun.MailgunImpl)          { s.mg = x }
 func (s *service) SetWorkspaceObject(a *Workspace)       { s.ws = a }
 func (s *service) SetSubscriptionObject(x *Subscription) { s.Subscription = x }
 
+func (s *service) GetConfig() Configuration             { return s.config }
 func (s *service) GetDBObject() *sqlx.DB                { return s.r.DB() }
 func (s *service) GetRepoObject() Repository            { return s.r }
 func (s *service) GetAccountObject() *Account           { return s.Acc }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
-	"github.com/mailgun/mailgun-go/v3"
 )
 
 // Env ...
@@ -55,18 +54,6 @@ func Transaction(db *sqlx.DB) func(next http.Handler) http.Handler {
 				return nil
 			})
 
-		}
-		return http.HandlerFunc(fn)
-	}
-}
-
-// Mailgun service ...
-func Mailgun(mg *mailgun.MailgunImpl) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			s := GetEnv(r).Service
-			s.SetMg(mg)
-			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
 	}
