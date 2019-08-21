@@ -21,12 +21,12 @@ Here's a sample  ```conf.json```
 {  
   "appSiteURL": "http://localhost/",
   "dbConnectionString": "postgresql://featmap:featmap@localhost:5432/featmap?sslmode=disable",
-  "jwtSecret": "mC3qd44x5hr5YaRhaj5pM5L",  // replace by your own secret!
+  "jwtSecret": "mC3qd44x5hr5YaRhaj5pM5L",
   "port": "80",
   "emailFrom" : "contact@example.com",
   "smtpServer" : "smtp.example.com",
   "smtpUser" : "postmaster@mail.example.com",
-  "smtpPass": "some_smtp_password"
+  "smtpPass": "some_smtp_password",
   "environment": "production"
 }
 ```
@@ -35,7 +35,7 @@ Setting | Description
 --- | --- 
 `appSiteURL` | The url to where you will be hosting the app.
 `dbConnectionString` | The connection string to the PostgreSQL database that Featmap should connect to.
-`jwtSecret` | This setting is used to secure the cookies produced by Featmap.
+`jwtSecret` | This setting is used to secure the cookies produced by Featmap. Generate a secure sting
 `port` | The port that Featmap should run on.
 `emailFrom` | The email adress that should be used as sender when sending invitation and password reset mails.
 `smtpServer` | SMTP server for sending emails.
