@@ -27,6 +27,7 @@ Here's a sample  ```conf.json```
   "smtpServer" : "smtp.example.com",
   "smtpUser" : "postmaster@mail.example.com",
   "smtpPass": "some_smtp_password"
+  "environment": "production"
 }
 ```
 
@@ -40,6 +41,7 @@ Setting | Description
 `smtpServer` | SMTP server for sending emails.
 `smtpUser` | SMTP server username.
 `smtpPass` | SMTP server password.
+`environment` |  Optional. If set to `development`, the backend will not serve secure cookies.
 
 It is possible to run Featmap without filling in the mail details, but recovery emails and workspace invites will not be available.
 
