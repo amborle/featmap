@@ -54,3 +54,6 @@ _testmain.go
 conf.json
 /webapp/build
 /bin
+
+bindata.go
+.idea
