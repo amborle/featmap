@@ -1,4 +1,4 @@
-version: "3"
+version: "2.1"
 services:
         postgres:
                 image: postgres:11-alpine
@@ -20,11 +20,11 @@ services:
                 build: 
                         context: .
                         dockerfile: Dockerfile
+                ports:
+                        - ${FEATMAP_HTTP_PORT}:80
                 depends_on: 
                     postgres:
                         condition: service_healthy
-                ports:
-                        - ${FEATMAP_HTTP_PORT}:80
                 volumes:
                         - ${PWD}/config/conf.json:/opt/featmap/conf.json
 
