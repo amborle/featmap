@@ -7,7 +7,8 @@ Featmap is a simple user story mapping tool for product managers to build, plan 
 ## How to run locally
 
 ### Database requirements
-Featmap runs on top of [PostgreSQL](https://www.postgresql.org/), so make sure you have it running on your system.
+Featmap runs on top of [PostgreSQL](https://www.postgresql.org/), so make sure you have it running on your system. At this step, make sure to setup the credentials and database that Featmap will use.
+
 
 ### Downloading
 [Download](https://github.com/amborle/featmap/releases) the Featmap binary for your respective platform and save it somewhere on your system. 
