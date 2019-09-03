@@ -53,8 +53,8 @@ func ChangeEmailBody(w emailBody) (string, error) {
 	return buf.String(), nil
 }
 
-func (s *service) SendEmail(smtpServer string, smtpUser string, smtpPass string, from string, recipient string, subject string, body string) error {
-	err := smtp.SendMail(smtpServer+":587",
+func (s *service) SendEmail(smtpServer string, smtpPort string, smtpUser string, smtpPass string, from string, recipient string, subject string, body string) error {
+	err := smtp.SendMail(smtpServer+":"+smtpPort,
 		smtp.PlainAuth("", smtpUser, smtpPass, smtpServer),
 		from, []string{recipient}, []byte("Subject:"+subject+"\r\n"+body))
 

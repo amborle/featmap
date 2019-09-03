@@ -26,9 +26,11 @@ Here's a sample  ```conf.json```
   "port": "80",
   "emailFrom" : "contact@example.com",
   "smtpServer" : "smtp.example.com",
+  "smtpPort": "587",
   "smtpUser" : "postmaster@mail.example.com",
   "smtpPass": "some_smtp_password",
-  "environment": "production"
+  "environment": "production",
+  
 }
 ```
 
@@ -40,9 +42,10 @@ Setting | Description
 `port` | The port that Featmap should run on.
 `emailFrom` | The email adress that should be used as sender when sending invitation and password reset mails.
 `smtpServer` | SMTP server for sending emails.
+`smtpPort` | **Optional** Will default to port 587 if not specified. 
 `smtpUser` | SMTP server username.
 `smtpPass` | SMTP server password.
-`environment` |  Optional. If set to `development`, the backend will not serve secure cookies.
+`environment` |  **Optional** If set to `development`, the backend will not serve secure cookies.
 
 It is possible to run Featmap without filling in the mail details, but recovery emails and workspace invites will not be available.
 

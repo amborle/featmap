@@ -31,6 +31,7 @@ type Configuration struct {
 	Port               string `json:"port"`
 	EmailFrom          string `json:"emailFrom"`
 	SMTPServer         string `json:"smtpServer"`
+	SMTPPort           string `json:"smtpPort"`
 	SMTPUser           string `json:"smtpUser"`
 	SMTPPass           string `json:"smtpPass"`
 }
@@ -141,6 +142,11 @@ func readConfiguration() (Configuration, error) {
 	decoder := json.NewDecoder(file)
 	configuration := Configuration{}
 	err = decoder.Decode(&configuration)
+
+	if configuration.SMTPPort == "" {
+		configuration.SMTPPort = "587"
+	}
+
 	return configuration, err
 }
 
