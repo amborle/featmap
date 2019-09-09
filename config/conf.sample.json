@@ -1,0 +1,10 @@
+{  
+  "appSiteURL": "https://localhost/",
+  "dbConnectionString": "postgresql://featmap:password@postgres:5432/featmap?sslmode=disable",
+  "jwtSecret": "ChangeMeForProduction",
+  "port": "80",
+  "emailFrom" : "no-reply@example.com",
+  "smtpServer" : "smtp.example.com",
+  "smtpUser" : "no-reply@example.com",
+  "smtpPass": "password"
+}

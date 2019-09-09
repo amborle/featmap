@@ -94,7 +94,42 @@ ls
 featmap-1.0.3-darwin-amd64  featmap-1.0.3-linux-amd64  featmap-1.0.3-windows-amd64.exe
 ```
 
+## Running with `docker-compose`
 
+Clone the repository
+
+```bash
+git clone https://github.com/amborle/featmap.git
+```
+
+Navigate to the repository.
+
+```bash
+cd featmap
+```
+
+Now let's build it (requires Bash).
+
+```bash
+docker-compose build
+```
+
+Create a `.env` file, and edit any defaults
+
+```bash
+cp config/env.sample .env
+```
+
+Create a configuration file by copying `config/conf.sample.json`, and make any appropriate changes from the env file for the database connection string
+
+```bash
+cp config/conf.sample.json config/conf.json
+```
+
+Startup the services, the app should now be available on the port you defined in your .env file. (Default: 8080)
+```bash
+docker-compose up -d
+```
 
 
 
