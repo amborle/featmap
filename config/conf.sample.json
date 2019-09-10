@@ -6,5 +6,6 @@
   "emailFrom" : "no-reply@example.com",
   "smtpServer" : "smtp.example.com",
   "smtpUser" : "no-reply@example.com",
-  "smtpPass": "password"
+  "smtpPass": "password",
+  "environment": "development"
 }
