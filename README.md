@@ -22,15 +22,14 @@ Here's a sample  ```conf.json```
 {  
   "appSiteURL": "http://localhost/",
   "dbConnectionString": "postgresql://featmap:featmap@localhost:5432/featmap?sslmode=disable",
-  "jwtSecret": "mC3qd44x5hr5YaRhaj5pM5L",
+  "jwtSecret": "ChangeMeForProduction",
   "port": "80",
   "emailFrom" : "contact@example.com",
   "smtpServer" : "smtp.example.com",
   "smtpPort": "587",
   "smtpUser" : "postmaster@mail.example.com",
   "smtpPass": "some_smtp_password",
-  "environment": "production",
-  
+  "environment": "development"  
 }
 ```
 
@@ -57,7 +56,7 @@ Execute the binary.
 Serving on port 80
 ```
 
-Open a browser to http://localhost and you are ready to go!
+Open a browser to http://localhost and you are ready to go! If Featmap is not running on port 80, use http://localhost:<port>.
 
 ## Building
 
