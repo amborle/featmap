@@ -46,8 +46,6 @@ Setting | Description
 `smtpPass` | SMTP server password.
 `environment` |  **Optional** If set to `development`, the backend will not serve secure cookies.
 
-It is possible to run Featmap without filling in the mail details, but recovery emails and workspace invites will not be available.
-
 ### Running
 Execute the binary.
 
