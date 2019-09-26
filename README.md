@@ -54,7 +54,7 @@ Execute the binary.
 Serving on port 80
 ```
 
-Open a browser to http://localhost and you are ready to go! If Featmap is not running on port 80, use http://localhost:<port>.
+Open a browser to http://localhost and you are ready to go! If Featmap is not running on port 80, use http://localhost:port.
 
 ## Building
 
