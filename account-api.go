@@ -45,10 +45,10 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateEmail(w http.ResponseWriter, r *http.Request) {
-	key := chi.URLParam(r, "EMAIL")
+	email := chi.URLParam(r, "EMAIL")
 
 	s := GetEnv(r).Service
-	err := s.UpdateEmail(key)
+	err := s.UpdateEmail(email)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

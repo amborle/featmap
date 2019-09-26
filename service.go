@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/amborle/featmap/lexorank"
@@ -159,7 +160,7 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 
 	workspaceName = govalidator.Trim(workspaceName, "")
 	name = govalidator.Trim(name, "")
-	email = govalidator.Trim(email, "")
+	email = strings.ToLower(govalidator.Trim(email, ""))
 
 	if !govalidator.IsEmail(email) {
 		return nil, nil, nil, errors.New("email_invalid")
@@ -283,7 +284,7 @@ func (s *service) DeleteAccount() error {
 
 func (s *service) Login(email string, password string) (*Account, error) {
 
-	acc, err := s.r.GetAccountByEmail(email)
+	acc, err := s.r.GetAccountByEmail(strings.ToLower(email))
 	if acc == nil {
 		return nil, errors.Wrap(err, "email not found")
 	}
@@ -585,7 +586,7 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 
 func (s *service) CreateInvite(email string, level string) (*Invite, error) {
 
-	email = govalidator.Trim(email, "")
+	email = strings.ToLower(govalidator.Trim(email, ""))
 
 	if !govalidator.IsEmail(email) {
 		return nil, errors.New("email invalid")
@@ -1612,14 +1613,17 @@ func (s *service) ConfirmEmail(key string) error {
 }
 
 func (s *service) UpdateEmail(email string) error {
-	dupacc, _ := s.r.GetAccountByEmail(email)
+
+	em := strings.ToLower(email)
+
+	dupacc, _ := s.r.GetAccountByEmail(em)
 	if dupacc != nil {
 		return errors.New("email_taken")
 	}
 
 	a := s.Acc
 
-	a.EmailConfirmationSentTo = email
+	a.EmailConfirmationSentTo = em
 	a.EmailConfirmationKey = uuid.Must(uuid.NewV4(), nil).String()
 	a.EmailConfirmationPending = true
 
@@ -1630,7 +1634,7 @@ func (s *service) UpdateEmail(email string) error {
 		log.Println(err)
 	}
 
-	err = s.SendEmail(s.config.SMTPServer, s.config.SMTPPort, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, email, "Welcome to Featmap!", body)
+	err = s.SendEmail(s.config.SMTPServer, s.config.SMTPPort, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, em, "Welcome to Featmap!", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
