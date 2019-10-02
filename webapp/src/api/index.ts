@@ -723,6 +723,30 @@ export const API_CHANGE_WORKFLOW_COLOR = async (workspaceId: string, id: string,
     });
 }
 
+export const API_OPEN_WORKFLOW = async (workspaceId: string, id: string) => {
+    return await fetch(endpoint + "/workflows/" + id + "/open", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include'
+    });
+}
+
+export const API_CLOSE_WORKFLOW = async (workspaceId: string, id: string) => {
+    return await fetch(endpoint + "/workflows/" + id + "/close", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include'
+    });
+}
+
 
 // SUBWORKFLOWS
 

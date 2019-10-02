@@ -148,7 +148,8 @@ class CreateCardModal extends Component<Props, State> {
                       createdByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
                       lastModified: t,
                       lastModifiedByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
-                      color: Color.WHITE
+                      color: Color.WHITE,
+                      status: CardStatus.OPEN
                     }
                     parentProps.createWorkflow(optimisticWorkflow)
 

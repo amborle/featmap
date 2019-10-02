@@ -87,7 +87,7 @@ func tmplBindataGo() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "tmpl/bindata.go", size: 0, mode: os.FileMode(511), modTime: time.Unix(1569938920, 0)}
+	info := bindataFileInfo{name: "tmpl/bindata.go", size: 0, mode: os.FileMode(511), modTime: time.Unix(1570000484, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

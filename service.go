@@ -104,6 +104,8 @@ type Service interface {
 	DeleteWorkflow(id string) error
 	UpdateWorkflowDescription(id string, d string) (*Workflow, error)
 	ChangeColorOnWorkflow(id string, color string) (*Workflow, error)
+	CloseWorkflow(id string) (*Workflow, error)
+	OpenWorkflow(id string) (*Workflow, error)
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
 	MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error)
@@ -1093,6 +1095,7 @@ func (s *service) CreateWorkflowWithID(id string, projectID string, title string
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
 		Color:         "WHITE",
+		Status:        "OPEN",
 	}
 
 	n := len(ww)
@@ -1217,6 +1220,36 @@ func (s *service) ChangeColorOnWorkflow(id string, color string) (*Workflow, err
 	}
 
 	p.Color = color
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreWorkflow(p)
+
+	return p, nil
+}
+
+func (s *service) CloseWorkflow(id string) (*Workflow, error) {
+	p, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "CLOSED"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreWorkflow(p)
+
+	return p, nil
+}
+
+func (s *service) OpenWorkflow(id string) (*Workflow, error) {
+	p, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "OPEN"
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 

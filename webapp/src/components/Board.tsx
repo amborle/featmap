@@ -26,6 +26,7 @@ import { API_MOVE_MILESTONE, API_MOVE_FEATURE, API_MOVE_SUBWORKFLOW, API_MOVE_WO
 import NewCard from './NewCard';
 import { CardStatus } from '../core/misc';
 import NewDimCard from './NewDimCard';
+import {filterOutClosedWorkflows} from "../store/workflows/selectors";
 
 
 interface SelfProps {
@@ -313,6 +314,11 @@ class Board extends Component<Props, State> {
                     <Droppable droppableId={"w"} type="WORKFLOW" direction="horizontal">
                       {(providedDroppable: DroppableProvided, snapshotDroppable: DroppableStateSnapshot) => {
 
+                        var ww = workflows
+                        if(!this.props.showClosed) {
+                           ww = filterOutClosedWorkflows(ww)
+                        }
+
                         return (
                             <div className="flex">
                               <div className="flex    border-b-2    "
@@ -324,7 +330,8 @@ class Board extends Component<Props, State> {
                                     <EmptyCard />
                                   </div>
 
-                                  {workflows.map((w, index) => {
+                                  {
+                                    ww.map((w, index) => {
                                     var ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
                                     var nbrOfClosedSubWorkflows = 0
                                     if(!this.props.showClosed) {
@@ -349,7 +356,7 @@ class Board extends Component<Props, State> {
                                                      )}>
 
                                                   <div className="flex flex-col bg-gray-100">
-                                                    <div className="flex flex-grow m-1 "><Card bottomStatus={nbrOfClosedSubWorkflows > 0 ? nbrOfClosedSubWorkflows +" closed activities" :""} color={w.color} title={w.title} link={this.props.url + "/w/" + w.id} /></div>
+                                                    <div className="flex flex-grow m-1 "><Card status={w.status} bottomStatus={nbrOfClosedSubWorkflows > 0 ? nbrOfClosedSubWorkflows +" closed activities" :""} color={w.color} title={w.title} link={this.props.url + "/w/" + w.id} /></div>
                                                     <div className="flex flex-row fm-paren">
                                                       <Droppable key={"w" + w.id} droppableId={"sw*" + w.id} type="SUBWORKFLOW" direction="horizontal">
                                                         {(providedDroppable: DroppableProvided, snapshotDroppable: DroppableStateSnapshot) => {
@@ -450,6 +457,11 @@ class Board extends Component<Props, State> {
                                   milestones
                                       .map((m, index) => {
                                             const closed = !this.props.showClosed && m.status === CardStatus.CLOSED
+
+                                        var ww = workflows
+                                        if(!this.props.showClosed) {
+                                          ww = filterOutClosedWorkflows(ww)
+                                        }
                                             return [
                                               <Draggable
                                                   isDragDisabled={viewOnly}
@@ -490,7 +502,7 @@ class Board extends Component<Props, State> {
 
                                                                 </div>
 
-                                                                {workflows.map((w) => {
+                                                                {ww.map((w) => {
 
                                                                   var ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
                                                                   if ( !this.props.showClosed ) {

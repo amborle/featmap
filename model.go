@@ -109,6 +109,7 @@ type Workflow struct {
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	Color              string    `db:"color" json:"color"`
+	Status             string    `db:"status" json:"status"`
 }
 
 // SubWorkflow ...

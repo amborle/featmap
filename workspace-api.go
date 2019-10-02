@@ -108,6 +108,8 @@ func workspaceApi(r chi.Router) {
 					r.Post("/move", moveWorkflow)
 					r.Post("/description", updateWorkflowDescription)
 					r.Post("/color", changeColorOnWorkflow)
+					r.Post("/open", openWorkflow)
+					r.Post("/close", closeWorkflow)
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
@@ -610,6 +612,30 @@ func changeColorOnWorkflow(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	f, err := GetEnv(r).Service.ChangeColorOnWorkflow(id, data.Color)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func closeWorkflow(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.CloseWorkflow(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func openWorkflow(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.OpenWorkflow(id)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return

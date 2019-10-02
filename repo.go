@@ -399,7 +399,6 @@ func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) {
 }
 
 // Workflows
-
 func (a *repo) GetWorkflow(workspaceID string, workflowID string) (*Workflow, error) {
 	x := &Workflow{}
 	if err := a.tx.Get(x, "SELECT * FROM workflows WHERE workspace_id = $1 AND id = $2", workspaceID, workflowID); err != nil {
@@ -418,7 +417,7 @@ func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*
 }
 
 func (a *repo) StoreWorkflow(x *Workflow) {
-	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_by, created_at, created_by_name, description,last_modified,last_modified_by_name,color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11, color = $12", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color)
+	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_by, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11, color = $12, status = $13", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
 }
 
 func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) {
@@ -426,7 +425,6 @@ func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) {
 }
 
 // SubWorkflows
-
 func (a *repo) GetSubWorkflow(workspaceID string, subWorkflowID string) (*SubWorkflow, error) {
 	x := &SubWorkflow{}
 	if err := a.tx.Get(x, "SELECT * FROM subworkflows WHERE workspace_id = $1 AND id = $2", workspaceID, subWorkflowID); err != nil {

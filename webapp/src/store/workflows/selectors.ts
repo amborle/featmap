@@ -1,6 +1,7 @@
 import { AppState } from '..'
 import { createSelector } from 'reselect'
 import { IWorkflow } from './types';
+import {ISubWorkflow} from "../subworkflows/types";
 
 
 const getWorkflowsState = ((state: AppState) => state.workflows)
@@ -23,4 +24,8 @@ export const getWorkflow = (ff: IWorkflow[], id: string) => {
 
 export const filterWorkflowsOnProject = (ff: IWorkflow[], projectId: string) => {
     return ff.filter(f => f.projectId === projectId)
+}
+
+export const filterOutClosedWorkflows = (xx: IWorkflow[]) => {
+    return xx.filter(f => f.status === "OPEN")
 }

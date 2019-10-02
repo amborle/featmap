@@ -252,6 +252,7 @@ class EntityDetailsTitle extends Component<Props, State> {
         switch (this.props.card.kind) {
             case "milestone":
             case "subworkflow":
+            case "workflow":
             case "feature": {
                 closed = this.props.card.status === "CLOSED"
                 break;
