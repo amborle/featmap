@@ -175,9 +175,9 @@ class ProjectPage extends Component<Props, State> {
                                     }
                                     <div className="ml-2">
                                         {this.state.showClosedMilstones ?
-                                            <Button iconColor="text-green-500" icon="toggle_on" title="Show closed milestones" handleOnClick={() => this.setState({ showClosedMilstones: false })} />
+                                            <Button iconColor="text-green-500" icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: false })} />
                                             :
-                                            <Button icon="toggle_off " title="Show closed milestones" handleOnClick={() => this.setState({ showClosedMilstones: true })} />
+                                            <Button icon="toggle_off " title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: true })} />
                                         }
                                     </div>
                                 </div>
@@ -186,7 +186,7 @@ class ProjectPage extends Component<Props, State> {
                         </div>
 
                         <Board
-                            showClosedMilstones={this.state.showClosedMilstones}
+                            showClosed={this.state.showClosedMilstones}
                             viewOnly={viewOnly}
                             url={this.props.match.url}
                             features={this.props.features}

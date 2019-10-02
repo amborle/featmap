@@ -135,9 +135,9 @@ class ExternalLinkPage extends Component<Props, State> {
                                 <div className=" flex items-center  text-sm">
                                     <div>
                                         {this.state.showClosedMilestones ?
-                                            <Button iconColor="text-green-500-500" icon="toggle_on" title="Show closed milestones" handleOnClick={() => this.setState({ showClosedMilestones: false })} />
+                                            <Button iconColor="text-green-500-500" icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilestones: false })} />
                                             :
-                                            <Button icon="toggle_off " title="Show closed milestones" handleOnClick={() => this.setState({ showClosedMilestones: true })} />
+                                            <Button icon="toggle_off " title="Show closed" handleOnClick={() => this.setState({ showClosedMilestones: true })} />
                                         }
                                     </div>
                                 </div>
@@ -147,7 +147,7 @@ class ExternalLinkPage extends Component<Props, State> {
                         <div className="mt-2">
 
                             <Board
-                                showClosedMilstones={this.state.showClosedMilestones}
+                                showClosed={this.state.showClosedMilestones}
                                 viewOnly={true}
                                 url={this.props.match.url}
                                 features={this.props.features}

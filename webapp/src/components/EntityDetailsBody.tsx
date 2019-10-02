@@ -6,7 +6,22 @@ import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../stor
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
 import { deleteFeature, updateFeature, createFeature } from '../store/features/actions';
 import { deleteProject, updateProject, createProject } from '../store/projects/actions';
-import { API_DELETE_MILESTONE, API_DELETE_SUBWORKFLOW, API_DELETE_WORKFLOW, API_DELETE_FEATURE, API_DELETE_PROJECT, API_CLOSE_FEATURE, API_OPEN_FEATURE, API_CLOSE_MILESTONE, API_OPEN_MILESTONE, API_CHANGE_FEATURE_COLOR, API_CHANGE_MILESTONE_COLOR, API_CHANGE_WORKFLOW_COLOR, API_CHANGE_SUBWORKFLOW_COLOR } from "../api";
+import {
+  API_DELETE_MILESTONE,
+  API_DELETE_SUBWORKFLOW,
+  API_DELETE_WORKFLOW,
+  API_DELETE_FEATURE,
+  API_DELETE_PROJECT,
+  API_CLOSE_FEATURE,
+  API_OPEN_FEATURE,
+  API_CLOSE_MILESTONE,
+  API_OPEN_MILESTONE,
+  API_CHANGE_FEATURE_COLOR,
+  API_CHANGE_MILESTONE_COLOR,
+  API_CHANGE_WORKFLOW_COLOR,
+  API_CHANGE_SUBWORKFLOW_COLOR,
+  API_CLOSE_SUBWORKFLOW, API_OPEN_SUBWORKFLOW
+} from "../api";
 import TimeAgo from 'react-timeago'
 import { Button } from './elements';
 import { application } from '../store/application/selectors';
@@ -232,6 +247,21 @@ class EntityDetailsBody extends Component<Props, State> {
         break;
       }
 
+      case "subworkflow": {
+
+        this.props.updateSubWorkflow({ ...card, status: CardStatus.CLOSED, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
+        if (!this.props.demo) {
+          API_CLOSE_SUBWORKFLOW(card.workspaceId, card.id)
+              .then(response => {
+                if (response.ok) {
+                } else {
+                  alert("Something went wrong.")
+                }
+              })
+        }
+        break;
+      }
+
       default:
         break;
     }
@@ -267,6 +297,20 @@ class EntityDetailsBody extends Component<Props, State> {
                 alert("Something went wrong.")
               }
             })
+        }
+        break;
+      }
+
+      case "subworkflow": {
+        this.props.updateSubWorkflow({ ...card, status: CardStatus.OPEN, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
+        if (!this.props.demo) {
+          API_OPEN_SUBWORKFLOW(card.workspaceId, card.id)
+              .then(response => {
+                if (response.ok) {
+                } else {
+                  alert("Something went wrong.")
+                }
+              })
         }
         break;
       }
@@ -348,6 +392,7 @@ class EntityDetailsBody extends Component<Props, State> {
     let open = true
     switch (this.props.entity.kind) {
       case "milestone":
+      case "subworkflow":
       case "feature":
         open = this.props.entity.status === CardStatus.OPEN
         break;
@@ -459,6 +504,7 @@ class EntityDetailsBody extends Component<Props, State> {
                       switch (this.props.entity.kind) {
                         //case "feature" || "milestone": {
                         case "milestone":
+                        case "subworkflow":
                         case "feature":
                           if (this.props.entity.status === "OPEN") {
                             return <Button icon="check" iconColor="text-green-500" title="Close card" handleOnClick={this.handleClose} />

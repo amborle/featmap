@@ -88,6 +88,7 @@ class EntityDetailsDescription extends Component<Props, State> {
         let closed = false
         switch (this.props.entity.kind) {
             case "milestone":
+            case "subworkflow":
             case "feature": {
                 closed = this.props.entity.status === "CLOSED"
                 break;

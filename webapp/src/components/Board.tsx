@@ -7,7 +7,10 @@ import { moveMilestone, updateMilestone } from '../store/milestones/actions';
 import { moveWorkflow, updateWorkflow } from '../store/workflows/actions';
 import { moveSubWorkflow, updateSubWorkflow } from '../store/subworkflows/actions';
 import { AppState } from '../store'
-import { getSubWorkflowByWorkflow } from '../store/subworkflows/selectors';
+import {
+  filterOutClosedSubWorkflows, getNbrOfClosedSubWorkflows,
+  getSubWorkflowByWorkflow
+} from '../store/subworkflows/selectors';
 import { filterFeaturesOnMilestoneAndSubWorkflow, filterFeaturesOnMilestone, closedFeatures } from '../store/features/selectors';
 import { application } from '../store/application/selectors';
 import { connect } from 'react-redux'
@@ -34,7 +37,7 @@ interface SelfProps {
   features: IFeature[]
   url: string,
   viewOnly: boolean
-  showClosedMilstones: boolean
+  showClosed: boolean
   demo: boolean
 }
 
@@ -322,6 +325,13 @@ class Board extends Component<Props, State> {
                                   </div>
 
                                   {workflows.map((w, index) => {
+                                    var ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
+                                    var nbrOfClosedSubWorkflows = 0
+                                    if(!this.props.showClosed) {
+                                      nbrOfClosedSubWorkflows =  getNbrOfClosedSubWorkflows(ss)
+                                      ss = filterOutClosedSubWorkflows(ss)
+                                    }
+
                                         return [
                                           <Draggable
                                               isDragDisabled={viewOnly}
@@ -338,14 +348,12 @@ class Board extends Component<Props, State> {
                                                          providedDraggable.draggableProps.style
                                                      )}>
 
-
                                                   <div className="flex flex-col bg-gray-100">
-                                                    <div className="flex flex-grow m-1 "><Card color={w.color} title={w.title} link={this.props.url + "/w/" + w.id} /></div>
+                                                    <div className="flex flex-grow m-1 "><Card bottomStatus={nbrOfClosedSubWorkflows > 0 ? nbrOfClosedSubWorkflows +" closed activities" :""} color={w.color} title={w.title} link={this.props.url + "/w/" + w.id} /></div>
                                                     <div className="flex flex-row fm-paren">
                                                       <Droppable key={"w" + w.id} droppableId={"sw*" + w.id} type="SUBWORKFLOW" direction="horizontal">
                                                         {(providedDroppable: DroppableProvided, snapshotDroppable: DroppableStateSnapshot) => {
                                                           {
-                                                            const ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
                                                             return (
                                                                 <div className="flex flex-row"
                                                                      ref={providedDroppable.innerRef}
@@ -381,7 +389,7 @@ class Board extends Component<Props, State> {
                                                                                        providedDraggable.draggableProps.style
                                                                                    )}>
                                                                                 <div className="flex  w-full">
-                                                                                  <Card color={sw.color} title={sw.title} link={this.props.url + "/sw/" + sw.id} rightLink={index === ss.length - 1 && !viewOnly ? () => this.setState({ showCreateSubWorkflowModal: true, createSubWorkflowWorkflowId: w.id }) : undefined} />
+                                                                                  <Card status={sw.status} color={sw.color} title={sw.title} link={this.props.url + "/sw/" + sw.id} rightLink={index === ss.length - 1 && !viewOnly ? () => this.setState({ showCreateSubWorkflowModal: true, createSubWorkflowWorkflowId: w.id }) : undefined} />
                                                                                 </div>
 
                                                                               </div>
@@ -441,7 +449,7 @@ class Board extends Component<Props, State> {
                                 {
                                   milestones
                                       .map((m, index) => {
-                                            const closed = !this.props.showClosedMilstones && m.status === CardStatus.CLOSED
+                                            const closed = !this.props.showClosed && m.status === CardStatus.CLOSED
                                             return [
                                               <Draggable
                                                   isDragDisabled={viewOnly}
@@ -484,7 +492,11 @@ class Board extends Component<Props, State> {
 
                                                                 {workflows.map((w) => {
 
-                                                                  const ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
+                                                                  var ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
+                                                                  if ( !this.props.showClosed ) {
+                                                                    ss = filterOutClosedSubWorkflows(ss)
+                                                                  }
+
                                                                   return [
                                                                     <div className="flex flex-row pl-1 pr-1" key={w.id}>
                                                                       {ss.length === 0 ?

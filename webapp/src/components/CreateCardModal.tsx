@@ -227,7 +227,8 @@ class CreateCardModal extends Component<Props, State> {
                       createdByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
                       lastModified: t,
                       lastModifiedByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
-                      color: Color.NONE
+                      color: Color.NONE,
+                      status: CardStatus.OPEN
                     }
                     parentProps.createSubWorkflow(optimisticSubMilestone)
 

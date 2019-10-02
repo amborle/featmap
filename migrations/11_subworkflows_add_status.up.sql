@@ -1,0 +1,1 @@
+alter table subworkflows add column status varchar not null default 'OPEN';

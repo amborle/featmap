@@ -22,3 +22,16 @@ export const getSubWorkflow = (xx: ISubWorkflow[], id: string) => {
 export const getSubWorkflowByWorkflow = (xx: ISubWorkflow[], id: string) => {
     return xx.filter(f => f.workflowId === id)
 }
+
+export const filterOutClosedSubWorkflows = (xx: ISubWorkflow[]) => {
+    return xx.filter(f => f.status === "OPEN")
+}
+
+export const getNbrOfClosedSubWorkflows = (xx: ISubWorkflow[]) => {
+    return xx.filter(f => f.status === "CLOSED").length
+}
+
+
+
+
+

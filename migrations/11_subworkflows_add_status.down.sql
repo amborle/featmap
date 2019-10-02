@@ -1,0 +1,1 @@
+alter table subworkflows drop column status;

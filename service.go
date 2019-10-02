@@ -112,6 +112,8 @@ type Service interface {
 	DeleteSubWorkflow(id string) error
 	UpdateSubWorkflowDescription(id string, d string) (*SubWorkflow, error)
 	ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflow, error)
+	CloseSubWorkflow(id string) (*SubWorkflow, error)
+	OpenSubWorkflow(id string) (*SubWorkflow, error)
 
 	GetFeaturesByProject(id string) []*Feature
 	MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error)
@@ -1248,6 +1250,7 @@ func (s *service) CreateSubWorkflowWithID(id string, workflowID string, title st
 		CreatedAt:     time.Now().UTC(),
 		CreatedByName: s.Acc.Name,
 		Color:         "WHITE",
+		Status:        "OPEN",
 	}
 
 	n := len(mm)
@@ -1372,6 +1375,36 @@ func (s *service) ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflo
 	}
 
 	p.Color = color
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreSubWorkflow(p)
+
+	return p, nil
+}
+
+func (s *service) CloseSubWorkflow(id string) (*SubWorkflow, error) {
+	p, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "CLOSED"
+	p.LastModifiedByName = s.Acc.Name
+	p.LastModified = time.Now().UTC()
+
+	s.r.StoreSubWorkflow(p)
+
+	return p, nil
+}
+
+func (s *service) OpenSubWorkflow(id string) (*SubWorkflow, error) {
+	p, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
+	if p == nil {
+		return nil, err
+	}
+
+	p.Status = "OPEN"
 	p.LastModifiedByName = s.Acc.Name
 	p.LastModified = time.Now().UTC()
 
