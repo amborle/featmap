@@ -2,8 +2,6 @@ scriptDir=$(dirname -- "$(readlink -f -- "$BASH_SOURCE")")
 cd "$scriptDir"
 cd ..
 
-VERSION=1.0.8
-
 export GO111MODULE=on
 
 export GOOS=darwin
