@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Run custom command
+      - name: Test
         uses: cedrickring/golang-action@1.4.1
         with:
           args: go test ./...
