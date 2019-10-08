@@ -1,5 +1,5 @@
 on: push
-name: CI
+name: ci
 jobs:
   checks:
     name: run
