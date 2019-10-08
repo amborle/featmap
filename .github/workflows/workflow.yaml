@@ -1,0 +1,13 @@
+on: push
+name: ci
+jobs:
+  checks:
+    name: run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Test
+        uses: cedrickring/golang-action@1.4.1
+        with:
+          args: go test ./...
