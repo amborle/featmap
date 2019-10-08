@@ -6,7 +6,7 @@ import (
 
 func TestSimple(t *testing.T) {
 	got, _ := Rank("a", "b")
-	if got != "am" {
+	if got != "am_test" {
 		t.Error() // to indicate test failed
 	}
 }
