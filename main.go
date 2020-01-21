@@ -127,7 +127,11 @@ func main() {
 	})
 
 	fmt.Println("Serving on port " + config.Port)
-	_ = http.ListenAndServe(":"+config.Port, r)
+	err = http.ListenAndServe(":"+config.Port, r)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 }
 
 func readConfiguration() (Configuration, error) {

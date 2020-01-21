@@ -70,7 +70,6 @@ type Project struct {
 	ID                 string    `db:"id" json:"id"`
 	Title              string    `db:"title" json:"title"`
 	Description        string    `db:"description" json:"description"`
-	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
@@ -87,7 +86,6 @@ type Milestone struct {
 	Description        string    `db:"description" json:"description"`
 	Status             string    `db:"status" json:"status"`
 	Rank               string    `db:"rank" json:"rank"`
-	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
@@ -103,7 +101,6 @@ type Workflow struct {
 	Title              string    `db:"title" json:"title"`
 	Description        string    `db:"description" json:"description"`
 	Rank               string    `db:"rank" json:"rank"`
-	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
@@ -120,7 +117,6 @@ type SubWorkflow struct {
 	Title              string    `db:"title" json:"title"`
 	Description        string    `db:"description" json:"description"`
 	Rank               string    `db:"rank" json:"rank"`
-	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
@@ -139,7 +135,6 @@ type Feature struct {
 	Rank               string    `db:"rank" json:"rank"`
 	Description        string    `db:"description" json:"description"`
 	Status             string    `db:"status" json:"status"`
-	CreatedBy          string    `db:"created_by" json:"createdBy"`
 	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
 	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`

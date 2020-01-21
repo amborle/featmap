@@ -364,7 +364,7 @@ func (a *repo) FindProjectsByWorkspace(workspaceID string) ([]*Project, error) {
 }
 
 func (a *repo) StoreProject(x *Project) {
-	a.tx.MustExec("INSERT INTO projects (workspace_id, id, title, created_by, created_at,created_by_name, description, last_modified, last_modified_by_name, external_link) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3, description = $7, last_modified = $8, last_modified_by_name = $9, external_link = $10", x.WorkspaceID, x.ID, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.ExternalLink)
+	a.tx.MustExec("INSERT INTO projects (workspace_id, id, title, created_at,created_by_name, description, last_modified, last_modified_by_name, external_link) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (workspace_id, id) DO UPDATE SET title = $3, description = $6, last_modified = $7, last_modified_by_name = $8, external_link = $9", x.WorkspaceID, x.ID, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.ExternalLink)
 }
 
 func (a *repo) DeleteProject(workspaceID string, projectID string) {
@@ -391,7 +391,7 @@ func (a *repo) FindMilestonesByProject(workspaceID string, projectID string) ([]
 }
 
 func (a *repo) StoreMilestone(x *Milestone) {
-	a.tx.MustExec("INSERT INTO milestones (workspace_id, project_id, id, rank, title, created_by, created_at,created_by_name, description, last_modified, last_modified_by_name,status, color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11, $12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11, status = $12,color = $13", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Status, x.Color)
+	a.tx.MustExec("INSERT INTO milestones (workspace_id, project_id, id, rank, title, created_at,created_by_name, description, last_modified, last_modified_by_name,status, color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11, $12) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, status = $11,color = $12", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Status, x.Color)
 }
 
 func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) {
@@ -417,7 +417,7 @@ func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*
 }
 
 func (a *repo) StoreWorkflow(x *Workflow) {
-	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_by, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11, color = $12, status = $13", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
+	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
 }
 
 func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) {
@@ -453,7 +453,7 @@ func (a *repo) FindSubWorkflowsByWorkflow(workspaceID string, workflowID string)
 }
 
 func (a *repo) StoreSubWorkflow(x *SubWorkflow) {
-	a.tx.MustExec("INSERT INTO subworkflows (workspace_id, workflow_id, id, rank, title, created_by, created_at,created_by_name, description, last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,rank = $4, title = $5, description = $9, last_modified = $10, last_modified_by_name = $11, color = $12, status = $13", x.WorkspaceID, x.WorkflowID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
+	a.tx.MustExec("INSERT INTO subworkflows (workspace_id, workflow_id, id, rank, title, created_at,created_by_name, description, last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12", x.WorkspaceID, x.WorkflowID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
 }
 
 func (a *repo) DeleteSubWorkflow(workspaceID string, subWorkflowID string) {
@@ -489,7 +489,8 @@ func (a *repo) FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid str
 }
 
 func (a *repo) StoreFeature(x *Feature) {
-	a.tx.MustExec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, rank, title, created_by, created_at, description, created_by_name, last_modified,last_modified_by_name, status, color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,rank = $5, title = $6,  description = $9, last_modified = $11, last_modified_by_name = $12, status = $13, color = $14 ", x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Rank, x.Title, x.CreatedBy, x.CreatedAt, x.Description, x.CreatedByName, x.LastModified, x.LastModifiedByName, x.Status, x.Color)
+	a.tx.MustExec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, rank, title, created_at, description, created_by_name, last_modified,last_modified_by_name, status, color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,rank = $5, title = $6,  description = $8, last_modified = $10, last_modified_by_name = $11, status = $12, color = $13 ",
+		x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Rank, x.Title, x.CreatedAt, x.Description, x.CreatedByName, x.LastModified, x.LastModifiedByName, x.Status, x.Color)
 }
 
 func (a *repo) DeleteFeature(workspaceID string, featureID string) {
