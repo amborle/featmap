@@ -26,7 +26,7 @@ class Card extends Component<Props, State> {
 
         <div className="flex flex-col flex-grow">
 
-          <Link className="flex-grow p-1" to={this.props.link}>
+          <Link className="flex-grow p-1 overflow-hidden" to={this.props.link}>
             <span className={this.props.status === "CLOSED" ? "line-through" : ""}> {this.props.title} </span>
           </Link>
           {this.props.bottomLink &&

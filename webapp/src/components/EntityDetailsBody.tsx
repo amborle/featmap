@@ -31,7 +31,6 @@ import CardDetailsTitle from './EntityDetailsTitle'
 import CardDetailsDescription from './EntityDetailsDescription';
 import { CardStatus, colorToBackgroundColorClass, Colors, colorToBorderColorClass, Color } from '../core/misc';
 import ContextMenu from './ContextMenu';
-import {RouteComponentProps, RouterProps} from "react-router";
 
 const mapStateToProps = (state: AppState) => ({
   application: application(state)

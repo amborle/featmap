@@ -4,7 +4,6 @@ import { AppState } from '../store'
 import onClickOutside from "react-onclickoutside";
 import EntityDetailsBody from './EntityDetailsBody';
 import { EntityTypes } from '../core/card'
-import {RouteComponentProps} from "react-router";
 
 const mapStateToProps = (state: AppState) => ({
 })

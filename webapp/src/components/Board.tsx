@@ -360,7 +360,7 @@ class Board extends Component<Props, State> {
                                                     <div className="flex flex-row fm-paren">
                                                       <Droppable key={"w" + w.id} droppableId={"sw*" + w.id} type="SUBWORKFLOW" direction="horizontal">
                                                         {(providedDroppable: DroppableProvided, snapshotDroppable: DroppableStateSnapshot) => {
-                                                          {
+                                                          
                                                             return (
                                                                 <div className="flex flex-row"
                                                                      ref={providedDroppable.innerRef}
@@ -411,7 +411,7 @@ class Board extends Component<Props, State> {
 
                                                                 </div>
                                                             )
-                                                          }
+                                                          
                                                         }
                                                         }
                                                       </Droppable>

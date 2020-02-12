@@ -114,8 +114,7 @@ func main() {
 
 	files := &assetfs.AssetFS{
 		Asset:     webapp.Asset,
-		AssetDir:  webapp.AssetDir,
-		AssetInfo: webapp.AssetInfo,
+		AssetDir:  webapp.AssetDir,		
 		Prefix:    "webapp/build/static",
 	}
 

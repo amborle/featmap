@@ -1,8 +1,6 @@
 import { AppState } from '..'
 import { createSelector } from 'reselect'
 import { IWorkflow } from './types';
-import {ISubWorkflow} from "../subworkflows/types";
-
 
 const getWorkflowsState = ((state: AppState) => state.workflows)
 
