@@ -1641,7 +1641,7 @@ func validateTitle(title string) (string, error) {
 	if len(title) < 1 {
 		return title, errors.New("title too short")
 	}
-	if len(title) > 50 {
+	if len(title) > 200 {
 		return title, errors.New("title too long")
 	}
 

@@ -18,7 +18,7 @@
     "@types/redux-logger": "^3.0.7",
     "@types/uuid": "^3.4.4",
     "@types/yup": "^0.26.12",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "connected-react-router": "^6.4.0",
     "formik": "^1.5.4",
     "history": "^4.9.0",

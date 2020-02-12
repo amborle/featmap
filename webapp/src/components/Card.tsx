@@ -24,13 +24,13 @@ class Card extends Component<Props, State> {
 
       <div className={"flex flex-row flex-no-shrink w-32 text-xs bg-white  overflow-hidden border  rounded " + (this.props.small ? " " : " h-16 ") + (color ? " border-l-4 " + colorToBorderColorClass(color) + " " : " " + colorToBorderColorClass(Color.WHITE) + " ")}>
 
-        <div className="flex flex-col flex-grow">
+        <div className="flex flex-col flex-grow ">
 
-          <Link className="flex-grow p-1 overflow-hidden" to={this.props.link}>
+          <Link className="flex-grow p-1 overflow-hidden " to={this.props.link}>
             <span className={this.props.status === "CLOSED" ? "line-through" : ""}> {this.props.title} </span>
           </Link>
           {this.props.bottomLink &&
-            <div className=" flex justify-center ">
+            <div className=" flex ml-2  ">
               <div className="font-bold text-lg "><button className=" hover:text-gray-800 text-gray-500" onClick={this.props.bottomLink}>+</button></div>
             </div>
           }
