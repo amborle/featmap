@@ -26,6 +26,7 @@ type Service interface {
 	SetAuth(x *jwtauth.JWTAuth)
 	SetWorkspaceObject(a *Workspace)
 	SetSubscriptionObject(x *Subscription)
+	UpdateLatestActivityNow()
 
 	GetConfig() Configuration
 	GetDBObject() *sqlx.DB
@@ -34,7 +35,7 @@ type Service interface {
 	GetAccountObject() *Account
 	GetWorkspaceObject() *Workspace
 	GetSubscriptionObject() *Subscription
-
+	
 	SendEmail(smtpServer string, smtpPort string, smtpUser string, smtpPass string, from string, recipient string, subject string, body string) error
 
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
@@ -159,6 +160,13 @@ func (s *service) GetAccountObject() *Account           { return s.Acc }
 func (s *service) GetSubscriptionObject() *Subscription { return s.Subscription }
 func (s *service) GetMemberObject() *Member             { return s.Member }
 func (s *service) GetWorkspaceObject() *Workspace       { return s.ws }
+
+
+func (s *service) UpdateLatestActivityNow() {
+	acc := s.GetAccountObject()
+	acc.LatestActivity = time.Now().UTC()
+	s.r.StoreAccount(acc)
+}
 
 func (s *service) Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error) {
 

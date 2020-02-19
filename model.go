@@ -22,6 +22,7 @@ type Account struct {
 	EmailConfirmationKey     string    `db:"email_confirmation_key" json:"-"`
 	EmailConfirmationPending bool      `db:"email_confirmation_pending" json:"emailConfirmationPending"`
 	PasswordResetKey         string    `db:"password_reset_key" json:"-"`
+	LatestActivity 	time.Time		`db:"latest_activity" json:"-"` 
 }
 
 // Subscription ...

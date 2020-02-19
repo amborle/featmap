@@ -36,6 +36,8 @@ func getApp(w http.ResponseWriter, r *http.Request) {
 
 	s := GetEnv(r).Service
 
+	s.UpdateLatestActivityNow()
+
 	render.JSON(w, r, response{
 		Account:       s.GetAccountObject(),
 		Workspaces:    s.GetWorkspaces(),

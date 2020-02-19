@@ -186,10 +186,10 @@ func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
 	return acc, nil
 }
 
-const saveAccountQuery = "INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10"
+const saveAccountQuery = "INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10, latest_activity=$11"
 
 func (a *repo) StoreAccount(x *Account) {
-	a.tx.MustExec(saveAccountQuery, x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name)
+	a.tx.MustExec(saveAccountQuery, x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name,x.LatestActivity)
 
 }
 
