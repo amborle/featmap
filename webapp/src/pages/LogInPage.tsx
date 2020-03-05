@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router'
 import * as Yup from 'yup';
-import { Formik, FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_LOG_IN_REQ, API_LOG_IN as LoginApi } from '../api'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/elements';
@@ -68,7 +68,7 @@ class LogIn extends Component<Props> {
                                         render={({ field, form }: FieldProps<API_LOG_IN_REQ>) => (
                                             <div className="flex  flex-row items-baseline">
                                                 <div className="flex flex-col w-full">
-                                                    <div><input type="text" {...field} placeholder="Email" id="email" className="rounded p-2 border w-64 text-lg	"/></div>
+                                                    <div><input type="text" {...field.value} placeholder="Email" id="email" className="rounded p-2 border w-64 text-lg	"/></div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.email && form.errors.email}</div>
                                                 </div>
                                             </div>
@@ -80,7 +80,7 @@ class LogIn extends Component<Props> {
                                             <div className="flex flex-row items-baseline">
 
                                                 <div className="flex flex-col w-full">
-                                                    <div><input type="password" {...field} placeholder="Password" id="password" className="rounded p-2 border w-64 text-lg	"/></div>
+                                                    <div><input type="password" {...field.value} placeholder="Password" id="password" className="rounded p-2 border w-64 text-lg	"/></div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.password && form.errors.password}</div>
                                                 </div>
                                             </div>

@@ -7,7 +7,7 @@ import { connect } from 'react-redux'
 import { IApplication, IMembership, IInvite } from '../store/application/types';
 import TimeAgo from 'react-timeago'
 import { API_GET_MEMBERS, API_UPDATE_MEMBER_LEVEL, API_DELETE_MEMBER, API_GET_INVITES, API_CREATE_INVITE, API_DELETE_INVITE, API_LEAVE, API_DELETE_WORKSPACE, API_RESEND_INVITE, API_CHANGE_ALLOW_EXTERNAL_SHARING } from '../api';
-import { Formik, FormikActions, FormikProps, Form, Field, } from 'formik';
+import { Formik, FormikHelpers as FormikActions , FormikProps, Form, Field, } from 'formik';
 import * as Yup from 'yup';
 import { newMessage } from '../store/application/actions';
 import { isEditor, SubscriptionLevels, memberLevelToTitle } from '../core/misc';
@@ -142,7 +142,7 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                             .required('Required.')
                                     })}
 
-                                    onSubmit={(values: changeRoleForm, actions: FormikActions<changeRoleForm>) => {
+                                    onSubmit={(values: changeRoleForm) => {
 
                                         API_UPDATE_MEMBER_LEVEL(ws.id, props.member.id, values.level)
                                             .then((response) => {
@@ -159,8 +159,8 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                             }
                                             )
                                     }}
-
-                                    render={(formikBag: FormikProps<changeRoleForm>) => (
+                                    >
+                                        {(formikBag: FormikProps<changeRoleForm>) => (
                                         <Form>
                                             {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
 
@@ -179,9 +179,8 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                             </div>
                                         </Form>
                                     )}
-                                />}
-
-
+                                    </Formik>
+                                    }
                             </div>
 
                             <div className="flex text-xs mt-3 ml-3  justify-right">
@@ -194,7 +193,7 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                             .required('Required.')
                                     })}
 
-                                    onSubmit={(values: {}, actions: FormikActions<{}>) => {
+                                    onSubmit={() => {
 
                                         API_DELETE_MEMBER(ws.id, props.member.id)
                                             .then((response) => {
@@ -209,9 +208,9 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                                 }
                                             }
                                             )
-                                    }}
-
-                                    render={(formikBag: FormikProps<changeRoleForm>) => (
+                                    }}                                    
+                                >
+                                {(formikBag: FormikProps<changeRoleForm>) => (
                                         <Form>
                                             {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
                                             <div>
@@ -219,7 +218,7 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                             </div>
                                         </Form>
                                     )}
-                                />
+                                    </Formik>
                             </div>
                         </div>
                     }
@@ -239,7 +238,7 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                 <Formik
                                     initialValues={{ email: "", level: 10 }}
 
-                                    onSubmit={(values: {}, actions: FormikActions<{}>) => {
+                                    onSubmit={() => {
 
                                         API_LEAVE(ws.id)
                                             .then((response) => {
@@ -254,15 +253,14 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                                 }
                                             }
                                             )
-                                    }}
-
-                                    render={(formikBag: FormikProps<{}>) => (
+                                    }}                                    
+                                >
+                                {(formikBag: FormikProps<{}>) => (
                                         <Form>
                                             <p className="text-xs"><Button small warning submit title="Leave workspace" /></p>
                                         </Form>
                                     )}
-                                />
-
+                                    </Formik>
                             </div>
                             :
                             null
@@ -394,7 +392,7 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                                                 <Formik
                                                                     initialValues={{ email: "", level: 10 }}
 
-                                                                    onSubmit={(values: {}, actions: FormikActions<{}>) => {
+                                                                    onSubmit={() => {
 
 
                                                                         API_DELETE_INVITE(ws.id, x.id)
@@ -410,14 +408,14 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                                                                 }
                                                                             }
                                                                             )
-                                                                    }}
-
-                                                                    render={(formikBag: FormikProps<{}>) => (
+                                                                    }}                                                                    
+                                                                >
+                                                                {(formikBag: FormikProps<{}>) => (
                                                                         <Form>
                                                                             <span className="text-xs"><Button small secondary submit title="Cancel invite" /></span>
                                                                         </Form>
                                                                     )}
-                                                                />
+                                                                    </Formik>
                                                             </div>
                                                             {!hasExpired && <div className="ml-1">
                                                                 <Formik

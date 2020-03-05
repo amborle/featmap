@@ -6,7 +6,7 @@ import { createWorkflow, updateWorkflow, deleteWorkflow } from '../store/workflo
 import { createSubWorkflow, updateSubWorkflow, deleteSubWorkflow } from '../store/subworkflows/actions';
 import { createMilestone, updateMilestone, deleteMilestone } from '../store/milestones/actions';
 import { createFeature, updateFeature, deleteFeature } from '../store/features/actions';
-import { Formik, FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
+import { Formik, FormikHelpers, FormikProps, Form, Field, FieldProps} from 'formik';
 import { API_CREATE_WORKFLOW, API_CREATE_MILESTONE, API_CREATE_SUBWORKFLOW, API_CREATE_FEATURE } from "../api";
 import { v4 as uuid } from 'uuid'
 import * as Yup from 'yup';
@@ -129,7 +129,7 @@ class CreateCardModal extends Component<Props, State> {
 
               validationSchema={Schema}
 
-              onSubmit={(values: formValues, actions: FormikActions<formValues>) => {
+              onSubmit={(values: formValues, actions: FormikHelpers<formValues>) => {
                 const t = new Date().toISOString()
 
                 switch (parentProps.action.type) {
@@ -302,16 +302,17 @@ class CreateCardModal extends Component<Props, State> {
                     <div>
 
                       <Field
-                        name="title"
-                        render={({ field, form }: FieldProps<formValues>) => (
-
-                          <div className="flex flex-col">
-                            <div><input autoFocus type="text" {...field} placeholder="Title" id="title" className="rounded p-2 border w-full	"/></div>
+                        name="title"                        
+                      >
+                        {({ field, form }: FieldProps<formValues>) => (
+                         <div className="flex flex-col">
+                            <div><input autoFocus type="text" {...field.value} placeholder="Title" id="title" className="rounded p-2 border w-full	"/></div>
                             <div className="p-1 text-red-500 text-xs font-bold">{form.touched.title && form.errors.title}</div>
                           </div>
-
                         )}
-                      />
+
+
+                        </Field>
                     </div>
 
                     <div className="flex justify-end">

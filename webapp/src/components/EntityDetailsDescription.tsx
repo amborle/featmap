@@ -6,7 +6,7 @@ import { updateSubWorkflow } from '../store/subworkflows/actions';
 import { updateWorkflow } from '../store/workflows/actions';
 import { updateFeature } from '../store/features/actions';
 import { updateProject } from '../store/projects/actions';
-import { Formik, FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_UPDATE_MILESTONE_DESCRIPTION, API_UPDATE_PROJECT_DESCRIPTION } from "../api";
 import { API_UPDATE_SUBWORKFLOW_DESCRIPTION } from "../api";
 import { API_UPDATE_WORKFLOW_DESCRIPTION } from "../api";
@@ -262,7 +262,7 @@ class EntityDetailsDescription extends Component<Props, State> {
                                         render={({ field, form }: FieldProps<{ description: string }>) => (
                                             <div className="flex flex-col mt-1 ">
                                                 <div className="markdown" >
-                                                    <textarea autoFocus rows={20} {...field} placeholder="Description" id="description" className="rounded p-2  border w-full  	"/>
+                                                    <textarea autoFocus rows={20} {...field.value} placeholder="Description" id="description" className="rounded p-2  border w-full  	"/>
                                                 </div>
                                                 <span className="text-xs right p-1">The description supports formatting through <a rel="noopener noreferrer" target="_blank" className="link" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a>.</span>
                                                 <div className="p-1 text-red-500 text-xs font-bold">{form.touched.description && form.errors.description}</div>

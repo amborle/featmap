@@ -6,7 +6,7 @@ import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../stor
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
 import { deleteFeature, updateFeature, createFeature } from '../store/features/actions';
 import { deleteProject, updateProject, createProject } from '../store/projects/actions';
-import { Formik, FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_RENAME_MILESTONE } from "../api";
 import { API_RENAME_SUBWORKFLOW, } from "../api";
 import { API_RENAME_WORKFLOW } from "../api";
@@ -293,7 +293,7 @@ class EntityDetailsTitle extends Component<Props, State> {
                                         render={({ field, form }: FieldProps<{ title: string }>) => (
                                             <div className="flex flex-col ">
                                                 <div >
-                                                    <input autoFocus onFocus={handleFocus} type="text" {...field} placeholder="Title" id="title" className="rounded p-2  border w-full  text-xl	"/>
+                                                    <input autoFocus onFocus={handleFocus} type="text" {...field.value} placeholder="Title" id="title" className="rounded p-2  border w-full  text-xl	"/>
                                                 </div>
                                                 <div className="p-1 text-red-500 text-xs font-bold">{form.touched.title && form.errors.title}</div>
                                             </div>

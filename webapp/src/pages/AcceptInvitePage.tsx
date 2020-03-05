@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router'
-import { Formik, FormikActions, FormikProps, Form } from 'formik';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form } from 'formik';
 import { API_ACCEPT_INVITE, API_GET_INVITE } from '../api'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/elements';

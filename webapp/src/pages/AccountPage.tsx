@@ -5,7 +5,7 @@ import { RouteComponentProps } from 'react-router'
 import { AppState, AllActions } from '../store'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Formik, FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import * as Yup from 'yup';
 import { API_CHANGE_EMAIL_REQ, API_CHANGE_EMAIL, API_RESEND_EMAIL, API_CHANGE_NAME, API_CHANGE_NAME_REQ, API_DELETE_ACCOUNT } from '../api'
 import { newMessage } from '../store/application/actions';
@@ -138,7 +138,7 @@ class WorkspacesPage extends Component<Props, State> {
                                                     <div className="flex  flex-row items-baseline">
 
                                                         <div className="flex flex-col w-full mr-1">
-                                                            <div><input type="text" {...field} placeholder="email" id="email" className="rounded p-1 border  	"/></div>
+                                                            <div><input type="text" {...field.value} placeholder="email" id="email" className="rounded p-1 border  	"/></div>
                                                         </div>
                                                         <span className="text-xs"><Button submit title="Change email" secondary small/></span>
 
@@ -195,7 +195,7 @@ class WorkspacesPage extends Component<Props, State> {
                                                     <div className="flex  flex-row items-center">
 
                                                         <div className="flex flex-col w-full mr-1">
-                                                            <div><input type="text" {...field} placeholder="name" id="name" className="rounded p-1 border 	"/></div>
+                                                            <div><input type="text" {...field.value} placeholder="name" id="name" className="rounded p-1 border 	"/></div>
                                                         </div>
                                                         <div className=" text-xs w-full">
                                                             <Button submit title="Change name" secondary small />

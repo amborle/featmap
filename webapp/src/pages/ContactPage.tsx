@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router'
 import * as Yup from 'yup';
-import { Formik, FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_CONTACT } from '../api'
 import { Button } from '../components/elements';
 import { Link } from 'react-router-dom';
@@ -111,7 +111,7 @@ class ContactPage extends Component<Props, State> {
                                                 render={({ field, form }: FieldProps<API_CONTACT>) => (
                                                     <div className="flex  flex-row items-baseline">
                                                         <div className=" flex flex-col w-full">
-                                                            <div><textarea autoFocus rows={20} {...field} placeholder="Message" id="body" className="rounded p-2  border w-full  	"/></div>
+                                                            <div><textarea autoFocus rows={20} {...field.value} placeholder="Message" id="body" className="rounded p-2  border w-full  	"/></div>
                                                             <div className="m-1 text-red-500 text-xs font-bold">{form.touched.body && form.errors.body && form.errors.body}</div>
                                                         </div>
                                                     </div>
@@ -123,7 +123,7 @@ class ContactPage extends Component<Props, State> {
                                                     <div className="flex  flex-row items-baseline">
 
                                                         <div className="flex flex-col w-full">
-                                                            <div><input type="text" {...field} placeholder="Your email adress" id="sender" className="rounded p-2 border w-full text-lg	"/></div>
+                                                            <div><input type="text" {...field.value} placeholder="Your email adress" id="sender" className="rounded p-2 border w-full text-lg	"/></div>
                                                             <div className="p-1 text-red-500 text-xs font-bold">{form.touched.sender && form.errors.sender && form.errors.sender}</div>
                                                         </div>
                                                     </div>
