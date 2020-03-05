@@ -305,7 +305,7 @@ class Board extends Component<Props, State> {
                     <p>
                       <Button primary title="Add goal" icon="add" noborder handleOnClick={() => this.setState({ showCreateWorkflowModal: true })} />
                     </p>
-                    <p>This board is empty, please start by adding a <b>user goal</b>. If you are new to user story mapping, have a look at <em><a className="link" target={"_blank"} href={"http://www.featmap.com/storymapping"}>An introduction to story mapping</a></em> or an <a className="link" target={"_blank"} href={"https://app.featmap.com/link/e31ddff9-7138-4db7-b340-af0c2217b417?demo=1"}>example story map</a>.</p>
+                    <p>This board is empty, please start by adding a <b>user goal</b>. If you are new to user story mapping, have a look at <em><a className="link" target={"_blank"}  rel="noopener noreferrer" href={"http://www.featmap.com/storymapping"}>An introduction to story mapping</a></em> or an <a className="link"  rel="noopener noreferrer" target={"_blank"} href={"https://app.featmap.com/link/e31ddff9-7138-4db7-b340-af0c2217b417?demo=1"}>example story map</a>.</p>
 
                   </div>
 
