@@ -23,7 +23,7 @@
     "history": "^4.10.1",
     "query-string": "^6.11.1",
     "react": "^16.13.0",
-    "react-beautiful-dnd": "^12.2.0",
+    "react-beautiful-dnd": "^13.0.0",
     "react-countdown-now": "^2.1.2",
     "react-dom": "^16.13.0",
     "react-hot-loader": "^4.12.19",
