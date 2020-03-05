@@ -44,7 +44,7 @@
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0",
     "short-uuid": "^3.1.1",
-    "typesafe-actions": "^4.4.2",
+    "typesafe-actions": "^5.1.0",
     "typescript": "3.8.3",
     "uuid": "^7.0.2",
     "yup": "^0.28.1"
