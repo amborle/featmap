@@ -399,8 +399,7 @@ class Board extends Component<Props, State> {
                                                                                   <Card status={sw.status} color={sw.color} title={sw.title} link={this.props.url + "/sw/" + sw.id} rightLink={index === ss.length - 1 && !viewOnly ? () => this.setState({ showCreateSubWorkflowModal: true, createSubWorkflowWorkflowId: w.id }) : undefined} />
                                                                                 </div>
 
-                                                                              </div>
-                                                                              {providedDraggable.placeholder}
+                                                                              </div>                                                                              
                                                                             </div>
                                                                         )}
                                                                       </Draggable>
@@ -547,8 +546,7 @@ class Board extends Component<Props, State> {
                                                                                                          )}>
 
                                                                                                       <Card color={f.color} status={f.status} title={f.title} link={this.props.url + "/f/" + f.id} bottomLink={index === ff.length - 1 && !viewOnly ? () => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id }) : undefined} />
-                                                                                                    </div>
-                                                                                                    {providedDraggable.placeholder}
+                                                                                                    </div>                                                                                                    
                                                                                                   </div>
                                                                                               )}
                                                                                             </Draggable>
