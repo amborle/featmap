@@ -45,16 +45,16 @@ class WorkspacesPage extends Component<Props, State> {
     render() {
         return (
             <div>
-                <Header account={this.props.state.application.application.account!}/>
+                <Header account={this.props.state.application.application.account!} />
                 <div >
                     <h3 className="p-2">Account settings</h3>
 
                     {this.props.state.application.application.account!.emailConfirmationPending &&
                         <CardLayout title="">
                             <span className="text-red-500 text-xl">⬤</span> <em>Email adress verfication missing</em>
-                            <hr/>
+                            <hr />
                             <p> A mail has been sent to  <i>{this.props.state.application.application.account!.emailConfirmationSentTo}</i>, but we have not yet received verfication. </p>
-                            <hr/>
+                            <hr />
 
                             <Formik
                                 initialValues={{}}
@@ -74,11 +74,13 @@ class WorkspacesPage extends Component<Props, State> {
 
                                     actions.setSubmitting(false)
                                 }}
-                                render={(formikBag: FormikProps<{}>) => (
+                            >
+                                {(formikBag: FormikProps<{}>) => (
                                     <Form>
                                         <Field
                                             name="email"
-                                            render={({ field, form }: FieldProps<{}>) => (
+                                        >
+                                            {({ field, form }: FieldProps<{}>) => (
                                                 <div>
                                                     <div className="flex  flex-row items-baseline">
                                                         <div className=" w-full text-xs"><Button submit secondary title="Resend email" /></div>
@@ -86,10 +88,11 @@ class WorkspacesPage extends Component<Props, State> {
                                                     <div className="p-1 text-xs font-bold">{formikBag.status}</div>
                                                 </div>
                                             )}
-                                        />
+                                        </Field>
                                     </Form>
                                 )}
-                            />
+
+                            </Formik>
                         </CardLayout>
                     }
 
@@ -103,7 +106,7 @@ class WorkspacesPage extends Component<Props, State> {
                             <p><span className="text-red-500 text-xl">⬤</span> <em>The email adress is not verified.</em> </p>
                         }
 
-                        <hr/>
+                        <hr />
                         <div className="flex flex-row items-baseline">
                             <Formik
                                 initialValues={{ email: '' }}
@@ -129,18 +132,20 @@ class WorkspacesPage extends Component<Props, State> {
 
                                     actions.setSubmitting(false)
                                 }}
-                                render={(formikBag: FormikProps<API_CHANGE_EMAIL_REQ>) => (
+                            >
+                                {(formikBag: FormikProps<API_CHANGE_EMAIL_REQ>) => (
                                     <Form>
                                         <Field
                                             name="email"
-                                            render={({ field, form }: FieldProps<API_CHANGE_EMAIL_REQ>) => (
+                                        >
+                                            {({ form }: FieldProps<API_CHANGE_EMAIL_REQ>) => (
                                                 <div className=" ">
                                                     <div className="flex  flex-row items-baseline">
 
                                                         <div className="flex flex-col w-full mr-1">
-                                                            <div><input type="text" {...field.value} placeholder="email" id="email" className="rounded p-1 border  	"/></div>
+                                                            <div><input type="text" value={form.values.email} onChange={form.handleChange} placeholder="email" id="email" className="rounded p-1 border  	" /></div>
                                                         </div>
-                                                        <span className="text-xs"><Button submit title="Change email" secondary small/></span>
+                                                        <span className="text-xs"><Button submit title="Change email" secondary small /></span>
 
                                                     </div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.email && form.errors.email}</div>
@@ -148,10 +153,10 @@ class WorkspacesPage extends Component<Props, State> {
                                                     <div className="p-1 text-xs font-bold">{formikBag.status}</div>
                                                 </div>
                                             )}
-                                        />
+                                        </Field>
                                     </Form>
                                 )}
-                            />
+                            </Formik>
                         </div>
                     </CardLayout>
 
@@ -159,7 +164,7 @@ class WorkspacesPage extends Component<Props, State> {
 
                         <p>Your name is {this.props.state.application.application.account!.name}. </p>
 
-                        <hr/>
+                        <hr />
                         <div className="flex flex-row items-baseline">
                             <Formik
                                 initialValues={{ name: this.props.state.application.application.account!.name }}
@@ -186,16 +191,18 @@ class WorkspacesPage extends Component<Props, State> {
 
                                     actions.setSubmitting(false)
                                 }}
-                                render={(formikBag: FormikProps<API_CHANGE_NAME_REQ>) => (
+                            >
+                                {(formikBag: FormikProps<API_CHANGE_NAME_REQ>) => (
                                     <Form>
                                         <Field
                                             name="name"
-                                            render={({ field, form }: FieldProps<API_CHANGE_NAME_REQ>) => (
+                                        >
+                                            {({ form }: FieldProps<API_CHANGE_NAME_REQ>) => (
                                                 <div className=" ">
                                                     <div className="flex  flex-row items-center">
 
                                                         <div className="flex flex-col w-full mr-1">
-                                                            <div><input type="text" {...field.value} placeholder="name" id="name" className="rounded p-1 border 	"/></div>
+                                                            <div><input type="text" value={form.values.name} onChange={form.handleChange} placeholder="name" id="name" className="rounded p-1 border 	" /></div>
                                                         </div>
                                                         <div className=" text-xs w-full">
                                                             <Button submit title="Change name" secondary small />
@@ -207,10 +214,10 @@ class WorkspacesPage extends Component<Props, State> {
                                                     <div className="p-1 text-xs font-bold">{formikBag.status}</div>
                                                 </div>
                                             )}
-                                        />
+                                        </Field>
                                     </Form>
                                 )}
-                            />
+                            </Formik>
                         </div>
 
                     </CardLayout>
@@ -238,18 +245,19 @@ class WorkspacesPage extends Component<Props, State> {
                                     }
                                     )
                             }}
-
-                            render={(formikBag: FormikProps<{}>) => (
+                        >
+                            {(formikBag: FormikProps<{}>) => (
                                 <Form>
                                     <p className="text-xs"><Button secondary button handleOnClick={() => this.setState({ reallySureWarning: true })} title="Delete account" /> {this.state.reallySureWarning && <Button submit warning title="Yes, I am really sure!" />} </p>
                                 </Form>
                             )}
-                        />
+
+                        </Formik>
 
                     </CardLayout>
 
                 </div>
-            </div>
+            </div >
         );
     }
 }

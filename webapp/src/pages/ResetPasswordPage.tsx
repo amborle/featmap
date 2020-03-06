@@ -43,7 +43,7 @@ class ResetPasswordPage extends Component<Props, State> {
     render() {
         return (
             this.state.showSent ?
-                <div className="p-4 w-full justify-center"><em>An email has been sent with further instructions on how to reset your password. </em> <br/><br/>Back to <Link className="link" to="/">Featmap</Link>   </div>
+                <div className="p-4 w-full justify-center"><em>An email has been sent with further instructions on how to reset your password. </em> <br /><br />Back to <Link className="link" to="/">Featmap</Link>   </div>
                 :
                 <div className="flex p-2  w-full  justify-center items-center flex-col ">
                     <div className="flex  p-3  max-w-xl w-full   items-center  flex-col  ">
@@ -51,7 +51,7 @@ class ResetPasswordPage extends Component<Props, State> {
                             <div className="p-1 "><h1 className={"text-3xl font-medium"}>Reset password</h1></div>
                         </div>
                         <div className="flex  p-2 flex-col items-baseline text-center">
-                            <div className="p-1 ">Enter your <b>email</b> below.<br/> An email with instructions on how to reset your password will be sent. </div>
+                            <div className="p-1 ">Enter your <b>email</b> below.<br /> An email with instructions on how to reset your password will be sent. </div>
                         </div>
 
                         <div>
@@ -70,30 +70,32 @@ class ResetPasswordPage extends Component<Props, State> {
 
                                     actions.setSubmitting(false)
                                 }}
-                                render={(formikBag: FormikProps<{ email: string }>) => (
+                            >
+                                {(formikBag: FormikProps<{ email: string }>) => (
                                     <Form>
                                         {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
                                         <Field
                                             name="email"
-                                            render={({ field, form }: FieldProps<{ email: string }>) => (
+                                        >
+                                            {({ form }: FieldProps<{ email: string }>) => (
                                                 <div className="flex flex-row items-baseline">
                                                     <div className="flex flex-col w-full">
-                                                        <div><input type="email" {...field.value} placeholder="email" id="password" className="rounded p-2 border w-64 text-lg 	"/></div>
+                                                        <div><input type="email" value={form.values.email} onChange={form.handleChange} placeholder="email" id="password" className="rounded p-2 border w-64 text-lg 	" /></div>
                                                         <div className="p-1 text-red-500 text-xs font-bold">{form.touched.email && form.errors.email && form.errors.email}</div>
                                                     </div>
                                                 </div>
                                             )}
-                                        />
+                                        </Field>
                                         <div className="flex   flex-row items-baseline justify-center">
-                                            <Button submit primary title="Reset password"/>
+                                            <Button submit primary title="Reset password" />
                                         </div>
 
                                     </Form>
                                 )}
-                            />
+                            </Formik>
                         </div>
                     </div>
-                </div>
+                </div >
         );
     }
 }

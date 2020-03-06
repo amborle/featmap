@@ -58,34 +58,35 @@ class LogIn extends Component<Props> {
 
 
                                 actions.setSubmitting(false)
-                            }}
-                            render={(formikBag: FormikProps<API_LOG_IN_REQ>) => (
+                            }}>
+                                {(formikBag: FormikProps<API_LOG_IN_REQ>) => (
                                 <Form>
                                     <div className="p-1 text-red-500 text-xs font-bold">{formikBag.status}</div>
 
-                                    <Field
-                                        name="email"
-                                        render={({ field, form }: FieldProps<API_LOG_IN_REQ>) => (
+                                    <Field name="email">
+                                        { ({ form }: FieldProps<API_LOG_IN_REQ>) => (
                                             <div className="flex  flex-row items-baseline">
                                                 <div className="flex flex-col w-full">
-                                                    <div><input type="text" {...field.value} placeholder="Email" id="email" className="rounded p-2 border w-64 text-lg	"/></div>
+                                                    <div><input type="text" placeholder="Email" value={form.values.email} onChange={form.handleChange} id="email" className="rounded p-2 border w-64 text-lg	"/></div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.email && form.errors.email}</div>
                                                 </div>
                                             </div>
                                         )}
-                                    />
-                                    <Field
-                                        name="password"
-                                        render={({ field, form }: FieldProps<API_LOG_IN_REQ>) => (
+                                        </Field>
+
+                                    <Field name="password">
+                                    
+                                            {({ form }: FieldProps<API_LOG_IN_REQ>) => (
+                                             
                                             <div className="flex flex-row items-baseline">
 
                                                 <div className="flex flex-col w-full">
-                                                    <div><input type="password" {...field.value} placeholder="Password" id="password" className="rounded p-2 border w-64 text-lg	"/></div>
+                                                    <div><input type="password" value={form.values.password} onChange={form.handleChange}  placeholder="Password" id="password" className="rounded p-2 border w-64 text-lg	"/></div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.password && form.errors.password}</div>
                                                 </div>
                                             </div>
                                         )}
-                                    />
+                                        </Field>                                                                    
                                     <div className="flex flex-row  items-baseline justify-center">
                                         <div className="  justify-center">
                                             <Button primary submit title="Log in"/>
@@ -94,7 +95,8 @@ class LogIn extends Component<Props> {
 
                                 </Form>
                             )}
-                        />
+                            </Formik>
+                                            
                     </div>
                     <div className="flex  p-2 flex-col ">
                         <div className="p-1 text-center">Not a member? <Link className="link" to="/account/signup">Create an account</Link></div>

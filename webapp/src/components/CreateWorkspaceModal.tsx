@@ -113,7 +113,8 @@ class CreateWorkspaceModal extends Component<Props, State> {
 
               actions.setSubmitting(false)
             }}
-            render={(formikBag: FormikProps<formValues>) => (
+          >
+            {(formikBag: FormikProps<formValues>) => (
               <Form>
                 {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
 
@@ -124,18 +125,19 @@ class CreateWorkspaceModal extends Component<Props, State> {
 
                     <Field
                       name="name"
-                      render={({ field, form }: FieldProps<formValues>) => (
+                    >
+                      {({ form }: FieldProps<formValues>) => (
 
                         <div className="flex flex-col">
                           <div className="flex flex-row items-center">
                             <div className="w-full" >
-                              <input autoFocus type="text" {...field.value} placeholder="Name" id="name" className="rounded p-2 border w-full	" />
+                              <input autoFocus type="text" value={form.values.name} onChange={form.handleChange} placeholder="Name" id="name" className="rounded p-2 border w-full	" />
                             </div>
                           </div>
                           <div className="p-1 text-red-500 text-xs font-bold">{form.touched.name && form.errors.name}</div>
                         </div>
                       )}
-                    />
+                    </Field>
                   </div>
                   <div className="flex justify-end">
                     <div className="flex flex-row">
@@ -151,7 +153,7 @@ class CreateWorkspaceModal extends Component<Props, State> {
 
               </Form>
             )}
-          />
+          </Formik>
         </div>
       </div>
     );

@@ -92,15 +92,16 @@ class AcceptInvitePage extends Component<Props, State> {
 
                                     actions.setSubmitting(false)
                                 }}
-                                render={(formikBag: FormikProps<{}>) => (
+                            >
+                                {(formikBag: FormikProps<{}>) => (
                                     <Form>
                                         <div className="p-2 font-bold  text-red">{formikBag.status}</div>
                                         <div className="flex  w-full text-lg justify-center ">
-                                            <div><Button title="Accept invite" primary submit  /></div>
+                                            <div><Button title="Accept invite" primary submit /></div>
                                         </div>
                                     </Form>
                                 )}
-                            />
+                            </Formik>
                         </div>
                         <div className="flex  p-2 flex-col ">
                             <div className="p-1 text-center">Not a member? <Link target="_blank" className="link" to="/account/signup">Create an account</Link></div>

@@ -91,7 +91,9 @@ class ContactPage extends Component<Props, State> {
 
                                         actions.setSubmitting(false)
                                     }}
-                                    render={(formikBag: FormikProps<API_CONTACT>) => (
+
+                                >
+                                    {(formikBag: FormikProps<API_CONTACT>) => (
                                         <Form>
                                             {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
                                             <div className="mb-3">
@@ -108,34 +110,37 @@ class ContactPage extends Component<Props, State> {
 
                                             <Field
                                                 name="body"
-                                                render={({ field, form }: FieldProps<API_CONTACT>) => (
+                                            >
+                                                {({ form }: FieldProps<API_CONTACT>) => (
                                                     <div className="flex  flex-row items-baseline">
                                                         <div className=" flex flex-col w-full">
-                                                            <div><textarea autoFocus rows={20} {...field.value} placeholder="Message" id="body" className="rounded p-2  border w-full  	"/></div>
+                                                            <div><textarea autoFocus rows={20} value={form.values.body} onChange={form.handleChange} placeholder="Message" id="body" className="rounded p-2  border w-full  	" /></div>
                                                             <div className="m-1 text-red-500 text-xs font-bold">{form.touched.body && form.errors.body && form.errors.body}</div>
                                                         </div>
                                                     </div>
                                                 )}
-                                            />
+
+                                            </Field>
                                             <Field
                                                 name="sender"
-                                                render={({ field, form }: FieldProps<API_CONTACT>) => (
+                                            >
+                                                {({ form }: FieldProps<API_CONTACT>) => (
                                                     <div className="flex  flex-row items-baseline">
 
                                                         <div className="flex flex-col w-full">
-                                                            <div><input type="text" {...field.value} placeholder="Your email adress" id="sender" className="rounded p-2 border w-full text-lg	"/></div>
+                                                            <div><input type="text" value={form.values.sender} onChange={form.handleChange} placeholder="Your email adress" id="sender" className="rounded p-2 border w-full text-lg	" /></div>
                                                             <div className="p-1 text-red-500 text-xs font-bold">{form.touched.sender && form.errors.sender && form.errors.sender}</div>
                                                         </div>
                                                     </div>
                                                 )}
-                                            />
+                                            </Field>
                                             <div className="flex justify-center">
-                                                <Button submit primary title="Send message"/>
+                                                <Button submit primary title="Send message" />
                                             </div>
 
                                         </Form>
                                     )}
-                                />
+                                </Formik>
                             </div>
                         </div>
                     }

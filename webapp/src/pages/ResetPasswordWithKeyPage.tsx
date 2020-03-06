@@ -35,7 +35,7 @@ class ResetPasswordPage extends Component<Props, State> {
     render() {
         return (
             this.state.showDone ?
-                <div className="p-2"><em>The password has been changed.</em> <br/><br/>Back to <Link className="link" to="/">Featmap</Link> </div>
+                <div className="p-2"><em>The password has been changed.</em> <br /><br />Back to <Link className="link" to="/">Featmap</Link> </div>
                 :
 
                 <div className="flex p-2  w-full  justify-center items-center flex-col ">
@@ -76,26 +76,29 @@ class ResetPasswordPage extends Component<Props, State> {
 
                                     actions.setSubmitting(false)
                                 }}
-                                render={(formikBag: FormikProps<API_NEW_PASSWORD_REQ>) => (
+
+                            >
+                                {(formikBag: FormikProps<API_NEW_PASSWORD_REQ>) => (
                                     <Form>
                                         {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
                                         <Field
                                             name="password"
-                                            render={({ field, form }: FieldProps<API_NEW_PASSWORD_REQ>) => (
+                                        >
+                                            {({ field, form }: FieldProps<API_NEW_PASSWORD_REQ>) => (
                                                 <div className="flex flex-row items-baseline">
                                                     <div className="flex flex-col w-full">
-                                                        <div><input type="password" {...field.value} placeholder="password" id="password" className="rounded p-2 border w-64 text-lg 	"/></div>
+                                                        <div><input type="password" value={form.values.password} onChange={form.handleChange} placeholder="password" id="password" className="rounded p-2 border w-64 text-lg 	" /></div>
                                                         <div className="p-1 text-red-500 text-xs font-bold">{form.touched.password && form.errors.password && form.errors.password}</div>
                                                     </div>
                                                 </div>
                                             )}
-                                        />
+                                        </Field>
                                         <div className="flex   flex-row justify-center">
-                                            <Button submit primary title="Change password"/>
+                                            <Button submit primary title="Change password" />
                                         </div>
                                     </Form>
                                 )}
-                            />
+                            </Formik>
                         </div>
                     </div>
                 </div>

@@ -96,62 +96,67 @@ class SignUp extends Component<Props> {
 
 
                                 actions.setSubmitting(false)
-                            }}
-                            render={(formikBag: FormikProps<API_SIGN_UP_REQ>) => (
+                            }}                        
+                        >
+                        {(formikBag: FormikProps<API_SIGN_UP_REQ>) => (
                                 <Form>
                                     {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
                                     <Field
-                                        name="workspaceName"
-                                        render={({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
+                                        name="workspaceName"                                        
+                                    >
+                                    {({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
                                             <div className="flex flex-col    items-baseline sm:flex-row">
                                                 <div className=" flex flex-col w-full">
-                                                    <div><input type="text" {...field.value} placeholder="workspace name" id="workspaceName" className="rounded p-2 border w-full text-lg	" /></div>
+                                                    <div><input type="text" value={form.values.workspace} onChange={form.handleChange} placeholder="workspace name" id="workspaceName" className="rounded p-2 border w-full text-lg	" /></div>
                                                     <div className="m-1 text-red-500 text-xs font-bold">{form.touched.workspaceName && form.errors.workspaceName && form.errors.workspaceName}</div>
                                                 </div>
                                             </div>
                                         )}
-                                    />
+                                        </Field>
                                     <Field
-                                        name="name"
-                                        render={({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
+                                        name="name"                                        
+                                    >
+                                    {({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
                                             <div className="flex  flex-row items-baseline">
                                                 <div className=" flex flex-col w-full">
-                                                    <div><input type="text" {...field.value} placeholder="Name, e.g. John Smith" id="name" className=" w-full rounded p-2 border  text-lg	" /></div>
+                                                    <div><input type="text" value={form.values.name} onChange={form.handleChange}  placeholder="Name, e.g. John Smith" id="name" className=" w-full rounded p-2 border  text-lg	" /></div>
                                                     <div className="m-1 text-red-500 text-xs font-bold">{form.touched.name && form.errors.name && form.errors.name}</div>
                                                 </div>
                                             </div>
                                         )}
-                                    />
+                                        </Field>
                                     <Field
-                                        name="email"
-                                        render={({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
+                                        name="email"                                        
+                                    >
+                                        {({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
                                             <div className="flex  flex-row items-baseline">
 
                                                 <div className="flex flex-col w-full">
-                                                    <div><input type="text" {...field.value} placeholder="Work email" id="email" className="rounded p-2 border w-full text-lg	" /></div>
+                                                    <div><input type="text" value={form.values.email} onChange={form.handleChange} placeholder="Work email" id="email" className="rounded p-2 border w-full text-lg	" /></div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.email && form.errors.email && form.errors.email}</div>
                                                 </div>
                                             </div>
                                         )}
-                                    />
+                                                                        </Field>
                                     <Field
                                         name="password"
-                                        render={({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
+                                    >
+                                    {({ field, form }: FieldProps<API_SIGN_UP_REQ>) => (
                                             <div className="flex flex-row items-baseline">
                                                 <div className="flex flex-col w-full">
-                                                    <div><input type="password" {...field.value} placeholder="Password" id="password" className="rounded p-2 border w-full text-lg	" /></div>
+                                                    <div><input type="password" value={form.values.password} onChange={form.handleChange} placeholder="Password" id="password" className="rounded p-2 border w-full text-lg	" /></div>
                                                     <div className="p-1 text-red-500 text-xs font-bold">{form.touched.password && form.errors.password && form.errors.password}</div>
                                                 </div>
                                             </div>
                                         )}
-                                    />
+                                        </Field>
                                     <div className="flex justify-center">
                                         <Button submit primary title="Create account" />
                                     </div>
 
                                 </Form>
                             )}
-                        />
+                        </Formik>
                     </div>
                     <div className="flex  p-2 flex-col ">
                         <div className="p-1 text-center">Already have an account? <Link className="link" to="/account/login">Login</Link></div>

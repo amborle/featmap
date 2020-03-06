@@ -248,7 +248,8 @@ class EntityDetailsDescription extends Component<Props, State> {
                         this.setState({ edit: false })
                         actions.setSubmitting(false)
                     }}
-                    render={(formikBag: FormikProps<{ description: string }>) => {
+                >
+                    {(formikBag: FormikProps<{ description: string }>) => {
 
                         this.submitForm = formikBag.submitForm
 
@@ -259,16 +260,17 @@ class EntityDetailsDescription extends Component<Props, State> {
                                 {this.state.edit ?
                                     <Field
                                         name="description"
-                                        render={({ field, form }: FieldProps<{ description: string }>) => (
+                                    >
+                                        {({ form }: FieldProps<{ description: string }>) => (
                                             <div className="flex flex-col mt-1 ">
                                                 <div className="markdown" >
-                                                    <textarea autoFocus rows={20} {...field.value} placeholder="Description" id="description" className="rounded p-2  border w-full  	"/>
+                                                    <textarea autoFocus rows={20} value={form.values.description} onChange={form.handleChange} placeholder="Description" id="description" className="rounded p-2  border w-full  	" />
                                                 </div>
                                                 <span className="text-xs right p-1">The description supports formatting through <a rel="noopener noreferrer" target="_blank" className="link" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a>.</span>
                                                 <div className="p-1 text-red-500 text-xs font-bold">{form.touched.description && form.errors.description}</div>
                                             </div>
                                         )}
-                                    />
+                                    </Field>
                                     :
                                     <div className=" mt-2 ml-2 border border-white  ">
                                         <div>
@@ -293,7 +295,7 @@ class EntityDetailsDescription extends Component<Props, State> {
                             </Form>
                         )
                     }}
-                />
+                </Formik>
             </div>)
 
     }
