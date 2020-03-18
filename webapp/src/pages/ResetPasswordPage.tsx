@@ -80,7 +80,7 @@ class ResetPasswordPage extends Component<Props, State> {
                                             {({ form }: FieldProps<{ email: string }>) => (
                                                 <div className="flex flex-row items-baseline">
                                                     <div className="flex flex-col w-full">
-                                                        <div><input type="email" value={form.values.email} onChange={form.handleChange} placeholder="email" id="password" className="rounded p-2 border w-64 text-lg 	" /></div>
+                                                        <div><input name="email" type="email" value={form.values.email} onChange={form.handleChange} placeholder="email"  className="rounded p-2 border w-64 text-lg 	" /></div>
                                                         <div className="p-1 text-red-500 text-xs font-bold">{form.touched.email && form.errors.email && form.errors.email}</div>
                                                     </div>
                                                 </div>
