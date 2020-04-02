@@ -2,7 +2,7 @@
 
 ![](https://github.com/amborle/featmap/workflows/ci/badge.svg)
 
-Featmap is a simple user story mapping tool for product managers to build, plan and communicate product backlogs. It is built using React, Typescript and Go. Try it out at [www.featmap.com](https://www.featmap.com).
+Featmap is a simple user story mapping tool for product managers to build, plan and communicate product backlogs. It is built using React, Typescript and Go.
 
 
 ![Featmap screenshot](screenshot.png)
