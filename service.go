@@ -2,12 +2,17 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"strings"
 	"time"
+
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/customer"
 
 	"github.com/amborle/featmap/lexorank"
 
 	"github.com/asaskevich/govalidator"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -35,7 +40,7 @@ type Service interface {
 	GetAccountObject() *Account
 	GetWorkspaceObject() *Workspace
 	GetSubscriptionObject() *Subscription
-	
+
 	SendEmail(smtpServer string, smtpPort string, smtpUser string, smtpPass string, from string, recipient string, subject string, body string) error
 
 	Register(workspaceName string, name string, email string, password string) (*Workspace, *Account, *Member, error)
@@ -51,8 +56,12 @@ type Service interface {
 	GetAccountsByWorkspace() []*Account
 	DeleteWorkspace() error
 
+	StripeWebhook(r *http.Request) error
+	GetSubscriptionPlanSession(plan string, quantity int64) (string, error)
 	GetSubscriptionByWorkspace(id string) *Subscription
 	GetSubscriptionsByAccount() []*Subscription
+
+	ChangeSubscription(plan string, quantity int64) error
 
 	ConfirmEmail(key string) error
 	UpdateEmail(email string) error
@@ -71,6 +80,7 @@ type Service interface {
 	Leave() error
 
 	ChangeAllowExternalSharing(value bool) error
+	ChangeGeneralInfo(EUVAT string, externalBillingEmail string) error
 
 	GetInvitesByWorkspace() []*Invite
 	CreateInvite(email string, level string) (*Invite, error)
@@ -97,6 +107,7 @@ type Service interface {
 	CloseMilestone(id string) (*Milestone, error)
 	OpenMilestone(id string) (*Milestone, error)
 	ChangeColorOnMilestone(id string, color string) (*Milestone, error)
+	UpdateAnnotationsOnMilestone(id string, names string) (*Milestone, error)
 
 	GetWorkflowsByProject(id string) []*Workflow
 	MoveWorkflow(id string, index int) (*Workflow, error)
@@ -107,6 +118,7 @@ type Service interface {
 	ChangeColorOnWorkflow(id string, color string) (*Workflow, error)
 	CloseWorkflow(id string) (*Workflow, error)
 	OpenWorkflow(id string) (*Workflow, error)
+	UpdateAnnotationsOnWorkflow(id string, names string) (*Workflow, error)
 
 	CreateSubWorkflowWithID(id string, workflowID string, title string) (*SubWorkflow, error)
 	MoveSubWorkflow(id string, toWorkflowID string, index int) (*SubWorkflow, error)
@@ -117,6 +129,7 @@ type Service interface {
 	ChangeColorOnSubWorkflow(id string, color string) (*SubWorkflow, error)
 	CloseSubWorkflow(id string) (*SubWorkflow, error)
 	OpenSubWorkflow(id string) (*SubWorkflow, error)
+	UpdateAnnotationsOnSubWorkflow(id string, names string) (*SubWorkflow, error)
 
 	GetFeaturesByProject(id string) []*Feature
 	MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error)
@@ -127,6 +140,23 @@ type Service interface {
 	CloseFeature(id string) (*Feature, error)
 	OpenFeature(id string) (*Feature, error)
 	ChangeColorOnFeature(id string, color string) (*Feature, error)
+	UpdateAnnotationsOnFeature(id string, names string) (*Feature, error)
+	UpdateEstimateOnFeature(id string, estimate int) (*Feature, error)
+
+	GetFeatureCommentsByProject(id string) []*FeatureComment
+	CreateFeatureCommentWithID(id string, featureID string, post string) (*FeatureComment, error)
+	UpdateFeatureCommentPost(id string, post string) (*FeatureComment, error)
+	DeleteFeatureComment(id string) error
+
+	GetPersonasByProject(id string) []*Persona
+	GetWorkflowPersonasByProject(id string) []*WorkflowPersona
+
+	CreateWorkflowPersonaWithID(id string, workflowID string, personaID string) (*WorkflowPersona, error)
+	DeleteWorkflowPersona(id string) error
+
+	CreatePersonaWithID(id string, projectID string, avatar string, name string, role string, description string, workflowID string, workflowPersonaID string) (*Persona, error)
+	DeletePersona(id string) error
+	UpdatePersona(id string, avatar string, name string, role string, description string) (*Persona, error)
 }
 
 type service struct {
@@ -160,7 +190,6 @@ func (s *service) GetAccountObject() *Account           { return s.Acc }
 func (s *service) GetSubscriptionObject() *Subscription { return s.Subscription }
 func (s *service) GetMemberObject() *Member             { return s.Member }
 func (s *service) GetWorkspaceObject() *Workspace       { return s.ws }
-
 
 func (s *service) UpdateLatestActivityNow() {
 	acc := s.GetAccountObject()
@@ -214,6 +243,8 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 		Name:                 workspaceName,
 		CreatedAt:            t,
 		AllowExternalSharing: true,
+		EUVAT:                "",
+		ExternalBillingEmail: email,
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -233,15 +264,22 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	sub := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
-		Level:              "PRO",
-		NumberOfEditors:    1000,
+		Level:              "TRIAL",
+		NumberOfEditors:    100,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 30),
+		ExpirationDate:     t.AddDate(0, 0, 15),
 		CreatedByName:      acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: acc.Name,
-		Status:             "active",
+		Status:             "trialing",
+	}
+
+	if s.config.Mode != "hosted" {
+		sub.Level = "BASIC"
+		sub.NumberOfEditors = 1000
+		sub.ExpirationDate = t.AddDate(1000, 0, 0)
+		sub.Status = "active"
 	}
 
 	member := &Member{
@@ -262,8 +300,6 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	s.SetSubscriptionObject(sub)
 	s.SetMemberObject(member)
 
-	s.generateSampleProject()
-
 	body, err := WelcomeBody(welcome{s.config.AppSiteURL, acc.EmailConfirmationSentTo, workspace.Name, acc.EmailConfirmationKey})
 	if err != nil {
 		log.Println(err)
@@ -276,9 +312,6 @@ func (s *service) Register(workspaceName string, name string, email string, pass
 	}
 
 	return workspace, acc, member, nil
-}
-
-func (s *service) generateSampleProject() {
 }
 
 func (s *service) DeleteAccount() error {
@@ -310,7 +343,7 @@ func (s *service) Login(email string, password string) (*Account, error) {
 
 func (s *service) Token(accountID string) string {
 
-	_, tokenString, _ := s.auth.Encode(jwtauth.Claims{"id": accountID})
+	_, tokenString, _ := s.auth.Encode(jwt.MapClaims{"id": accountID})
 
 	return tokenString
 }
@@ -372,19 +405,21 @@ func (s *service) CreateWorkspace(name string) (*Workspace, *Subscription, *Memb
 		Name:                 name,
 		CreatedAt:            t,
 		AllowExternalSharing: true,
+		EUVAT:                "",
+		ExternalBillingEmail: s.Acc.Email,
 	}
 	subscription := &Subscription{
 		ID:                 uuid.Must(uuid.NewV4(), nil).String(),
 		WorkspaceID:        workspace.ID,
-		Level:              "PRO",
-		NumberOfEditors:    1000,
+		Level:              "TRIAL",
+		NumberOfEditors:    100,
 		FromDate:           t,
-		ExpirationDate:     t.AddDate(0, 0, 30),
+		ExpirationDate:     t.AddDate(0, 0, 15),
 		CreatedByName:      s.Acc.Name,
 		CreatedAt:          t,
 		LastModified:       t,
 		LastModifiedByName: s.Acc.Name,
-		Status:             "active",
+		Status:             "trialing",
 	}
 	member := &Member{
 		ID:          uuid.Must(uuid.NewV4(), nil).String(),
@@ -513,7 +548,7 @@ func (s *service) CreateMember(workspaceID string, accountID string, level strin
 	sub := s.GetSubscriptionByWorkspace(workspaceID)
 
 	if sub.Level == "NONE" {
-		return nil, errors.New("cannot create member on workspace wihout subscription")
+		return nil, errors.New("cannot create member on workspace without plan")
 	}
 
 	if isEditor(level) {
@@ -588,6 +623,31 @@ func (s *service) ChangeAllowExternalSharing(value bool) error {
 	w := s.GetWorkspaceByContext()
 
 	w.AllowExternalSharing = value
+
+	s.r.StoreWorkspace(w)
+
+	return nil
+}
+
+func (s *service) ChangeGeneralInfo(EUVAT string, externalBillingInfo string) error {
+
+	w := s.GetWorkspaceByContext()
+
+	if !govalidator.IsEmail(externalBillingInfo) {
+		return errors.New("invalid email")
+	}
+
+	w.EUVAT = EUVAT
+	w.ExternalBillingEmail = externalBillingInfo
+
+	if len(w.ExternalCustomerID) > 0 {
+		params := &stripe.CustomerParams{}
+		params.Email = stripe.String(externalBillingInfo)
+		_, err := customer.Update(w.ExternalCustomerID, params)
+		if err != nil {
+			return err
+		}
+	}
 
 	s.r.StoreWorkspace(w)
 
@@ -795,12 +855,30 @@ func (s *service) GetProjectExtendedByExternalLink(link string) (*projectRespons
 		return nil, err
 	}
 
+	featureComments, err := s.r.FindFeatureCommentsByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	personas, err := s.r.FindPersonasByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	workflowPersonas, err := s.r.FindWorkflowPersonasByProject(project.WorkspaceID, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	resp := &projectResponse{
-		Project:      project,
-		Milestones:   milestones,
-		Workflows:    workflows,
-		SubWorkflows: subworkflows,
-		Features:     features,
+		Project:          project,
+		Milestones:       milestones,
+		Workflows:        workflows,
+		SubWorkflows:     subworkflows,
+		Features:         features,
+		FeatureComments:  featureComments,
+		Personas:         personas,
+		WorkflowPersonas: workflowPersonas,
 	}
 
 	return resp, nil
@@ -1075,6 +1153,26 @@ func (s *service) ChangeColorOnMilestone(id string, color string) (*Milestone, e
 	return p, nil
 }
 
+func (s *service) UpdateAnnotationsOnMilestone(id string, names string) (*Milestone, error) {
+
+	f, err := s.r.GetMilestone(s.Member.WorkspaceID, id)
+	if f == nil {
+		return nil, err
+	}
+
+	if !areAnnotationsValid(names) {
+		return nil, errors.New("invalid annotation")
+	}
+
+	f.Annotations = names
+	f.LastModifiedByName = s.Acc.Name
+	f.LastModified = time.Now().UTC()
+
+	s.r.StoreMilestone(f)
+
+	return f, nil
+}
+
 // Workflow
 
 func (s *service) CreateWorkflowWithID(id string, projectID string, title string) (*Workflow, error) {
@@ -1261,6 +1359,26 @@ func (s *service) OpenWorkflow(id string) (*Workflow, error) {
 	s.r.StoreWorkflow(p)
 
 	return p, nil
+}
+
+func (s *service) UpdateAnnotationsOnWorkflow(id string, names string) (*Workflow, error) {
+
+	f, err := s.r.GetWorkflow(s.Member.WorkspaceID, id)
+	if f == nil {
+		return nil, err
+	}
+
+	if !areAnnotationsValid(names) {
+		return nil, errors.New("invalid annotation")
+	}
+
+	f.Annotations = names
+	f.LastModifiedByName = s.Acc.Name
+	f.LastModified = time.Now().UTC()
+
+	s.r.StoreWorkflow(f)
+
+	return f, nil
 }
 
 // SubWorkflow
@@ -1450,6 +1568,26 @@ func (s *service) OpenSubWorkflow(id string) (*SubWorkflow, error) {
 	return p, nil
 }
 
+func (s *service) UpdateAnnotationsOnSubWorkflow(id string, names string) (*SubWorkflow, error) {
+
+	f, err := s.r.GetSubWorkflow(s.Member.WorkspaceID, id)
+	if f == nil {
+		return nil, err
+	}
+
+	if !areAnnotationsValid(names) {
+		return nil, errors.New("invalid annotation")
+	}
+
+	f.Annotations = names
+	f.LastModifiedByName = s.Acc.Name
+	f.LastModified = time.Now().UTC()
+
+	s.r.StoreSubWorkflow(f)
+
+	return f, nil
+}
+
 // Features
 
 func (s *service) CreateFeatureWithID(id string, subWorkflowID string, milestoneID string, title string) (*Feature, error) {
@@ -1574,6 +1712,46 @@ func (s *service) ChangeColorOnFeature(id string, color string) (*Feature, error
 	return p, nil
 }
 
+func (s *service) UpdateAnnotationsOnFeature(id string, names string) (*Feature, error) {
+
+	f, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if f == nil {
+		return nil, err
+	}
+
+	if !areAnnotationsValid(names) {
+		return nil, errors.New("invalid annotation")
+	}
+
+	f.Annotations = names
+	f.LastModifiedByName = s.Acc.Name
+	f.LastModified = time.Now().UTC()
+
+	s.r.StoreFeature(f)
+
+	return f, nil
+}
+
+func (s *service) UpdateEstimateOnFeature(id string, estimate int) (*Feature, error) {
+
+	f, err := s.r.GetFeature(s.Member.WorkspaceID, id)
+	if f == nil {
+		return nil, err
+	}
+
+	if estimate < 0 || estimate > 999 {
+		return nil, errors.New("invalid estimate")
+	}
+
+	f.Estimate = estimate
+	f.LastModifiedByName = s.Acc.Name
+	f.LastModified = time.Now().UTC()
+
+	s.r.StoreFeature(f)
+
+	return f, nil
+}
+
 func (s *service) MoveFeature(id string, toMilestoneID string, toSubWorkflowID string, index int) (*Feature, error) {
 
 	if index < 0 || index > 1000 {
@@ -1640,6 +1818,125 @@ func (s *service) UpdateFeatureDescription(id string, d string) (*Feature, error
 	s.r.StoreFeature(x)
 
 	return x, nil
+}
+
+// Feature comments
+
+func (s *service) CreateFeatureCommentWithID(id string, featureID string, post string) (*FeatureComment, error) {
+
+	f, err := s.r.GetFeature(s.Member.WorkspaceID, featureID)
+	if err != nil {
+		return nil, errors.New("feature not found")
+	}
+
+	m, err := s.r.GetMilestone(s.Member.WorkspaceID, f.MilestoneID)
+	if err != nil {
+		return nil, errors.New("milestone not found")
+	}
+
+	if len(post) > 10000 {
+		return nil, errors.New("post_too_long")
+	}
+
+	t := time.Now().UTC()
+
+	p := &FeatureComment{
+		WorkspaceID:   s.Member.WorkspaceID,
+		ID:            id,
+		FeatureID:     featureID,
+		ProjectID:     m.ProjectID,
+		Post:          post,
+		CreatedAt:     t,
+		CreatedByName: s.Acc.Name,
+		LastModified:  t,
+	}
+
+	s.r.StoreFeatureComment(p)
+
+	owner := &FeatureCommentOwner{
+		WorkspaceID:      s.Member.WorkspaceID,
+		ID:               uuid.Must(uuid.NewV4(), nil).String(),
+		FeatureCommentID: p.ID,
+		MemberID:         s.Member.ID,
+		ProjectID:        p.ProjectID,
+	}
+
+	s.r.StoreFeatureCommentOwner(owner)
+
+	p.MemberID = owner.MemberID
+
+	return p, nil
+}
+
+func (s *service) DeleteFeatureComment(id string) error {
+
+	fco, err := s.r.GetFeatureCommentOwnerByFeatureComment(s.Member.WorkspaceID, id)
+	if err != nil {
+		return errors.New("feature comment owner not found")
+	}
+
+	if s.Member.ID != fco.MemberID {
+		return errors.New("something went wrong when deleting comment")
+	}
+
+	s.r.DeleteFeatureComment(s.Member.WorkspaceID, id)
+	return nil
+}
+
+func (s *service) GetFeatureCommentsByProject(id string) []*FeatureComment {
+	pp, err := s.r.FindFeatureCommentsByProject(s.Member.WorkspaceID, id)
+
+	owners, err := s.r.FindFeatureCommentOwnersByProject(s.Member.WorkspaceID, id)
+
+	// Populare MemberID on comments
+	for _, p := range pp {
+		for _, o := range owners {
+
+			if p.ID == o.FeatureCommentID {
+				p.MemberID = o.MemberID
+				break
+			} else {
+				p.MemberID = ""
+			}
+
+		}
+	}
+
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
+}
+
+func (s *service) UpdateFeatureCommentPost(id string, post string) (*FeatureComment, error) {
+
+	fc, err := s.r.GetFeatureComment(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, errors.New("feature comment not found")
+	}
+
+	fco, err := s.r.GetFeatureCommentOwnerByFeatureComment(s.Member.WorkspaceID, id)
+	if err != nil {
+		return nil, errors.New("feature comment owner not found")
+	}
+
+	if s.Member.ID != fco.MemberID {
+		return nil, errors.New("something went wrong when deleting comment")
+	}
+
+	if len(post) > 10000 {
+		return nil, errors.New("post_too_long")
+	}
+
+	fc.Post = post
+
+	fc.MemberID = fco.MemberID
+	fc.LastModified = time.Now().UTC()
+
+	s.r.StoreFeatureComment(fc)
+
+	return fc, nil
+
 }
 
 // -----------
@@ -1738,7 +2035,7 @@ func (s *service) ResendEmail() error {
 
 	body, _ := ChangeEmailBody(emailBody{s.config.AppSiteURL, a.EmailConfirmationSentTo, a.EmailConfirmationKey})
 
-	err := s.SendEmail(s.config.SMTPServer, s.config.SMTPPort, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, a.EmailConfirmationSentTo, "Featmap: verify your email adress", body)
+	err := s.SendEmail(s.config.SMTPServer, s.config.SMTPPort, s.config.SMTPUser, s.config.SMTPPass, s.config.EmailFrom, a.EmailConfirmationSentTo, "Featmap: verify your email address", body)
 	if err != nil {
 		log.Println("error sending mail")
 	}
@@ -1800,4 +2097,167 @@ func colorIsValid(color string) bool {
 		color == "INDIGO" ||
 		color == "PURPLE" ||
 		color == "PINK"
+}
+
+func (s *service) GetPersonasByProject(id string) []*Persona {
+	pp, err := s.r.FindPersonasByProject(s.Member.WorkspaceID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
+}
+
+// Workflow personas
+
+func (s *service) GetWorkflowPersonasByProject(id string) []*WorkflowPersona {
+	pp, err := s.r.FindWorkflowPersonasByProject(s.Member.WorkspaceID, id)
+	if err != nil {
+		log.Println(err)
+	}
+	return pp
+}
+
+func (s *service) DeleteWorkflowPersona(id string) error {
+	s.r.DeleteWorkflowPersona(s.Member.WorkspaceID, id)
+	return nil
+}
+
+func (s *service) CreateWorkflowPersonaWithID(id string, workflowID string, personaID string) (*WorkflowPersona, error) {
+
+	w, _ := s.r.GetWorkflow(s.Member.WorkspaceID, workflowID)
+
+	if w == nil {
+		return nil, errors.New("workflow does not exist")
+	}
+
+	p, _ := s.r.GetPersona(s.Member.WorkspaceID, personaID)
+	if p == nil {
+		return nil, errors.New("persona does not exist")
+	}
+
+	if w.ProjectID != p.ProjectID {
+		return nil, errors.New("persona needs to be from the same project as workflow")
+	}
+
+	wp := &WorkflowPersona{
+		WorkspaceID: s.Member.WorkspaceID,
+		ProjectID:   w.ProjectID,
+		WorkflowID:  w.ID,
+		ID:          id,
+		PersonaID:   personaID,
+	}
+
+	s.r.StoreWorkflowPersona(wp)
+
+	return wp, nil
+}
+
+// Personas
+
+func (s *service) CreatePersonaWithID(id string, projectID string, avatar string, name string, role string, description string, workflowID string, workflowPersonaID string) (*Persona, error) {
+	proj, _ := s.r.GetProject(s.Member.WorkspaceID, projectID)
+
+	if proj == nil {
+		return nil, errors.New("project does not exist")
+	}
+
+	if !validAvatar(avatar) {
+		return nil, errors.New("avatar not valid")
+	}
+
+	if len(name) == 0 || len(name) > 200 {
+		return nil, errors.New("name not valid")
+	}
+
+	if len(role) > 200 {
+		return nil, errors.New("role not valid")
+	}
+
+	if len(description) > 10000 {
+		return nil, errors.New("description not valid")
+	}
+
+	p := &Persona{
+		WorkspaceID: s.Member.WorkspaceID,
+		ProjectID:   projectID,
+		ID:          id,
+		Avatar:      avatar,
+		Name:        name,
+		Role:        role,
+		Description: description,
+		CreatedAt:   time.Now().UTC(),
+	}
+
+	s.r.StorePersona(p)
+
+	if workflowID == "" {
+		return p, nil
+	}
+
+	wf, _ := s.r.GetWorkflow(s.Member.WorkspaceID, workflowID)
+	if wf == nil {
+		return nil, errors.New("workflow does not exist")
+	}
+
+	if wf.ProjectID != p.ProjectID {
+		return nil, errors.New("not in the same project")
+	}
+
+	wp := &WorkflowPersona{
+		WorkspaceID: s.Member.WorkspaceID,
+		ProjectID:   projectID,
+		WorkflowID:  workflowID,
+		ID:          workflowPersonaID,
+		PersonaID:   p.ID,
+	}
+
+	s.r.StoreWorkflowPersona(wp)
+
+	return p, nil
+}
+
+func (s *service) DeletePersona(id string) error {
+	s.r.DeletePersona(s.Member.WorkspaceID, id)
+	return nil
+}
+
+func (s *service) UpdatePersona(id string, avatar string, name string, role string, description string) (*Persona, error) {
+	pers, _ := s.r.GetPersona(s.Member.WorkspaceID, id)
+
+	if pers == nil {
+		return nil, errors.New("persona does not exist")
+	}
+
+	if !validAvatar(avatar) {
+		return nil, errors.New("avatar not valid")
+	}
+
+	if len(name) == 0 || len(name) > 200 {
+		return nil, errors.New("name not valid")
+	}
+
+	if len(role) > 200 {
+		return nil, errors.New("role not valid")
+	}
+
+	if len(description) > 10000 {
+		return nil, errors.New("description not valid")
+	}
+
+	pers.Avatar = avatar
+	pers.Name = name
+	pers.Role = role
+	pers.Description = description
+
+	s.r.StorePersona(pers)
+
+	return pers, nil
+}
+
+func validAvatar(avatar string) bool {
+	switch avatar {
+	case "avatar00", "avatar01", "avatar02", "avatar03", "avatar04", "avatar05", "avatar06", "avatar07", "avatar08":
+		return true
+	}
+	return false
 }

@@ -31,6 +31,23 @@ func getLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws, _ := s.GetWorkspace(project.WorkspaceID)
+
+	sub := s.GetSubscriptionByWorkspace(ws.ID)
+	if sub == nil {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
+		return
+	}
+
+	if !subscriptionIsActive(sub) {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
+		return
+	}
+
+	if !(sub.Level == "PRO" || sub.Level == "TRIAL" || sub.Level == "BASIC") {
+		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
+		return
+	}
+
 	if !ws.AllowExternalSharing {
 		_ = render.Render(w, r, ErrInvalidRequest(errors.New("not allowed")))
 		return

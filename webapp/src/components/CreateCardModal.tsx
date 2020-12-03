@@ -149,7 +149,8 @@ class CreateCardModal extends Component<Props, State> {
                       lastModified: t,
                       lastModifiedByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
                       color: Color.WHITE,
-                      status: CardStatus.OPEN
+                      status: CardStatus.OPEN,
+                      annotations: ""
                     }
                     parentProps.createWorkflow(optimisticWorkflow)
 
@@ -188,7 +189,8 @@ class CreateCardModal extends Component<Props, State> {
                       createdByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
                       lastModified: t,
                       lastModifiedByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
-                      color: Color.NONE
+                      color: Color.NONE,
+                      annotations: ""
                     }
                     parentProps.createMilestone(optimisticMilestone)
 
@@ -229,7 +231,8 @@ class CreateCardModal extends Component<Props, State> {
                       lastModified: t,
                       lastModifiedByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
                       color: Color.NONE,
-                      status: CardStatus.OPEN
+                      status: CardStatus.OPEN,
+                      annotations: ""
                     }
                     parentProps.createSubWorkflow(optimisticSubMilestone)
 
@@ -267,7 +270,9 @@ class CreateCardModal extends Component<Props, State> {
                       createdByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
                       lastModified: t,
                       lastModifiedByName: parentProps.application.account === undefined ? "demo" : parentProps.application.account.name,
-                      color: Color.NONE
+                      color: Color.NONE,
+                      annotations: "",
+                      estimate: 0
                     }
                     parentProps.createFeature(optimisticFeature)
 

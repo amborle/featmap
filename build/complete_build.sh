@@ -10,5 +10,3 @@ echo "generate static assets"
 
 echo "main build"
 ./build_all_arch.sh
-
-

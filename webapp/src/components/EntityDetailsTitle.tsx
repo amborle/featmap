@@ -303,7 +303,7 @@ class EntityDetailsTitle extends Component<Props, State> {
                                     </Field>
                                     :
                                     <div className="text-xl mt-2 ml-2 border border-white">
-                                        {this.props.viewOnly || closed ? <span className={closed ? "line-through" : ""}> {this.props.card.title}</span> : <button onClick={() => this.setState({ edit: true })}>{this.props.card.title}</button>}
+                                        {this.props.viewOnly || closed ? <span className={closed ? "line-through" : ""}> {this.props.card.title}</span> : <button className="text-left" onClick={() => this.setState({ edit: true })}>{this.props.card.title}</button>}
                                     </div>
                                 }
                             </Form>

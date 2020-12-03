@@ -241,3 +241,12 @@ type ContactRequest struct {
 func (p *ContactRequest) Bind(r *http.Request) error {
 	return nil
 }
+
+type changeGeneralInfoRequest struct {
+	EUVAT                string `json:"euVat"`
+	ExternalBillingEmail string `json:"externalBillingEmail"`
+}
+
+func (p *changeGeneralInfoRequest) Bind(r *http.Request) error {
+	return nil
+}

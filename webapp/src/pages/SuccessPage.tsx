@@ -19,7 +19,7 @@ class SuccessPage extends Component<Props, State> {
             < div className="flex p-2  w-full  justify-center items-center flex-col " >
                 <div className="flex  p-3  max-w-xl w-full   items-center  flex-col ">
                     <div className="flex  p-2 flex-col items-baseline">
-                        <div className="p-1 "><h2><i className="material-icons text-3xl text-green-500">check</i> Subscription change successful!</h2></div>
+                        <div className="p-1 "><h2><i className="material-icons text-3xl text-green-500">check</i> Plan change successful!</h2></div>
                         <div className="p-1 ">Back to <Link className="link" to="/">Featmap</Link>.</div>
                     </div>
                 </div>

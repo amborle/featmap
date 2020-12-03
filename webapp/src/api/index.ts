@@ -5,8 +5,25 @@ import { IWorkflow } from '../store/workflows/types';
 import { ISubWorkflow } from '../store/subworkflows/types';
 import { IFeature } from '../store/features/types';
 import { Color } from '../core/misc';
+import { IFeatureComment } from '../store/featurecomments/types';
+import { IPersona } from '../store/personas/types';
+import { IWorkflowPersona } from '../store/workflowpersonas/types';
 
 const endpoint = process.env.REACT_APP_API_ENDPOINT ? process.env.REACT_APP_API_ENDPOINT : "/v1"
+
+export const API_CHANGE_GENERAL_INFORMATION = async (workspaceId: string, euVat: string, externalBillingEmail: string) => {
+
+    return await fetch(endpoint + "/settings/general-info", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ euVat, externalBillingEmail })
+    });
+}
 
 export interface API_SIGN_UP_REQ {
     workspaceName: string
@@ -183,6 +200,7 @@ export const API_DELETE_WORKSPACE = async (id: string) => {
 }
 
 export interface API_FETCH_APP_RESP {
+    mode: string
     workspaces: IWorkspace[]
     memberships: IMembership[]
     account: IAccount
@@ -359,6 +377,9 @@ export interface API_GET_PROJECT_RESP {
     workflows: IWorkflow[]
     subWorkflows: ISubWorkflow[]
     features: IFeature[]
+    featureComments: IFeatureComment[]
+    personas: IPersona[]
+    workflowPersonas: IWorkflowPersona[]
 }
 
 export const API_GET_PROJECT = async (workspaceId: string, projectId: string) => {
@@ -422,7 +443,6 @@ export const API_UPDATE_PROJECT_DESCRIPTION = async (workspaceId: string, id: st
         body: JSON.stringify({ description })
     });
 }
-
 
 
 
@@ -534,6 +554,18 @@ export const API_CHANGE_MILESTONE_COLOR = async (workspaceId: string, id: string
     });
 }
 
+export const API_CHANGE_MILESTONE_ANNOTATIONS = async (workspaceId: string, id: string, annotations: string) => {
+    return await fetch(endpoint + "/milestones/" + id + "/annotations", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ annotations })
+    });
+}
 
 // FEATURES 
 
@@ -639,10 +671,77 @@ export const API_CHANGE_FEATURE_COLOR = async (workspaceId: string, id: string, 
 }
 
 
+export const API_CHANGE_FEATURE_ANNOTATIONS = async (workspaceId: string, id: string, annotations: string) => {
+    return await fetch(endpoint + "/features/" + id + "/annotations", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ annotations })
+    });
+}
 
+
+export const API_CHANGE_FEATURE_ESTIMATE = async (workspaceId: string, id: string, estimate: number) => {
+    return await fetch(endpoint + "/features/" + id + "/estimate", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ estimate })
+    });
+}
+
+
+
+// FEATURE COMMENTS
+
+export const API_CREATE_FEATURE_COMMENT = async (workspaceId: string, featureId: string, id: string, post: string) => {
+    return await fetch(endpoint + "/featurecomments/" + id, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ featureId, post })
+    });
+}
+
+export const API_DELETE_FEATURE_COMMENT = async (workspaceId: string, id: string) => {
+    return await fetch(endpoint + "/featurecomments/" + id, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include'
+    });
+}
+
+
+export const API_UPDATE_FEATURE_COMMENT_POST = async (workspaceId: string, id: string, post: string) => {
+    return await fetch(endpoint + "/featurecomments/" + id + "/post", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ description: post })
+    });
+}
 
 // WORKFLOWS
-
 
 export const API_CREATE_WORKFLOW = async (workspaceId: string, projectId: string, id: string, title: string) => {
     return await fetch(endpoint + "/workflows/" + id, {
@@ -747,6 +846,19 @@ export const API_CLOSE_WORKFLOW = async (workspaceId: string, id: string) => {
     });
 }
 
+
+export const API_CHANGE_WORKFLOW_ANNOTATIONS = async (workspaceId: string, id: string, annotations: string) => {
+    return await fetch(endpoint + "/workflows/" + id + "/annotations", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ annotations })
+    });
+}
 
 // SUBWORKFLOWS
 
@@ -855,6 +967,19 @@ export const API_CLOSE_SUBWORKFLOW = async (workspaceId: string, id: string) => 
     });
 }
 
+export const API_CHANGE_SUBWORKFLOW_ANNOTATIONS = async (workspaceId: string, id: string, annotations: string) => {
+    return await fetch(endpoint + "/subworkflows/" + id + "/annotations", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ annotations })
+    });
+}
+
 export interface API_CONTACT {
     topic: string,
     body: string
@@ -869,4 +994,104 @@ export const API_CONTACT = async (data: API_CONTACT) => {
         },
         body: JSON.stringify(data)
     });
+}
+
+
+// SUBSCRIPTIONS
+
+export const API_GET_CHECKOUT_SESSION = async (workspaceId: string, plan: string, quantity: number) => {
+    return await fetch(endpoint + "/subscription/checkoutsession", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ plan, quantity })
+    });
+}
+
+export const API_CHANGE_SUBSCRIPTION = async (workspaceId: string, plan: string, quantity: number) => {
+    return await fetch(endpoint + "/subscription/change", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ plan, quantity })
+    });
+}
+
+
+// WORKFLOW PERSONAS
+
+export const API_DELETE_WORKFLOWPERSONA = async (workspaceId: string, id: string) => {
+    return await fetch(endpoint + "/workflowpersonas/" + id, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include'
+    });
+}
+
+export const API_CREATE_WORKFLOWPERSONA = async (workspaceId: string, id: string, workflowId: string, personaId: string) => {
+    return await fetch(endpoint + "/workflowpersonas/" + id, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ workflowId, personaId })
+
+    })
+}
+
+// PERSONAS
+
+export const API_CREATE_PERSONA = async (workspaceId: string, projectId: string, id: string, avatar: string, name: string, role: string, description: string, workflowId: string, workflowPersonaId: string) => {
+    return await fetch(endpoint + "/personas/" + id, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ projectId, avatar, name, role, description, workflowId, workflowPersonaId })
+
+    })
+}
+
+export const API_DELTE_PERSONA = async (workspaceId: string, id: string) => {
+    return await fetch(endpoint + "/personas/" + id, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include'
+
+    })
+}
+
+export const API_UPDATE_PERSONA = async (workspaceId: string, id: string, avatar: string, name: string, role: string, description: string) => {
+    return await fetch(endpoint + "/personas/" + id, {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            "Workspace": workspaceId
+        },
+        credentials: 'include',
+        body: JSON.stringify({ avatar, name, role, description })
+    })
 }

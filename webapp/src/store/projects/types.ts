@@ -11,4 +11,5 @@ export interface IProject {
     lastModified: string
     lastModifiedByName: string
     externalLink: string
+    annotations: string
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Board from '../components/Board';
 import EntityDetailsPage from './EntityDetailsPage';
-import { application, getWorkspaceByName, getMembership } from '../store/application/selectors';
+import { application, getWorkspaceByName, getMembership, getSubscription } from '../store/application/selectors';
 import { projects, getProjectById } from '../store/projects/selectors';
 import { RouteComponentProps } from 'react-router'
 import { Route, Switch, Link } from 'react-router-dom'
@@ -14,18 +14,28 @@ import { connect } from 'react-redux'
 import { API_GET_PROJECT, API_GET_PROJECT_RESP } from '../api';
 import { IApplication } from '../store/application/types';
 import { IMilestone } from '../store/milestones/types';
-import { features } from '../store/features/selectors';
+import { features, filterFeaturesOnMilestoneAndSubWorkflow } from '../store/features/selectors';
 import { filterWorkflowsOnProject } from '../store/workflows/selectors';
-import { subWorkflows } from '../store/subworkflows/selectors';
+import { subWorkflows, getSubWorkflowByWorkflow } from '../store/subworkflows/selectors';
 import { ISubWorkflow } from '../store/subworkflows/types';
 import { workflows } from '../store/workflows/selectors';
 import { IWorkflow } from '../store/workflows/types';
 import { loadSubWorkflows } from '../store/subworkflows/actions';
 import { loadFeatures } from '../store/features/actions';
+import { loadPersonas } from '../store/personas/actions';
+import { loadWorkflowPersonas } from '../store/workflowpersonas/actions';
+import { loadFeatureComments } from '../store/featurecomments/actions';
 import { IFeature } from '../store/features/types';
-import { isEditor } from '../core/misc';
+import { isEditor, subIsInactive, subIsTrial, subIsBasicOrAbove } from '../core/misc';
 import { Button } from '../components/elements';
 import queryString from 'query-string'
+import { featureComments, filterFeatureCommentsOnProject } from '../store/featurecomments/selectors';
+import { IFeatureComment } from '../store/featurecomments/types';
+import ContextMenu from '../components/ContextMenu';
+import { workflowPersonas, filterWorkflowPersonasOnProject } from '../store/workflowpersonas/selectors';
+import { personas, filterPersonasOnProject } from '../store/personas/selectors';
+import { IPersona } from '../store/personas/types';
+import { IWorkflowPersona } from '../store/workflowpersonas/types';
 
 const mapStateToProps = (state: AppState) => ({
     application: application(state),
@@ -33,14 +43,20 @@ const mapStateToProps = (state: AppState) => ({
     milestones: milestones(state),
     subWorkflows: subWorkflows(state),
     workflows: workflows(state),
-    features: features(state)
+    features: features(state),
+    featureComments: featureComments(state),
+    personas: personas(state),
+    workflowPersonas: workflowPersonas(state)
 })
 
 const mapDispatchToProps = {
     loadMilestones,
     loadWorkflows,
     loadSubWorkflows,
-    loadFeatures
+    loadFeatures,
+    loadFeatureComments,
+    loadPersonas,
+    loadWorkflowPersonas
 }
 
 interface PropsFromState {
@@ -50,6 +66,9 @@ interface PropsFromState {
     subWorkflows: ISubWorkflow[]
     workflows: IWorkflow[]
     features: IFeature[]
+    featureComments: IFeatureComment[]
+    personas: IPersona[]
+    workflowPersonas: IWorkflowPersona[]
 }
 interface RouterProps extends RouteComponentProps<{
     workspaceName: string
@@ -60,6 +79,9 @@ interface PropsFromDispatch {
     loadWorkflows: typeof loadWorkflows
     loadSubWorkflows: typeof loadSubWorkflows
     loadFeatures: typeof loadFeatures
+    loadFeatureComments: typeof loadFeatureComments
+    loadPersonas: typeof loadPersonas
+    loadWorkflowPersonas: typeof loadWorkflowPersonas
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
@@ -70,6 +92,7 @@ interface State {
     showClosedMilstones: boolean
     copySuccess: boolean
     demo: boolean
+    showPersonas: boolean
 }
 
 class ProjectPage extends Component<Props, State> {
@@ -80,7 +103,8 @@ class ProjectPage extends Component<Props, State> {
             loading: true,
             showClosedMilstones: false,
             copySuccess: false,
-            demo: false
+            demo: false,
+            showPersonas: false
         }
     }
 
@@ -99,6 +123,9 @@ class ProjectPage extends Component<Props, State> {
                             this.props.loadWorkflows(data.workflows)
                             this.props.loadSubWorkflows(data.subWorkflows)
                             this.props.loadFeatures(data.features)
+                            this.props.loadFeatureComments(data.featureComments)
+                            this.props.loadPersonas(data.personas)
+                            this.props.loadWorkflowPersonas(data.workflowPersonas)
                             this.setState({ loading: false })
                         })
                     }
@@ -122,6 +149,38 @@ class ProjectPage extends Component<Props, State> {
 
     }
 
+    download = (filename: string, text: string) => {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    projectCSV = (): string => {
+
+        var csv = `sep=,\n`
+        csv = csv + `release_title, goal_title, activity_title, feature_title, feature_description, feature_status, feature_color,feature_annotations,feature_size \n`
+
+        this.props.milestones.forEach(m =>
+            this.props.workflows.forEach(w => {
+                getSubWorkflowByWorkflow(this.props.subWorkflows, w.id).forEach(sw => {
+                    filterFeaturesOnMilestoneAndSubWorkflow(this.props.features, m.id, sw.id).forEach(f => {
+                        csv = csv + `"${m.title.replace(/"/g, '""',)}","${w.title.replace(/"/g, '""',)}","${sw.title.replace(/"/g, '""',)}","${f.title.replace(/"/g, '""',)}","${f.description.replace(/"/g, '""',)}","${f.status.replace(/"/g, '""',)}","${f.color.replace(/"/g, '""',)}","${f.annotations.replace(/"/g, '""',)}","${f.estimate.toString()}"\n`
+                    })
+                }
+                )
+            }
+            )
+        )
+        return csv
+    }
+
 
     copyToClipboard = (url: string) => {
         const listener = (e: ClipboardEvent) => {
@@ -142,8 +201,10 @@ class ProjectPage extends Component<Props, State> {
         const ws = getWorkspaceByName(this.props.application, workspaceName)!
         const proj = getProjectById(this.props.projects, projectId)!
         const member = getMembership(this.props.application, ws.id)
+        const s = getSubscription(this.props.application, ws.id)
 
-        const viewOnly = !isEditor(member.level)
+        const viewOnly = !isEditor(member.level) || subIsInactive(s)
+        const showPrivateLink = !subIsInactive(s) && (subIsTrial(s) || subIsBasicOrAbove(s)) && ws.allowExternalSharing
 
         return (
             proj ?
@@ -154,15 +215,24 @@ class ProjectPage extends Component<Props, State> {
                         <div className="flex flex-row p-2 ">
                             <div className="flex flex-grow m-1 text-xl items-center">
                                 <div className="flex"><span className="font-semibold">{proj.title}  </span></div>
+                                <ContextMenu icon="more_horiz">
+                                    <div className="rounded bg-white shadow-md  absolute mt-8 top-0 right-0 min-w-full text-xs" >
+                                        <ul className="list-reset">
+                                            <li><Button noborder title="Export CSV" handleOnClick={() => this.download("storymap.csv", this.projectCSV())} /></li>
+                                        </ul>
+                                    </div>
+                                </ContextMenu>
                                 {viewOnly && <div className="flex ml-2"><span className="font-semibold p-1 bg-gray-200 text-xs "> VIEW ONLY  </span></div>}
                             </div>
                             <div className="flex items-center">
                                 <div className=" flex items-center  text-sm">
 
-                                    {ws.allowExternalSharing &&
+
+                                    {showPrivateLink &&
                                         <div >
+
                                             <div className="flex items-center flex-grow">
-                                                <div className="flex flex-grow mr-1 " ><Link target="_blank" className="link" to={"/link/" + proj.externalLink}>External link (view only) </Link></div>
+                                                <div className="flex flex-grow mr-1 " ><Link target="_blank" className="link" to={"/link/" + proj.externalLink}>Share link </Link></div>
                                                 <div>
                                                     {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(process.env.REACT_APP_BASE_URL + "/link/" + proj.externalLink)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
                                                 </div>
@@ -173,13 +243,19 @@ class ProjectPage extends Component<Props, State> {
 
                                         </div>
                                     }
-                                    <div className="ml-2">
+
+                                    <div >
+                                        <Button title="Personas" icon="person_outline" noborder handleOnClick={() => this.setState({ showPersonas: true })} />
+                                    </div>
+
+                                    <div className="">
                                         {this.state.showClosedMilstones ?
-                                            <Button iconColor="text-green-500" icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: false })} />
+                                            <Button iconColor="text-green-500" noborder icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: false })} />
                                             :
-                                            <Button icon="toggle_off " title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: true })} />
+                                            <Button icon="toggle_off " noborder title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: true })} />
                                         }
                                     </div>
+
                                 </div>
                                 <div className="ml-4"><Link to={this.props.match.url + "/p/" + this.props.match.params.projectId}><i className="material-icons text-gray-600">settings</i></Link></div>
                             </div>
@@ -196,6 +272,13 @@ class ProjectPage extends Component<Props, State> {
                             projectId={projectId}
                             workspaceId={ws.id}
                             demo={this.state.demo}
+                            comments={filterFeatureCommentsOnProject(this.props.featureComments, projectId)}
+                            personas={filterPersonasOnProject(this.props.personas, projectId)}
+                            workflowPersonas={filterWorkflowPersonasOnProject(this.props.workflowPersonas, projectId)}
+
+                            showPersonas={this.state.showPersonas}
+                            closePersonas={() => this.setState({ showPersonas: false })}
+                            openPersonas={() => this.setState({ showPersonas: true })}
                         />
 
 

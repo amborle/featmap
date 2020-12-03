@@ -4,6 +4,8 @@ import onClickOutside from "react-onclickoutside";
 interface Props {
   icon: string
   night?: boolean
+  text?: string
+  smallIcon?: boolean
 }
 
 interface State {
@@ -25,12 +27,13 @@ class ContextMenu extends Component<Props, State> {
   }
 
   render() {
+
     return (
-      <div>
+      <div  >
         <div className="relative">
           <div className="flex items-center ">
-            <button onClick={() => this.setState((state) => { return { expand: !state.expand } })} className="flex text-sm p-1 rounded font-semibold ">
-              <i className={"material-icons " + (this.props.night ? "text-white" : "")}>{this.props.icon}</i>
+            <button onClick={() => this.setState((state) => { return { expand: !state.expand } })} className="flex text-sm p-1 rounded font-semibold  ">
+              <i style={this.props.smallIcon ? { fontSize: "18px" } : {}} className={" align-middle material-icons " + (this.props.night ? "text-white" : "")}>{this.props.icon}</i> {this.props.text ? <span className="text-xs font-medium"> {this.props.text}</span> : null}
             </button>
           </div>
           <div onClick={() => this.setState((state) => { return { expand: !state.expand } })}>

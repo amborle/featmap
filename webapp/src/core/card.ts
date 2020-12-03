@@ -17,6 +17,7 @@ export interface ICard {
     lastModified: string
     lastModifiedByName: string
     color: Color
+    annotations: string
 }
 
 export type EntityTypes = IMilestone | ISubWorkflow | IFeature | IWorkflow | IProject

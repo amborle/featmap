@@ -2,6 +2,7 @@ import { Roles, SubscriptionLevels } from "../../core/misc";
 
 
 export interface IApplication {
+    mode: string
     workspaces: IWorkspace[]
     memberships: IMembership[]
     account?: IAccount
@@ -24,7 +25,9 @@ export interface IWorkspace {
     name: string
     createdAt: string
     allowExternalSharing: boolean
-
+    euVat: string
+    externalBillingEmail: string
+    status: string
 }
 
 export interface IAccount {
@@ -48,7 +51,8 @@ export interface ISubscription {
     createdAt: string
     lastModified: string
     lastModifiedByName: string
-    status: string
+    externalStatus: string
+    externalPlanId: string
 }
 
 export interface IInvite {

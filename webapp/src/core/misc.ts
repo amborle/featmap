@@ -1,4 +1,4 @@
-
+import { ISubscription } from "../store/application/types";
 
 export enum Roles {
     VIEWER = "VIEWER",
@@ -17,20 +17,18 @@ export const isEditor = (level: Roles) => {
     return level === Roles.EDITOR || level === Roles.ADMIN || level === Roles.OWNER
 }
 
-
-
 export const daysBetween = (fromDate: Date, toDate: Date) => {
     const oneDay = 24 * 60 * 60 * 1000
     return Math.round(Math.abs((fromDate.getTime() - toDate.getTime()) / (oneDay)));
 }
 
 
-
-
 export enum CardStatus {
     OPEN = "OPEN",
     CLOSED = "CLOSED"
 }
+
+export type personaBarState = { page: "all" } | { page: "persona", personaId: string, edit: boolean } | { page: "create", workflowId: string, workflowTitle: string }
 
 
 export const subscriptionLevelToText = (level: SubscriptionLevels) => {
@@ -39,10 +37,10 @@ export const subscriptionLevelToText = (level: SubscriptionLevels) => {
             return "Trial"
         }
         case SubscriptionLevels.BASIC: {
-            return "Basic"
+            return "Team"
         }
         case SubscriptionLevels.PRO: {
-            return "Pro"
+            return "Business"
         }
 
         default: {
@@ -82,6 +80,106 @@ export enum Color {
     PINK = "PINK"
 }
 
+export enum Annotation2 {
+    RISKY = "Risky",
+    UNCLEAR = "Unclear",
+    SPLIT = "Can be split",
+    DEPENDENCY = "Has dependencies",
+    BLOCKED = "Blocked",
+    DISCUSSION = "Discussion needed",
+    REJECTED = "Rejected",
+    IDEA = "Idea",
+    RESEARCH = "Research needed",
+}
+
+export interface Annotation {
+    name: string
+    description: string
+    icon: string
+}
+
+export class Annotations {
+
+    annotations: Annotation[]
+
+    constructor(annotations: Annotation[]) {
+        this.annotations = annotations;
+    }
+
+    getDescriptionByName = (name: string) => {
+        return this.annotations.find(an => an.name === name)?.description
+    }
+
+    toString = () => {
+        return this.annotations.map(a => a.name).join(",")
+    }
+
+    add = (name: string) => {
+        this.annotations.push(...annotationsFromNames([name]).annotations)
+    }
+
+    remove = (name: string[]) => {
+        name.forEach(n => {
+            this.annotations = this.annotations.filter(an => an.name !== n)
+        })
+
+        return this
+    }
+
+}
+
+export const annotationsFromNames = (names: string[]): Annotations => {
+    const ann = allAnnotations().annotations.flatMap(a => names.find(n => n === a.name) ? a : [])
+    return new Annotations(ann)
+}
+
+export const dbAnnotationsFromNames = (ann: string) => {
+    const list = ann.split(",")
+    return annotationsFromNames(list)
+}
+
+
+export const allAnnotations = () => {
+    return new Annotations(
+        [
+            { name: "RISKY", description: "Risky", icon: "local_fire_department" },
+            { name: "UNCLEAR", description: "Unclear", icon: "help_outline" },
+            { name: "SPLIT", description: "Can be split", icon: "call_split" },
+            { name: "DEPENDENCY", description: "Has dependencies", icon: "timeline" },
+            { name: "BLOCKED", description: "Blocked", icon: "block" },
+            { name: "DISCUSSION", description: "Discussion needed", icon: "group" },
+            { name: "REJECTED", description: "Rejected", icon: "thumb_down" },
+            { name: "IDEA", description: "Idea", icon: "star_border" },
+            { name: "RESEARCH", description: "Research needed", icon: "fact_check" }
+        ]
+    )
+}
+
+export const annotationsToEnums = (text: string): (Annotation2 | null)[] => {
+    const list = text.split(",")
+    const ann = list.map(t => {
+        return Object.keys(Annotation2).map(an => {
+            return an === t ? Annotation2[an as keyof typeof Annotation2] : []
+        }).flat()
+    }
+    ).flat()
+
+    return ann
+}
+
+// export const allAnnotations = () => {
+
+//     let all: Annotation2[] = []
+
+//     for (let ann in Annotation2) {
+//         const a: Annotation2 = Annotation2[ann as keyof typeof Annotation2];
+//         all.push(a)
+//     }
+
+//     return all
+// }
+
+
 export const Colors = new Array<Color>(
     Color.WHITE,
     Color.GREY,
@@ -97,6 +195,8 @@ export const Colors = new Array<Color>(
 );
 
 
+
+
 export const colorToBackgroundColorClass = (color: Color) => {
     switch (color) {
         case Color.WHITE:
@@ -106,13 +206,13 @@ export const colorToBackgroundColorClass = (color: Color) => {
         case Color.RED:
             return "bg-red-400"
         case Color.ORANGE:
-            return "bg-orange-400"
-        case Color.YELLOW:
             return "bg-yellow-500"
+        case Color.YELLOW:
+            return "bg-yellow-300"
         case Color.GREEN:
             return "bg-green-400"
         case Color.TEAL:
-            return "bg-teal-400"
+            return "bg-green-600"
         case Color.BLUE:
             return "bg-blue-400"
         case Color.INDIGO:
@@ -131,19 +231,19 @@ export const colorToBackgroundColorClass = (color: Color) => {
 export const colorToBorderColorClass = (color: Color) => {
     switch (color) {
         case Color.WHITE:
-            return "border-gray-500"
+            return "border-gray-300"
         case Color.GREY:
             return "border-gray-500"
         case Color.RED:
             return "border-red-400"
         case Color.ORANGE:
-            return "border-orange-400"
-        case Color.YELLOW:
             return "border-yellow-500"
+        case Color.YELLOW:
+            return "border-yellow-300"
         case Color.GREEN:
             return "border-green-400"
         case Color.TEAL:
-            return "border-teal-400"
+            return "border-green-600"
         case Color.BLUE:
             return "border-blue-400"
         case Color.INDIGO:
@@ -157,6 +257,48 @@ export const colorToBorderColorClass = (color: Color) => {
         default:
             return "border-gray-500"
     }
+}
+
+export const subIsInactive = (sub: ISubscription) => {
+    switch (sub.externalStatus) {
+
+        case "incomplete_expired":
+        case "incomplete":
+        case "past_due":
+        case "canceled":
+            return true
+        case "trialing":
+            return (new Date(sub.expirationDate)) < new Date()
+        case "active":
+            return false
+        default:
+            return true
+    }
+}
+
+export const mustCreateNewSub = (sub: ISubscription) => {
+    switch (sub.externalStatus) {
+        case "incomplete_expired":
+        case "incomplete":
+        case "trialing":
+        case "canceled":
+            return true
+        default:
+            return false
+    }
+}
+
+export const subIsTrial = (sub: ISubscription) => {
+    return sub.externalStatus === "trialing"
+}
+
+
+export const subIsProOrAbove = (sub: ISubscription) => {
+    return sub.level === SubscriptionLevels.PRO
+}
+
+export const subIsBasicOrAbove = (sub: ISubscription) => {
+    return sub.level === SubscriptionLevels.PRO || sub.level === SubscriptionLevels.BASIC
 }
 
 

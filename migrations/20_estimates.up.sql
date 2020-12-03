@@ -1,0 +1,1 @@
+ALTER TABLE public.features ADD estimate int NOT NULL DEFAULT 0;

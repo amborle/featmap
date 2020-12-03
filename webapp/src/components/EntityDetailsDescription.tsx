@@ -263,7 +263,7 @@ class EntityDetailsDescription extends Component<Props, State> {
                                     >
                                         {({ form }: FieldProps<{ description: string }>) => (
                                             <div className="flex flex-col mt-1 ">
-                                                <div className="markdown" >
+                                                <div >
                                                     <textarea autoFocus rows={20} value={form.values.description} onChange={form.handleChange} placeholder="Description" id="description" className="rounded p-2  border w-full  	" />
                                                 </div>
                                                 <span className="text-xs right p-1">The description supports formatting through <a rel="noopener noreferrer" target="_blank" className="link" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a>.</span>
@@ -280,12 +280,12 @@ class EntityDetailsDescription extends Component<Props, State> {
                                                 </div>)
                                                 :
                                                 <div>
-                                                    <div className="text-left markdown overflow-auto">
+                                                    <div className="text-left markdown-body overflow-auto">
                                                         <ReactMarkdown source={this.props.entity.description} linkTarget="_blank" />
                                                     </div>
                                                 </div>
                                             }
-                                            <div className="mt-1">
+                                            <div className="mt-4">
                                                 {!(this.props.viewOnly || closed) && <Button title="Edit description" icon="edit" handleOnClick={() => this.setState({ edit: true })} />}
                                             </div>
                                         </div>

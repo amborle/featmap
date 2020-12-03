@@ -15,6 +15,8 @@ import { IFeature } from '../store/features/types';
 import { projects, getProjectById } from '../store/projects/selectors';
 import { IProject } from '../store/projects/types';
 import { application } from '../store/application/selectors';
+import { filterFeatureCommentsOnFeature, featureComments } from '../store/featurecomments/selectors';
+import { IFeatureComment } from '../store/featurecomments/types';
 
 const mapStateToProps = (state: AppState) => ({
   application: application(state),
@@ -22,6 +24,7 @@ const mapStateToProps = (state: AppState) => ({
   subWorkflows: subWorkflows(state),
   workflows: workflows(state),
   features: features(state),
+  featureComments: featureComments(state),
   projects: projects(state)
 })
 
@@ -35,6 +38,7 @@ interface PropsFromState {
   subWorkflows: ISubWorkflow[]
   workflows: IWorkflow[]
   features: IFeature[]
+  featureComments: IFeatureComment[]
   projects: IProject[]
 }
 
@@ -77,35 +81,37 @@ class ExternalEntityDetailsPage extends Component<Props, State> {
     if (this.props.match.params.milestoneId) {
       const ms = getMilestone(this.props.milestones, this.props.match.params.milestoneId)
       return (
-        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={ms} url={this.props.match.url} close={this.close} />
+        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={ms} url={this.props.match.url} close={this.close} comments={[]} />
       )
     }
 
     else if (this.props.match.params.subWorkflowId) {
       const ms = getSubWorkflow(this.props.subWorkflows, this.props.match.params.subWorkflowId)
       return (
-        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={ms} url={this.props.match.url} close={this.close} />
+        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={ms} url={this.props.match.url} close={this.close} comments={[]} />
       )
     }
 
     else if (this.props.match.params.workflowId) {
       const ms = getWorkflow(this.props.workflows, this.props.match.params.workflowId)
       return (
-        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={ms} url={this.props.match.url} close={this.close} />
+        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={ms} url={this.props.match.url} close={this.close} comments={[]} />
       )
     }
 
     else if (this.props.match.params.featureId) {
       const p = getFeature(this.props.features, this.props.match.params.featureId)
+      const c = filterFeatureCommentsOnFeature(this.props.featureComments, this.props.match.params.featureId)
+
       return (
-        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={p} url={this.props.match.url} close={this.close} />
+        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={p} url={this.props.match.url} close={this.close} comments={c} />
       )
     }
 
     else if (this.props.match.params.projectId2) {
       const p = getProjectById(this.props.projects, this.props.match.params.projectId2)!
       return (
-        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={p} url={this.props.match.url} close={this.close} />
+        <EntityDetailsModal demo={this.props.demo} viewOnly={viewOnly} entity={p} url={this.props.match.url} close={this.close} comments={[]} />
       )
     }
   }

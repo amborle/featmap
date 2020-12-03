@@ -7,6 +7,7 @@ export interface State {
 
 export const applicationInitialState: State = {
     application: {
+        mode: "",
         workspaces: [],
         memberships: [],
         messages: [],

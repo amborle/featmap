@@ -48,6 +48,23 @@ export function reducer(state: State = initialState, action: Actions) {
                 items: state.items.filter(x => x.id !== id)
             }
         }
+
+        case ActionTypes.DELETE_FEATURES_BY_MILESTONE: {
+            const id = action.payload
+            return {
+                ...state,
+                items: state.items.filter(x => x.milestoneId !== id)
+            }
+        }
+
+        case ActionTypes.DELETE_FEATURES_BY_SUBWORKFLOW: {
+            const id = action.payload
+            return {
+                ...state,
+                items: state.items.filter(x => x.subWorkflowId !== id)
+            }
+        }
+
         case ActionTypes.MOVE_FEATURE: {
             const { id, toMilestoneId, toSubWorkflowId, index, ts, by } = action.payload
 

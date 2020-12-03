@@ -4,6 +4,7 @@ import { AppState } from '../store'
 import onClickOutside from "react-onclickoutside";
 import EntityDetailsBody from './EntityDetailsBody';
 import { EntityTypes } from '../core/card'
+import { IFeatureComment } from '../store/featurecomments/types';
 
 const mapStateToProps = (state: AppState) => ({
 })
@@ -19,10 +20,11 @@ interface PropsFromDispatch {
 
 interface SelfProps {
   entity: EntityTypes
+  comments: IFeatureComment[]
   url: string
   close: () => void
   viewOnly: boolean
-  demo: boolean
+  demo: boolean 
 }
 
 
@@ -47,7 +49,7 @@ class EntityDetailsModal extends Component<Props, State> {
   }
 
   render() {
-    const Body = class Body extends Component<{ demo: boolean; viewOnly: boolean, url: string, card: EntityTypes, close: () => void }> {
+    const Body = class Body extends Component<{  comments: IFeatureComment[], demo: boolean; viewOnly: boolean, url: string, card: EntityTypes, close: () => void }> {
 
       handleClickOutside = () => {
         this.props.close()
@@ -55,8 +57,8 @@ class EntityDetailsModal extends Component<Props, State> {
 
       render() {
         return (
-          <div className=" w-full  max-w-xl   fm-max-dialog  overflow-y-auto ">
-            <EntityDetailsBody demo={this.props.demo} viewOnly={this.props.viewOnly} url={this.props.url} entity={this.props.card} close={this.props.close}/>
+          <div className=" w-full  max-w-5xl   fm-max-dialog  overflow-y-auto ">
+            <EntityDetailsBody demo={this.props.demo} viewOnly={this.props.viewOnly} url={this.props.url} comments={this.props.comments} entity={this.props.card} close={this.props.close} />
           </div>
         )
       }
@@ -66,7 +68,7 @@ class EntityDetailsModal extends Component<Props, State> {
 
     return (
       <div style={{ background: ' rgba(0,0,0,.75)' }} className="fixed p-5 z-0 top-0 left-0 h-full w-full  flex items-start  bg-gray-100 text-sm" >
-        <DialogWithClickOutside demo={this.props.demo} viewOnly={this.props.viewOnly} url={this.props.url} card={this.props.entity} close={this.props.close}/>
+        <DialogWithClickOutside demo={this.props.demo} comments={this.props.comments} viewOnly={this.props.viewOnly} url={this.props.url} card={this.props.entity} close={this.props.close} />
       </div >
     );
   }

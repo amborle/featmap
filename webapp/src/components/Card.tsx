@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
-import { Color, colorToBorderColorClass } from '../core/misc';
+import { Color, colorToBorderColorClass, dbAnnotationsFromNames } from '../core/misc';
 
 type Props = {
   title: string
@@ -8,48 +8,85 @@ type Props = {
   status?: string
   small?: boolean
   color?: Color
-  rightLink?: () => void
   bottomLink?: () => void
-  bottomStatus?: string
+  nbrOfItems?: number
+  nbrOfComments?: number
+  annotations: string
+  estimate?: number
 };
 
 type State = {};
 
 class Card extends Component<Props, State> {
+
   render() {
+
+    const annos = dbAnnotationsFromNames(this.props.annotations)
 
     const color = this.props.color && (this.props.color !== Color.WHITE) ? this.props.color : null
 
+    const title = this.props.title.length > 50 ? this.props.title.substring(0, 50) + " (...)" : this.props.title
+
     return (
+      <div>
+        <div style={{ fontSize: '.70rem' }} className={"flex flex-row flex-no-shrink w-32   bg-white  overflow-hidden border   " + (this.props.small ? " " : " h-16 ") + (color ? " border-l-4 " + colorToBorderColorClass(color) + " " : " " + colorToBorderColorClass(Color.WHITE) + " ")}>
 
-      <div className={"flex flex-row flex-no-shrink w-32 text-xs bg-white  overflow-hidden border  rounded " + (this.props.small ? " " : " h-16 ") + (color ? " border-l-4 " + colorToBorderColorClass(color) + " " : " " + colorToBorderColorClass(Color.WHITE) + " ")}>
+          <Link className="flex flex-col flex-grow" to={this.props.link}>
 
-        <div className="flex flex-col flex-grow ">
 
-          <Link className="flex-grow p-1 overflow-hidden " to={this.props.link}>
-            <span className={this.props.status === "CLOSED" ? "line-through" : ""}> {this.props.title} </span>
+            <div className="flex-grow p-1 overflow-hidden">
+              <span className={this.props.status === "CLOSED" ? "line-through" : ""}> {title} </span>
+            </div>
+
+
+            <div className=" flex p-1 flex-row">
+              {this.props.nbrOfItems && !(this.props.nbrOfItems === 0) ?
+                <div className=" flex ">
+                  <div>{this.props.nbrOfItems} items</div>
+                </div>
+                :
+                null
+              }
+
+              {this.props.nbrOfComments! > 0 ?
+                <div title={this.props.nbrOfComments + " comments"} className="whitespace-nowrap " >
+                  {this.props.nbrOfComments!}<i style={{ fontSize: "12px" }} className="material-icons align-middle">chat_bubble_outline </i>
+                </div>
+
+                :
+                null
+              }
+              <div className="flex flex-grow"></div>
+
+              {this.props.annotations ?
+                annos.annotations.map((a, i) => {
+                  return <div className="bg-gray-200" key={i}> <i style={{ fontSize: "14px" }} title={a.description} className=" text-gray-700 material-icons align-middle">{a.icon}</i></div>
+                })
+                :
+                null
+              }
+
+              {this.props.estimate && !(this.props.estimate === 0) ?
+                <div className="whitespace-nowrap bg-gray-200 px-1 " >
+                  <span title={"Size is " + this.props.estimate}> {this.props.estimate}</span>
+                </div>
+                :
+                null
+              }
+
+            </div>
+
           </Link>
-          {this.props.bottomLink &&
-            <div className=" flex ml-2  ">
-              <div className="font-bold text-lg "><button className=" hover:text-gray-800 text-gray-500" onClick={this.props.bottomLink}>+</button></div>
-            </div>
-          }
-          {this.props.bottomStatus &&
-            <div className=" flex p-1 ">
-              <div style={{ fontSize: "9px" }}>{this.props.bottomStatus}</div>
-            </div>
-          }
+
 
         </div>
-        {this.props.rightLink &&
-          <div className="flex items-center p-1">
-            <div className="font-bold text-lg "><button className=" hover:text-gray-800 text-gray-500" onClick={this.props.rightLink}>+</button></div>
+        {this.props.bottomLink &&
+          <div className=" flex w-32 h-6  flex-no-shrink -mt-1 -mb-2  justify-center">
+            <div className="flex showme font-bold text-xl   "><button className=" hover:text-gray-800 text-gray-500" onClick={this.props.bottomLink}>+</button></div>
           </div>
         }
 
-
       </div>
-
 
     );
   }

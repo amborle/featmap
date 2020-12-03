@@ -1,21 +1,19 @@
 module github.com/amborle/featmap
 
-go 1.12
+go 1.15
 
 require (
-	github.com/amborle/featmap/featmap v0.0.0-20190808101947-044b2a832368
-	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
-	github.com/elazarl/go-bindata-assetfs v1.0.0
-	github.com/go-chi/chi v4.0.2+incompatible
-	github.com/go-chi/cors v1.0.0
-	github.com/go-chi/jwtauth v3.3.0+incompatible
+	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/elazarl/go-bindata-assetfs v1.0.1
+	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/go-chi/cors v1.1.1
+	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/go-chi/render v1.0.1
-	github.com/golang-migrate/migrate/v4 v4.5.0
+	github.com/golang-migrate/migrate/v4 v4.13.0
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/lib/pq v1.2.0
-	github.com/mailgun/mailgun-go/v3 v3.6.0
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/satori/go.uuid v1.2.0
-
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	github.com/stripe/stripe-go v70.15.0+incompatible
+	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9
 )

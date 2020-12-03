@@ -4,7 +4,7 @@ import { AppState } from '../store'
 import { deleteMilestone, updateMilestone, createMilestone } from '../store/milestones/actions';
 import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../store/subworkflows/actions';
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
-import { deleteFeature, updateFeature, createFeature } from '../store/features/actions';
+import { deleteFeature, deleteAllFeaturesByMilestone, deleteAllFeaturesBySubWorkflow, updateFeature, createFeature } from '../store/features/actions';
 import { deleteProject, updateProject, createProject } from '../store/projects/actions';
 import {
   API_DELETE_MILESTONE,
@@ -20,7 +20,7 @@ import {
   API_CHANGE_MILESTONE_COLOR,
   API_CHANGE_WORKFLOW_COLOR,
   API_CHANGE_SUBWORKFLOW_COLOR,
-  API_CLOSE_SUBWORKFLOW, API_OPEN_SUBWORKFLOW, API_OPEN_WORKFLOW, API_CLOSE_WORKFLOW
+  API_CLOSE_SUBWORKFLOW, API_OPEN_SUBWORKFLOW, API_OPEN_WORKFLOW, API_CLOSE_WORKFLOW, API_CHANGE_FEATURE_ESTIMATE
 } from "../api";
 import TimeAgo from 'react-timeago'
 import { Button } from './elements';
@@ -29,11 +29,22 @@ import { IApplication } from '../store/application/types';
 import { EntityTypes } from '../core/card'
 import CardDetailsTitle from './EntityDetailsTitle'
 import CardDetailsDescription from './EntityDetailsDescription';
+import CardDetailsComments from './EntityDetailsComments';
 import { CardStatus, colorToBackgroundColorClass, Colors, colorToBorderColorClass, Color } from '../core/misc';
 import ContextMenu from './ContextMenu';
+import { IFeatureComment } from '../store/featurecomments/types';
+import EntityDetailsAnnotations from './EntityDetailsAnnotations';
+import * as Yup from 'yup';
+import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, } from 'formik';
+import { IFeature } from '../store/features/types';
+import { IMilestone } from '../store/milestones/types';
+import { ISubWorkflow } from '../store/subworkflows/types';
+import { IWorkflow } from '../store/workflows/types';
+import { getSubWorkflowByWorkflow, subWorkflows } from '../store/subworkflows/selectors';
 
 const mapStateToProps = (state: AppState) => ({
-  application: application(state)
+  application: application(state),
+  subWorkflows: subWorkflows(state)
 })
 
 const mapDispatchToProps = {
@@ -49,6 +60,8 @@ const mapDispatchToProps = {
   updateFeature,
   createFeature,
   deleteFeature,
+  deleteAllFeaturesByMilestone,
+  deleteAllFeaturesBySubWorkflow,
   updateProject,
   createProject,
   deleteProject,
@@ -56,6 +69,7 @@ const mapDispatchToProps = {
 
 interface PropsFromState {
   application: IApplication
+  subWorkflows: ISubWorkflow[]
 }
 
 interface PropsFromDispatch {
@@ -71,6 +85,8 @@ interface PropsFromDispatch {
   updateFeature: typeof updateFeature
   createFeature: typeof createFeature
   deleteFeature: typeof deleteFeature
+  deleteAllFeaturesByMilestone: typeof deleteAllFeaturesByMilestone
+  deleteAllFeaturesBySubWorkflow: typeof deleteAllFeaturesBySubWorkflow
   updateProject: typeof updateProject
   createProject: typeof createProject
   deleteProject: typeof deleteProject
@@ -79,6 +95,7 @@ interface PropsFromDispatch {
 
 interface SelfProps {
   entity: EntityTypes
+  comments: IFeatureComment[]
   url: string
   close: () => void
   viewOnly: boolean
@@ -91,6 +108,7 @@ type Props = & PropsFromState & PropsFromDispatch & SelfProps
 interface State {
   copySuccess: boolean
   editTitle: boolean
+  editAnnotations: boolean
 }
 
 interface formValues {
@@ -100,7 +118,7 @@ interface formValues {
 class EntityDetailsBody extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = { editTitle: false, copySuccess: false }
+    this.state = { editTitle: false, copySuccess: false, editAnnotations: false }
   }
 
   urlRef = React.createRef<HTMLInputElement>()
@@ -143,6 +161,8 @@ class EntityDetailsBody extends Component<Props, State> {
       case "milestone": {
 
         this.props.deleteMilestone(card.id)
+        this.props.deleteAllFeaturesByMilestone(card.id)
+
         if (!this.props.demo) {
           API_DELETE_MILESTONE(card.workspaceId, card.id)
             .then(response => {
@@ -160,6 +180,9 @@ class EntityDetailsBody extends Component<Props, State> {
       case "subworkflow": {
 
         this.props.deleteSubWorkflow(card.id)
+        this.props.deleteAllFeaturesBySubWorkflow(card.id)
+
+
         if (!this.props.demo) {
           API_DELETE_SUBWORKFLOW(card.workspaceId, card.id)
             .then(response => {
@@ -176,6 +199,9 @@ class EntityDetailsBody extends Component<Props, State> {
       case "workflow": {
 
         this.props.deleteWorkflow(card.id)
+
+        getSubWorkflowByWorkflow(this.props.subWorkflows, card.id).forEach(x => this.props.deleteAllFeaturesBySubWorkflow(x.id))
+
         if (!this.props.demo) {
           API_DELETE_WORKFLOW(card.workspaceId, card.id)
             .then(response => {
@@ -223,6 +249,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_CLOSE_FEATURE(card.workspaceId, card.id)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IFeature) => {
+                  this.props.updateFeature(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -238,6 +268,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_CLOSE_MILESTONE(card.workspaceId, card.id)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IMilestone) => {
+                  this.props.updateMilestone(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -251,12 +285,16 @@ class EntityDetailsBody extends Component<Props, State> {
         this.props.updateSubWorkflow({ ...card, status: CardStatus.CLOSED, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
         if (!this.props.demo) {
           API_CLOSE_SUBWORKFLOW(card.workspaceId, card.id)
-              .then(response => {
-                if (response.ok) {
-                } else {
-                  alert("Something went wrong.")
+            .then(response => {
+              if (response.ok) {
+                response.json().then((data: ISubWorkflow) => {
+                  this.props.updateSubWorkflow(data)
                 }
-              })
+                )
+              } else {
+                alert("Something went wrong.")
+              }
+            })
         }
         break;
       }
@@ -266,12 +304,16 @@ class EntityDetailsBody extends Component<Props, State> {
         this.props.updateWorkflow({ ...card, status: CardStatus.CLOSED, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
         if (!this.props.demo) {
           API_CLOSE_WORKFLOW(card.workspaceId, card.id)
-              .then(response => {
-                if (response.ok) {
-                } else {
-                  alert("Something went wrong.")
+            .then(response => {
+              if (response.ok) {
+                response.json().then((data: IFeature) => {
+                  this.props.updateFeature(data)
                 }
-              })
+                )
+              } else {
+                alert("Something went wrong.")
+              }
+            })
         }
         break;
       }
@@ -293,6 +335,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_OPEN_FEATURE(card.workspaceId, card.id)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IFeature) => {
+                  this.props.updateFeature(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -307,6 +353,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_OPEN_MILESTONE(card.workspaceId, card.id)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IMilestone) => {
+                  this.props.updateMilestone(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -319,12 +369,16 @@ class EntityDetailsBody extends Component<Props, State> {
         this.props.updateSubWorkflow({ ...card, status: CardStatus.OPEN, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
         if (!this.props.demo) {
           API_OPEN_SUBWORKFLOW(card.workspaceId, card.id)
-              .then(response => {
-                if (response.ok) {
-                } else {
-                  alert("Something went wrong.")
+            .then(response => {
+              if (response.ok) {
+                response.json().then((data: ISubWorkflow) => {
+                  this.props.updateSubWorkflow(data)
                 }
-              })
+                )
+              } else {
+                alert("Something went wrong.")
+              }
+            })
         }
         break;
       }
@@ -333,12 +387,16 @@ class EntityDetailsBody extends Component<Props, State> {
         this.props.updateWorkflow({ ...card, status: CardStatus.OPEN, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
         if (!this.props.demo) {
           API_OPEN_WORKFLOW(card.workspaceId, card.id)
-              .then(response => {
-                if (response.ok) {
-                } else {
-                  alert("Something went wrong.")
+            .then(response => {
+              if (response.ok) {
+                response.json().then((data: IWorkflow) => {
+                  this.props.updateWorkflow(data)
                 }
-              })
+                )
+              } else {
+                alert("Something went wrong.")
+              }
+            })
         }
         break;
       }
@@ -361,6 +419,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_CHANGE_FEATURE_COLOR(card.workspaceId, card.id, color)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IFeature) => {
+                  this.props.updateFeature(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -375,6 +437,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_CHANGE_MILESTONE_COLOR(card.workspaceId, card.id, color)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IMilestone) => {
+                  this.props.updateMilestone(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -389,6 +455,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_CHANGE_WORKFLOW_COLOR(card.workspaceId, card.id, color)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: IWorkflow) => {
+                  this.props.updateWorkflow(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -403,6 +473,10 @@ class EntityDetailsBody extends Component<Props, State> {
           API_CHANGE_SUBWORKFLOW_COLOR(card.workspaceId, card.id, color)
             .then(response => {
               if (response.ok) {
+                response.json().then((data: ISubWorkflow) => {
+                  this.props.updateSubWorkflow(data)
+                }
+                )
               } else {
                 alert("Something went wrong.")
               }
@@ -415,6 +489,8 @@ class EntityDetailsBody extends Component<Props, State> {
         break;
     }
   }
+
+
 
   render() {
     let open = true
@@ -430,12 +506,22 @@ class EntityDetailsBody extends Component<Props, State> {
 
     return (
       <div className="flex flex-col">
-        <div className={"flex w-full h-4 " + (this.props.entity.kind === "project" ? "" : colorToBackgroundColorClass(this.props.entity.color))}/>
+        <div className={"flex w-full h-4 " + (this.props.entity.kind === "project" ? "" : colorToBackgroundColorClass(this.props.entity.color))} />
         <div className={"flex w-full h-full flex-row bg-white overflow-auto "}>
 
           <div className="flex flex-col w-full p-2  ">
+
+            <EntityDetailsAnnotations viewOnly={this.props.viewOnly} open={open} card={this.props.entity} demo={this.props.demo} edit={false} close={() => alert("close")} />
+
+
             <CardDetailsTitle demo={this.props.demo} viewOnly={this.props.viewOnly} card={this.props.entity} app={this.props.application} url={this.props.url} close={this.props.close} />
             <CardDetailsDescription demo={this.props.demo} viewOnly={this.props.viewOnly} entity={this.props.entity} app={this.props.application} url={this.props.url} close={this.props.close} />
+
+            {this.props.entity.kind === "feature" ? (
+              <CardDetailsComments demo={this.props.demo} viewOnly={this.props.viewOnly} entity={this.props.entity} app={this.props.application} comments={this.props.comments} open={open} />
+            ) : null
+            }
+
           </div>
           <div className="flex flex-col w-64 bg-gray-200 p-2">
             <div className="flex justify-end items-center">
@@ -459,9 +545,9 @@ class EntityDetailsBody extends Component<Props, State> {
                 Permalink
             </div>
               <div className="flex items-center flex-grow">
-                <div className="flex flex-grow " ><input onClick={() => this.urlRef.current!.select()} ref={this.urlRef} readOnly className="p-1 w-full  border mr-1" value={ window.location.protocol + "//"  + window.location.host  + this.props.url} /></div>
+                <div className="flex flex-grow " ><input onClick={() => this.urlRef.current!.select()} ref={this.urlRef} readOnly className="p-1 w-full  border mr-1" value={window.location.protocol + "//" + window.location.host + this.props.url} /></div>
                 <div>
-                  {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(window.location.protocol + "//"  + window.location.host  + this.props.url)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
+                  {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(window.location.protocol + "//" + window.location.host + this.props.url)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
                 </div>
                 <div >
                   <i style={{ fontSize: "16px" }} className={"material-icons  text-green-500" + (!this.state.copySuccess ? " invisible" : "")}>check_circle</i>
@@ -507,6 +593,78 @@ class EntityDetailsBody extends Component<Props, State> {
               null
             }
 
+            {!this.props.viewOnly && open ?
+              <div>
+
+                {(() => {
+                  switch (this.props.entity.kind) {
+                    case "feature": {
+
+                      const fea: IFeature = this.props.entity
+                      return <div className="flex flex-col text-xs mt-1  ">
+                        <div className=" mb-1 font-bold">
+                          Size</div>
+                        <div className="flex items-center flex-grow">
+                          <Formik
+                            initialValues={{ estimate: this.props.entity.estimate }}
+
+
+                            validationSchema={Yup.object().shape({
+                              estimate: Yup.number().integer("Must be an integer.").max(999, 'Max 999.').min(0, "Must be positive.")
+                            })}
+
+                            onSubmit={(values: { estimate: number }, actions: FormikActions<{ estimate: number }>) => {
+
+                              const est = values.estimate ? values.estimate : 0
+
+                              this.props.updateFeature({ ...fea, estimate: est, lastModified: new Date().toISOString(), lastModifiedByName: this.props.application.account === undefined ? "demo" : this.props.application.account.name })
+
+
+                              if (!this.props.demo) {
+                                API_CHANGE_FEATURE_ESTIMATE(this.props.entity.workspaceId, this.props.entity.id, est)
+                                  .then(response => {
+                                    if (response.ok) {
+                                      response.json().then((data: IFeature) => {
+                                        this.props.updateFeature(data)
+                                      }
+                                      )
+                                    } else {
+                                      alert("Something went wrong.")
+                                    }
+                                  })
+                              }
+                            }}
+                          >
+                            {(formikBag: FormikProps<{ estimate: number }>) => (
+                              <Form>
+                                <Field
+                                  name="estimate"
+                                  component="input"
+                                  type="number"
+                                  min="0"
+                                  max="999"
+                                  className="rounded p-2 border mr-2 w-16"
+                                  onBlur={() => formikBag.submitForm()}
+                                />
+
+                                {formikBag.touched.estimate && formikBag.errors.estimate && <div className="text-red-500 font-bold text-xs">{formikBag.errors.estimate}</div>}
+                              </Form>
+                            )}
+                          </Formik>
+
+                        </div>
+                      </div>
+                    }
+                    default:
+                  }
+                })()
+                }
+              </div>
+              :
+              null
+            }
+
+
 
             <div className="flex flex-col text-xs mt-3 ">
               <div className=" mb-1 font-bold">
@@ -548,7 +706,6 @@ class EntityDetailsBody extends Component<Props, State> {
                       }
                     })()
                     }
-
                   </div>
                   :
                   null

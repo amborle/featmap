@@ -2,18 +2,27 @@
 import React, { SFC, FunctionComponent } from 'react';
 
 export const OldButton: SFC<{ title: string }> = (props) => (
-    <div className="p-2 flex-no-shrink whitespace-no-wrap  rounded  text-xs  font-bold bg-gray-200 uppercase ">{props.title}</div>
+    <div className="p-2 flex-no-shrink whitespace-nowrap  rounded  text-xs  font-bold bg-gray-200 uppercase ">{props.title}</div>
 )
 
 
 export const Button: SFC<{ iconColor?: string, title?: string, small?: boolean, button?: boolean, secondary?: boolean, icon?: string, handleOnClick?: () => void, warning?: boolean, primary?: boolean, submit?: boolean, noborder?: boolean }> = (props) => (
     <button type={(props.submit ? "submit" : "button")} onClick={props.handleOnClick}>
-        <div className={" flex flex-no-shrink whitespace-no-wrap    font-medium items-center " + (props.small ? " p-1 " : " p-2 ") + (!props.noborder && " border ") + (!props.primary && " text-black  ") + (props.primary && " text-white bg-green-400  border-green-400 ") + (props.secondary && " bg-gray-200  border-gray-200 ") + (props.warning && " border-red-500 text-red-500 font-semibold")}>
+        <div className={" flex flex-no-shrink whitespace-nowrap    font-medium items-center " + (props.small ? " p-1 " : " p-2 ") + (!props.noborder && " border ") + (!props.primary && " text-black  ") + (props.primary && " text-white bg-green-400  border-green-400 ") + (props.secondary && " bg-gray-200  border-gray-200 ") + (props.warning && " border-red-500 text-red-500 font-semibold")}>
             {props.icon && <div className="flex"><i style={{ fontSize: "18px" }} className={"material-icons " + (props.iconColor ? props.iconColor : "")} > {props.icon}</i ></div>}
             <div className="flex ml-1 ">{props.title}</div>
         </div>
     </button>
 )
+
+export const DarkButton: SFC<{ submit?: boolean, primary?: boolean, handleOnClick?: () => void }> = (props) => (
+    <button type={(props.submit ? "submit" : "button")} className={"whitespace-nowrap p-1 px-2 font-medium text-xs  leading-6 rounded  uppercase " + (props.primary ? " bg-green-500 " : " bg-gray-900")} onClick={props.handleOnClick}>
+        {props.children}
+    </button>
+
+)
+
+
 
 export const CardLayout: FunctionComponent<{ title?: string }> = props => {
     return (

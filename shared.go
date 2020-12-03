@@ -1,10 +1,48 @@
 package main
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 func subHasExpired(s *Subscription) bool {
 	b := s.ExpirationDate.Before(time.Now().UTC())
 	return b
+}
+
+var validAnnotations = []string{
+	"RISKY",
+	"UNCLEAR",
+	"SPLIT",
+	"DEPENDENCY",
+	"BLOCKED",
+	"DISCUSSION",
+	"REJECTED",
+	"IDEA",
+	"RESEARCH",
+}
+
+func areAnnotationsValid(names string) bool {
+	if len(names) == 0 {
+		return true
+	}
+
+	for _, n := range strings.Split(names, ",") {
+		if !isAnnotationValid(n) {
+			return false
+		}
+	}
+	return true
+}
+
+func isAnnotationValid(name string) bool {
+
+	for _, n := range validAnnotations {
+		if n == name {
+			return true
+		}
+	}
+	return false
 }
 
 var countries = []string{

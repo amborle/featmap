@@ -7,5 +7,6 @@ export interface IFeature extends ICard {
     milestoneId: string
     subWorkflowId: string
     status: CardStatus
+    estimate: number
 }
 

@@ -1,1 +1,0 @@
-alter table workflows drop column status;

@@ -3,37 +3,45 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/amborle/featmap/webapp"
-	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/stripe/stripe-go"
+
 	"github.com/amborle/featmap/migrations"
-	"github.com/elazarl/go-bindata-assetfs"
+	"github.com/amborle/featmap/webapp"
+	assetfs "github.com/elazarl/go-bindata-assetfs"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
 	"github.com/jmoiron/sqlx"
 )
 
 // Configuration ...
 type Configuration struct {
-	Environment        string `json:"environment"`
-	AppSiteURL         string `json:"appSiteURL"`
-	DbConnectionString string `json:"dbConnectionString"`
-	JWTSecret          string `json:"jwtSecret"`
-	Port               string `json:"port"`
-	EmailFrom          string `json:"emailFrom"`
-	SMTPServer         string `json:"smtpServer"`
-	SMTPPort           string `json:"smtpPort"`
-	SMTPUser           string `json:"smtpUser"`
-	SMTPPass           string `json:"smtpPass"`
+	Environment         string `json:"environment"`
+	Mode                string `json:"mode"`
+	AppSiteURL          string `json:"appSiteURL"`
+	DbConnectionString  string `json:"dbConnectionString"`
+	JWTSecret           string `json:"jwtSecret"`
+	Port                string `json:"port"`
+	EmailFrom           string `json:"emailFrom"`
+	SMTPServer          string `json:"smtpServer"`
+	SMTPPort            string `json:"smtpPort"`
+	SMTPUser            string `json:"smtpUser"`
+	SMTPPass            string `json:"smtpPass"`
+	StripeKey           string `json:"stripeKey"`
+	StripeWebhookSecret string `json:"stripeWebhookSecret"`
+	StripeBasicPlan     string `json:"stripeBasicPlan"`
+	StripeProPlan       string `json:"stripeProPlan"`
 }
 
 func main() {
@@ -46,22 +54,22 @@ func main() {
 	r.Use(middleware.Recoverer)
 	// r.Use(middleware.SetHeader("Content-Type", "application/json"))
 
-	// CORS
-	corsConfiguration := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "Workspace", "X-CSRF-Token"},
-		ExposedHeaders:   []string{""},
-		AllowCredentials: true,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	})
-
-	r.Use(corsConfiguration.Handler)
-
 	config, err := readConfiguration()
 	if err != nil {
 		log.Fatalln("no conf.json found")
 	}
+
+	// CORS
+	corsConfiguration := cors.New(cors.Options{
+		AllowedOrigins:   []string{config.AppSiteURL, "http://localhost:3000"}, // localhost is for development work
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "Workspace", "X-CSRF-Token"},
+		ExposedHeaders:   []string{""},
+		AllowCredentials: true,
+		MaxAge:           300,
+	})
+
+	r.Use(corsConfiguration.Handler)
 
 	db, err := sqlx.Connect("postgres", config.DbConnectionString)
 	if err != nil {
@@ -102,23 +110,27 @@ func main() {
 
 	r.Use(User())
 
+	stripe.Key = config.StripeKey
+
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Route("/v1/users", usersAPI)     // Nothing is needed
-	r.Route("/v1/link", linkAPI)       // Nothing is needed
+	r.Route("/v1/users", usersAPI)               // Nothing is needed
+	r.Route("/v1/link", linkAPI)                 // Nothing is needed
+	r.Route("/v1/subscription", subscriptionAPI) // Nothing is needed
+
 	r.Route("/v1/account", accountAPI) // Account needed
-	r.Route("/v1/", workspaceApi)      // Account + workspace is needed
+	r.Route("/v1/", workspaceAPI)      // Account + workspace is needed
 
 	files := &assetfs.AssetFS{
-		Asset:     webapp.Asset,
-		AssetDir:  webapp.AssetDir,		
-		Prefix:    "webapp/build/static",
+		Asset:    webapp.Asset,
+		AssetDir: webapp.AssetDir,
+		Prefix:   "webapp/build/static",
 	}
 
-	FileServer(r, "/static", files)
+	fileServer(r, "/static", files)
 
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		index, _ := webapp.Asset("webapp/build/index.html")
@@ -153,7 +165,7 @@ func readConfiguration() (Configuration, error) {
 	return configuration, err
 }
 
-func FileServer(r chi.Router, path string, root http.FileSystem) {
+func fileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit URL parameters.")
 	}

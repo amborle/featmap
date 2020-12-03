@@ -8,6 +8,9 @@ type Workspace struct {
 	Name                 string    `db:"name" json:"name"`
 	CreatedAt            time.Time `db:"created_at" json:"createdAt"`
 	AllowExternalSharing bool      `db:"allow_external_sharing" json:"allowExternalSharing"`
+	ExternalCustomerID   string    `db:"external_customer_id" json:"-"`
+	EUVAT                string    `db:"eu_vat" json:"euVat"`
+	ExternalBillingEmail string    `db:"external_billing_email" json:"externalBillingEmail"`
 }
 
 // Account ...
@@ -22,22 +25,26 @@ type Account struct {
 	EmailConfirmationKey     string    `db:"email_confirmation_key" json:"-"`
 	EmailConfirmationPending bool      `db:"email_confirmation_pending" json:"emailConfirmationPending"`
 	PasswordResetKey         string    `db:"password_reset_key" json:"-"`
-	LatestActivity 	time.Time		`db:"latest_activity" json:"-"` 
+	LatestActivity           time.Time `db:"latest_activity" json:"-"`
 }
 
 // Subscription ...
 type Subscription struct {
-	WorkspaceID        string    `db:"workspace_id" json:"workspaceId"`
-	ID                 string    `db:"id" json:"id"`
-	Level              string    `db:"level" json:"level"`
-	NumberOfEditors    int       `db:"number_of_editors" json:"numberOfEditors"`
-	FromDate           time.Time `db:"from_date" json:"fromDate"`
-	ExpirationDate     time.Time `db:"expiration_date" json:"expirationDate"`
-	CreatedByName      string    `db:"created_by_name" json:"createdByName"`
-	CreatedAt          time.Time `db:"created_at" json:"createdAt"`
-	LastModified       time.Time `db:"last_modified" json:"lastModified"`
-	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
-	Status             string    `db:"status" json:"status"`
+	WorkspaceID                string    `db:"workspace_id" json:"workspaceId"`
+	ID                         string    `db:"id" json:"id"`
+	Level                      string    `db:"level" json:"level"`
+	NumberOfEditors            int       `db:"number_of_editors" json:"numberOfEditors"`
+	FromDate                   time.Time `db:"from_date" json:"fromDate"`
+	ExpirationDate             time.Time `db:"expiration_date" json:"expirationDate"`
+	CreatedByName              string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt                  time.Time `db:"created_at" json:"createdAt"`
+	LastModified               time.Time `db:"last_modified" json:"lastModified"`
+	LastModifiedByName         string    `db:"last_modified_by_name" json:"lastModifiedByName"`
+	Status                     string    `db:"status" json:"externalStatus"`
+	ExternalCustomerID         string    `db:"external_customer_id" json:"-"`
+	ExternalPlanID             string    `db:"external_plan_id" json:"-"`
+	ExternalSubscriptionID     string    `db:"external_subscription_id" json:"-"`
+	ExternalSubscriptionItemID string    `db:"external_subscription_item_id" json:"-"`
 }
 
 // Member ...
@@ -76,6 +83,7 @@ type Project struct {
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	ExternalLink       string    `db:"external_link" json:"externalLink"`
+	Annotations        string    `db:"annotations" json:"annotations"`
 }
 
 // Milestone ...
@@ -92,6 +100,7 @@ type Milestone struct {
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	Color              string    `db:"color" json:"color"`
+	Annotations        string    `db:"annotations" json:"annotations"`
 }
 
 // Workflow ...
@@ -108,6 +117,7 @@ type Workflow struct {
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	Color              string    `db:"color" json:"color"`
 	Status             string    `db:"status" json:"status"`
+	Annotations        string    `db:"annotations" json:"annotations"`
 }
 
 // SubWorkflow ...
@@ -124,6 +134,7 @@ type SubWorkflow struct {
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	Color              string    `db:"color" json:"color"`
 	Status             string    `db:"status" json:"status"`
+	Annotations        string    `db:"annotations" json:"annotations"`
 }
 
 // Feature ...
@@ -141,4 +152,49 @@ type Feature struct {
 	LastModified       time.Time `db:"last_modified" json:"lastModified"`
 	LastModifiedByName string    `db:"last_modified_by_name" json:"lastModifiedByName"`
 	Color              string    `db:"color" json:"color"`
+	Annotations        string    `db:"annotations" json:"annotations"`
+	Estimate           int       `db:"estimate" json:"estimate"`
+}
+
+// FeatureComment ...
+type FeatureComment struct {
+	WorkspaceID   string    `db:"workspace_id" json:"workspaceId"`
+	ID            string    `db:"id" json:"id"`
+	FeatureID     string    `db:"feature_id" json:"featureId"`
+	ProjectID     string    `db:"project_id" json:"projectId"`
+	Post          string    `db:"post" json:"post"`
+	CreatedByName string    `db:"created_by_name" json:"createdByName"`
+	CreatedAt     time.Time `db:"created_at" json:"createdAt"`
+	LastModified  time.Time `db:"last_modified" json:"lastModified"`
+	MemberID      string    `db:"-" json:"memberId"`
+}
+
+// FeatureCommentOwner ...
+type FeatureCommentOwner struct {
+	WorkspaceID      string `db:"workspace_id" json:"workspaceId"`
+	ID               string `db:"id" json:"id"`
+	FeatureCommentID string `db:"feature_comment_id" json:"featureCommentId"`
+	MemberID         string `db:"member_id" json:"memberId"`
+	ProjectID        string `db:"project_id" json:"projectId"`
+}
+
+// Persona ...
+type Persona struct {
+	WorkspaceID string    `db:"workspace_id" json:"workspaceId"`
+	ProjectID   string    `db:"project_id" json:"projectId"`
+	ID          string    `db:"id" json:"id"`
+	Name        string    `db:"name" json:"name"`
+	Role        string    `db:"role" json:"role"`
+	Avatar      string    `db:"avatar" json:"avatar"`
+	Description string    `db:"description" json:"description"`
+	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
+}
+
+// WorkflowPersona ...
+type WorkflowPersona struct {
+	WorkspaceID string `db:"workspace_id" json:"workspaceId"`
+	ProjectID   string `db:"project_id" json:"projectId"`
+	WorkflowID  string `db:"workflow_id" json:"workflowId"`
+	ID          string `db:"id" json:"id"`
+	PersonaID   string `db:"persona_id" json:"personaId"`
 }

@@ -20,6 +20,12 @@ export const filterFeaturesOnMilestoneAndSubWorkflow = (ff: IFeature[], mileston
     return ff.filter(f => f.milestoneId === milestoneId).filter(x => x.subWorkflowId === subWorkflowId)
 }
 
+export const filterFeaturesOnSubWorkflow = (ff: IFeature[], subWorkflowId: string) => {
+    return ff.filter(x => x.subWorkflowId === subWorkflowId)
+}
+
+
+
 export const filterFeaturesOnMilestone = (ff: IFeature[], milestoneId: string) => {
     return ff.filter(f => f.milestoneId === milestoneId)
 }

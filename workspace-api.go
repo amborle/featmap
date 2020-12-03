@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/go-chi/render"
 
 	"net/http"
@@ -8,7 +10,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func workspaceApi(r chi.Router) {
+func workspaceAPI(r chi.Router) {
 
 	r.Use(RequireAccount())
 	r.Use(RequireMember())
@@ -19,6 +21,7 @@ func workspaceApi(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireOwner())
+		r.Use(requireDeleteableWorkspace())
 		r.Post("/delete", deleteWorkspace)
 	})
 
@@ -33,6 +36,7 @@ func workspaceApi(r chi.Router) {
 
 		r.Route("/members/{ID}", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
+				r.Use(RequireSubscription())
 				r.Post("/level", updateMemberLevel)
 			})
 
@@ -44,12 +48,19 @@ func workspaceApi(r chi.Router) {
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAdmin())
+		r.Use(RequireSubscription())
 		r.Post("/invites", createInvite)
 	})
 
 	r.Group(func(r chi.Router) {
 		r.Use(RequireAdmin())
+		r.Use(RequireSubscription())
 		r.Post("/settings/allow-external-sharing", changeExternalSharingRequest)
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(RequireOwner())
+		r.Post("/settings/general-info", changeGeneralInfo)
 	})
 
 	r.Group(func(r chi.Router) {
@@ -57,6 +68,7 @@ func workspaceApi(r chi.Router) {
 
 		r.Route("/invites/{ID}", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
+				r.Use(RequireSubscription())
 				r.Post("/resend", resendInvite)
 			})
 
@@ -80,6 +92,7 @@ func workspaceApi(r chi.Router) {
 					})
 
 					r.Group(func(r chi.Router) {
+						r.Use(RequireSubscription())
 						r.Use(RequireEditor())
 						r.Post("/", createProject)
 						r.Delete("/", deleteProject)
@@ -89,6 +102,7 @@ func workspaceApi(r chi.Router) {
 				})
 
 				r.Route("/milestones/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createMilestone)
 					r.Delete("/", deleteMilestone)
@@ -98,9 +112,11 @@ func workspaceApi(r chi.Router) {
 					r.Post("/open", openMilestone)
 					r.Post("/close", closeMilestone)
 					r.Post("/color", changeColorOnMilestone)
+					r.Post("/annotations", changeAnnotationsOnMilestone)
 				})
 
 				r.Route("/workflows/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createWorkflow)
 					r.Delete("/", deleteWorkflow)
@@ -110,9 +126,11 @@ func workspaceApi(r chi.Router) {
 					r.Post("/color", changeColorOnWorkflow)
 					r.Post("/open", openWorkflow)
 					r.Post("/close", closeWorkflow)
+					r.Post("/annotations", changeAnnotationsOnWorkflow)
 				})
 
 				r.Route("/subworkflows/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createSubWorkflow)
 					r.Post("/rename", renameSubWorkflow)
@@ -122,9 +140,11 @@ func workspaceApi(r chi.Router) {
 					r.Post("/color", changeColorOnSubWorkflow)
 					r.Post("/open", openSubWorkflow)
 					r.Post("/close", closeSubWorkflow)
+					r.Post("/annotations", changeAnnotationsOnSubWorkflow)
 				})
 
 				r.Route("/features/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
 					r.Use(RequireEditor())
 					r.Post("/", createFeature)
 					r.Post("/rename", renameFeature)
@@ -134,7 +154,33 @@ func workspaceApi(r chi.Router) {
 					r.Post("/open", openFeature)
 					r.Post("/close", closeFeature)
 					r.Post("/color", changeColorOnFeature)
+					r.Post("/annotations", changeAnnotationsOnFeature)
+					r.Post("/estimate", changeEstimateOnFeature)
 				})
+
+				r.Route("/featurecomments/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
+					r.Use(RequireEditor())
+					r.Post("/", createFeatureComment)
+					r.Delete("/", deleteFeatureComment)
+					r.Post("/post", updateFeatureCommentPost)
+				})
+
+				r.Route("/workflowpersonas/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
+					r.Use(RequireEditor())
+					r.Post("/", createWorkflowPersona)
+					r.Delete("/", deleteWorkflowPersona)
+				})
+
+				r.Route("/personas/{ID}", func(r chi.Router) {
+					r.Use(RequireSubscription())
+					r.Use(RequireEditor())
+					r.Post("/", createPersona)
+					r.Delete("/", deletePersona)
+					r.Put("/", updatePersona)
+				})
+
 			})
 	})
 }
@@ -268,6 +314,20 @@ func changeExternalSharingRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func changeGeneralInfo(w http.ResponseWriter, r *http.Request) {
+	data := &changeGeneralInfoRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	err := GetEnv(r).Service.ChangeGeneralInfo(data.EUVAT, data.ExternalBillingEmail)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+}
+
 // Projects
 type createProjectRequest struct {
 	Title string `json:"title"`
@@ -295,11 +355,14 @@ func createProject(w http.ResponseWriter, r *http.Request) {
 }
 
 type projectResponse struct {
-	Project      *Project       `json:"project"`
-	Milestones   []*Milestone   `json:"milestones"`
-	Workflows    []*Workflow    `json:"workflows"`
-	SubWorkflows []*SubWorkflow `json:"subWorkflows"`
-	Features     []*Feature     `json:"features"`
+	Project          *Project           `json:"project"`
+	Milestones       []*Milestone       `json:"milestones"`
+	Workflows        []*Workflow        `json:"workflows"`
+	SubWorkflows     []*SubWorkflow     `json:"subWorkflows"`
+	Features         []*Feature         `json:"features"`
+	FeatureComments  []*FeatureComment  `json:"featureComments"`
+	Personas         []*Persona         `json:"personas"`
+	WorkflowPersonas []*WorkflowPersona `json:"workflowPersonas"`
 }
 
 func getProjectExtended(w http.ResponseWriter, r *http.Request) {
@@ -312,12 +375,18 @@ func getProjectExtended(w http.ResponseWriter, r *http.Request) {
 	workflows := s.GetWorkflowsByProject(id)
 	subworkflows := s.GetSubWorkflowsByProject(id)
 	features := s.GetFeaturesByProject(id)
+	featureComments := s.GetFeatureCommentsByProject(id)
+	personas := s.GetPersonasByProject(id)
+	workflowPersonas := s.GetWorkflowPersonasByProject(id)
 	oo := projectResponse{
-		Project:      project,
-		Milestones:   milestones,
-		Workflows:    workflows,
-		SubWorkflows: subworkflows,
-		Features:     features,
+		Project:          project,
+		Milestones:       milestones,
+		Workflows:        workflows,
+		SubWorkflows:     subworkflows,
+		Features:         features,
+		FeatureComments:  featureComments,
+		Personas:         personas,
+		WorkflowPersonas: workflowPersonas,
 	}
 
 	render.JSON(w, r, oo)
@@ -507,6 +576,23 @@ func changeColorOnMilestone(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, f)
 }
 
+func changeAnnotationsOnMilestone(w http.ResponseWriter, r *http.Request) {
+	data := &changeAnnotationRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.UpdateAnnotationsOnMilestone(id, data.Annotations)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
 // Workflows
 
 type createWorkflowRequest struct {
@@ -636,6 +722,23 @@ func openWorkflow(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 
 	f, err := GetEnv(r).Service.OpenWorkflow(id)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func changeAnnotationsOnWorkflow(w http.ResponseWriter, r *http.Request) {
+	data := &changeAnnotationRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.UpdateAnnotationsOnWorkflow(id, data.Annotations)
 	if err != nil {
 		_ = render.Render(w, r, ErrInvalidRequest(err))
 		return
@@ -780,6 +883,23 @@ func openSubWorkflow(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, f)
 }
 
+func changeAnnotationsOnSubWorkflow(w http.ResponseWriter, r *http.Request) {
+	data := &changeAnnotationRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.UpdateAnnotationsOnSubWorkflow(id, data.Annotations)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
 // Features
 
 type createFeatureRequest struct {
@@ -850,6 +970,26 @@ func deleteFeature(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+func changeEstimateOnFeature(w http.ResponseWriter, r *http.Request) {
+
+	id := chi.URLParam(r, "ID")
+
+	data := &updateEstimateRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	f, err := GetEnv(r).Service.UpdateEstimateOnFeature(id, data.Estimate)
+
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	render.JSON(w, r, f)
+}
+
 type moveFeatureRequest struct {
 	Index           int    `json:"index"`
 	ToSubWorkflowID string `json:"toSubWorkflowId"`
@@ -917,6 +1057,173 @@ func changeColorOnFeature(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, f)
 }
 
+func changeAnnotationsOnFeature(w http.ResponseWriter, r *http.Request) {
+	data := &changeAnnotationRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+
+	f, err := GetEnv(r).Service.UpdateAnnotationsOnFeature(id, data.Annotations)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+// Feature comments
+
+type createFeatureCommentRequest struct {
+	FeatureID string `json:"featureId"`
+	Post      string `json:"post"`
+}
+
+func (p *createFeatureCommentRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+func createFeatureComment(w http.ResponseWriter, r *http.Request) {
+	data := &createFeatureCommentRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+	f, err := GetEnv(r).Service.CreateFeatureCommentWithID(id, data.FeatureID, data.Post)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func updateFeatureCommentPost(w http.ResponseWriter, r *http.Request) {
+	data := &updateDescriptionRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	id := chi.URLParam(r, "ID")
+
+	m, err := GetEnv(r).Service.UpdateFeatureCommentPost(id, data.Description)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, m)
+}
+
+func deleteFeatureComment(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+
+	if err := GetEnv(r).Service.DeleteFeatureComment(id); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.Status(r, http.StatusOK)
+}
+
+// Workflow personas
+
+func deleteWorkflowPersona(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+	log.Println(id)
+
+	if err := GetEnv(r).Service.DeleteWorkflowPersona(id); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.Status(r, http.StatusOK)
+}
+
+func createWorkflowPersona(w http.ResponseWriter, r *http.Request) {
+	data := &createWorkflowPersonaRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+	f, err := GetEnv(r).Service.CreateWorkflowPersonaWithID(id, data.WorkflowID, data.PersonaID)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+type createWorkflowPersonaRequest struct {
+	PersonaID  string `json:"personaId"`
+	WorkflowID string `json:"workflowId"`
+}
+
+func (p *createWorkflowPersonaRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+// Personas
+
+func deletePersona(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+	log.Println(id)
+
+	if err := GetEnv(r).Service.DeletePersona(id); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.Status(r, http.StatusOK)
+}
+
+func createPersona(w http.ResponseWriter, r *http.Request) {
+	data := &createPersonaRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+	f, err := GetEnv(r).Service.CreatePersonaWithID(id, data.ProjectID, data.Avatar, data.Name, data.Role, data.Description, data.WorkflowID, data.WorkflowPersonaID)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+func updatePersona(w http.ResponseWriter, r *http.Request) {
+	data := &createPersonaRequest{}
+	if err := render.Bind(r, data); err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	id := chi.URLParam(r, "ID")
+	f, err := GetEnv(r).Service.UpdatePersona(id, data.Avatar, data.Name, data.Role, data.Description)
+	if err != nil {
+		_ = render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+	render.JSON(w, r, f)
+}
+
+type createPersonaRequest struct {
+	ProjectID         string `json:"projectId"`
+	Avatar            string `json:"avatar"`
+	Name              string `json:"name"`
+	Role              string `json:"role"`
+	Description       string `json:"description"`
+	WorkflowID        string `json:"workflowId"`
+	WorkflowPersonaID string `json:"workflowPersonaId"`
+}
+
+func (p *createPersonaRequest) Bind(r *http.Request) error {
+	return nil
+}
+
 // Common
 
 type renameRequest struct {
@@ -935,10 +1242,26 @@ func (p *updateDescriptionRequest) Bind(r *http.Request) error {
 	return nil
 }
 
+type updateEstimateRequest struct {
+	Estimate int `json:"estimate"`
+}
+
+func (p *updateEstimateRequest) Bind(r *http.Request) error {
+	return nil
+}
+
 type changeColorRequest struct {
 	Color string `json:"color"`
 }
 
 func (p *changeColorRequest) Bind(r *http.Request) error {
+	return nil
+}
+
+type changeAnnotationRequest struct {
+	Annotations string `json:"annotations"`
+}
+
+func (p *changeAnnotationRequest) Bind(r *http.Request) error {
 	return nil
 }

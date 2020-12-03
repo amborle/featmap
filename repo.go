@@ -38,6 +38,7 @@ type Repository interface {
 	StoreSubscription(z *Subscription)
 	FindSubscriptionsByWorkspace(id string) ([]*Subscription, error)
 	FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
+	FindSubscriptionByExternalID(externalSubID string) (*Subscription, error)
 
 	StoreInvite(x *Invite)
 	DeleteInvite(wsid string, id string)
@@ -73,6 +74,26 @@ type Repository interface {
 	FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid string, swid string) ([]*Feature, error)
 	StoreFeature(x *Feature)
 	DeleteFeature(workspaceID string, workflowID string)
+
+	GetFeatureComment(workspaceID string, ID string) (*FeatureComment, error)
+	FindFeatureCommentsByProject(workspaceID string, projectID string) ([]*FeatureComment, error)
+	StoreFeatureComment(x *FeatureComment)
+	DeleteFeatureComment(workspaceID string, commentID string)
+
+	GetFeatureCommentOwner(workspaceID string, ID string) (*FeatureCommentOwner, error)
+	FindFeatureCommentOwnersByProject(workspaceID string, projectID string) ([]*FeatureCommentOwner, error)
+	StoreFeatureCommentOwner(x *FeatureCommentOwner)
+	GetFeatureCommentOwnerByFeatureComment(workspaceID string, ID string) (*FeatureCommentOwner, error)
+
+	GetPersona(workspaceID string, ID string) (*Persona, error)
+	FindPersonasByProject(workspaceID string, projectID string) ([]*Persona, error)
+	StorePersona(x *Persona)
+	DeletePersona(workspaceID string, id string)
+
+	GetWorkflowPersona(workspaceID string, ID string) (*WorkflowPersona, error)
+	FindWorkflowPersonasByProject(workspaceID string, projectID string) ([]*WorkflowPersona, error)
+	StoreWorkflowPersona(x *WorkflowPersona)
+	DeleteWorkflowPersona(workspaceID string, id string)
 }
 
 type repo struct {
@@ -141,10 +162,10 @@ func (a *repo) GetWorkspacesByAccount(id string) ([]*Workspace, error) {
 	return workspaces, nil
 }
 
-const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4"
+const saveWorkspaceQuery = "INSERT INTO workspaces (id, name, created_at, allow_external_sharing, external_customer_id, eu_vat, external_billing_email) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET allow_external_sharing = $4, external_customer_id = $5, eu_vat = $6, external_billing_email = $7"
 
 func (a *repo) StoreWorkspace(x *Workspace) {
-	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing)
+	a.tx.MustExec(saveWorkspaceQuery, x.ID, x.Name, x.CreatedAt, x.AllowExternalSharing, x.ExternalCustomerID, x.EUVAT, x.ExternalBillingEmail)
 }
 
 func (a *repo) DeleteWorkspace(workspaceID string) {
@@ -189,7 +210,7 @@ func (a *repo) GetAccountByPasswordKey(key string) (*Account, error) {
 const saveAccountQuery = "INSERT INTO accounts (id, email, password, created_at, email_confirmation_sent_to, email_confirmed, email_confirmation_key,email_confirmation_pending, password_reset_key, name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO UPDATE SET email = $2, password = $3, email_confirmation_sent_to = $5, email_confirmed = $6,email_confirmation_key = $7,email_confirmation_pending = $8, password_reset_key=$9, name=$10, latest_activity=$11"
 
 func (a *repo) StoreAccount(x *Account) {
-	a.tx.MustExec(saveAccountQuery, x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name,x.LatestActivity)
+	a.tx.MustExec(saveAccountQuery, x.ID, x.Email, x.Password, x.CreatedAt, x.EmailConfirmationSentTo, x.EmailConfirmed, x.EmailConfirmationKey, x.EmailConfirmationPending, x.PasswordResetKey, x.Name, x.LatestActivity)
 
 }
 
@@ -262,10 +283,10 @@ func (a *repo) FindMembersByWorkspace(id string) ([]*Member, error) {
 
 // Subscriptions
 
-const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, status = $11"
+const storeSubQuery = "INSERT INTO subscriptions (id, workspace_id,level, number_of_editors, from_date,expiration_date, created_by_name, created_at, last_modified, last_modified_by_name, status, external_customer_id, external_plan_id, external_subscription_id,external_subscription_item_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT (workspace_id, id) DO UPDATE SET level = $3, number_of_editors = $4, from_date = $5,expiration_date = $6, created_by_name = $7, created_at = $8, last_modified = $9, last_modified_by_name = $10, status = $11, external_customer_id = $12, external_plan_id = $13,  external_subscription_id = $14, external_subscription_item_id = $15"
 
 func (a *repo) StoreSubscription(x *Subscription) {
-	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.Status)
+	a.tx.MustExec(storeSubQuery, x.ID, x.WorkspaceID, x.Level, x.NumberOfEditors, x.FromDate, x.ExpirationDate, x.CreatedByName, x.CreatedAt, x.LastModified, x.LastModifiedByName, x.Status, x.ExternalCustomerID, x.ExternalPlanID, x.ExternalSubscriptionID, x.ExternalSubscriptionItemID)
 }
 
 func (a *repo) FindSubscriptionsByWorkspace(id string) ([]*Subscription, error) {
@@ -287,6 +308,14 @@ func (a *repo) FindSubscriptionsByAccount(accID string) ([]*Subscription, error)
 		return nil, errors.Wrap(err, "no subscriptions found")
 	}
 
+	return x, nil
+}
+
+func (a *repo) FindSubscriptionByExternalID(externalSubID string) (*Subscription, error) {
+	x := &Subscription{}
+	if err := a.tx.Get(x, "SELECT * FROM subscriptions  WHERE external_subscription_id = $1", externalSubID); err != nil {
+		return nil, errors.Wrap(err, "no subscription found")
+	}
 	return x, nil
 }
 
@@ -391,7 +420,7 @@ func (a *repo) FindMilestonesByProject(workspaceID string, projectID string) ([]
 }
 
 func (a *repo) StoreMilestone(x *Milestone) {
-	a.tx.MustExec("INSERT INTO milestones (workspace_id, project_id, id, rank, title, created_at,created_by_name, description, last_modified, last_modified_by_name,status, color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11, $12) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, status = $11,color = $12", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Status, x.Color)
+	a.tx.MustExec("INSERT INTO milestones (workspace_id, project_id, id, rank, title, created_at,created_by_name, description, last_modified, last_modified_by_name,status, color, annotations) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, $11, $12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, status = $11,color = $12, annotations = $13", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Status, x.Color, x.Annotations)
 }
 
 func (a *repo) DeleteMilestone(workspaceID string, milestoneID string) {
@@ -417,7 +446,7 @@ func (a *repo) FindWorkflowsByProject(workspaceID string, projectID string) ([]*
 }
 
 func (a *repo) StoreWorkflow(x *Workflow) {
-	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
+	a.tx.MustExec("INSERT INTO workflows (workspace_id, project_id, id, rank, title, created_at, created_by_name, description,last_modified,last_modified_by_name,color,status,annotations) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12, annotations = $13", x.WorkspaceID, x.ProjectID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status, x.Annotations)
 }
 
 func (a *repo) DeleteWorkflow(workspaceID string, workflowID string) {
@@ -453,7 +482,7 @@ func (a *repo) FindSubWorkflowsByWorkflow(workspaceID string, workflowID string)
 }
 
 func (a *repo) StoreSubWorkflow(x *SubWorkflow) {
-	a.tx.MustExec("INSERT INTO subworkflows (workspace_id, workflow_id, id, rank, title, created_at,created_by_name, description, last_modified,last_modified_by_name,color,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12", x.WorkspaceID, x.WorkflowID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status)
+	a.tx.MustExec("INSERT INTO subworkflows (workspace_id, workflow_id, id, rank, title, created_at,created_by_name, description, last_modified,last_modified_by_name,color,status, annotations) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET workflow_id = $2,rank = $4, title = $5, description = $8, last_modified = $9, last_modified_by_name = $10, color = $11, status = $12, annotations = $13", x.WorkspaceID, x.WorkflowID, x.ID, x.Rank, x.Title, x.CreatedAt, x.CreatedByName, x.Description, x.LastModified, x.LastModifiedByName, x.Color, x.Status, x.Annotations)
 }
 
 func (a *repo) DeleteSubWorkflow(workspaceID string, subWorkflowID string) {
@@ -489,10 +518,134 @@ func (a *repo) FindFeaturesByMilestoneAndSubWorkflow(workspaceID string, mid str
 }
 
 func (a *repo) StoreFeature(x *Feature) {
-	a.tx.MustExec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, rank, title, created_at, description, created_by_name, last_modified,last_modified_by_name, status, color) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,rank = $5, title = $6,  description = $8, last_modified = $10, last_modified_by_name = $11, status = $12, color = $13 ",
-		x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Rank, x.Title, x.CreatedAt, x.Description, x.CreatedByName, x.LastModified, x.LastModifiedByName, x.Status, x.Color)
+	a.tx.MustExec("INSERT INTO features (workspace_id, subworkflow_id, milestone_id, id, rank, title, created_at, description, created_by_name, last_modified,last_modified_by_name, status, color, annotations, estimate) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT (workspace_id, id) DO UPDATE SET subworkflow_id = $2, milestone_id = $3,rank = $5, title = $6,  description = $8, last_modified = $10, last_modified_by_name = $11, status = $12, color = $13,  annotations = $14, estimate = $15",
+		x.WorkspaceID, x.SubWorkflowID, x.MilestoneID, x.ID, x.Rank, x.Title, x.CreatedAt, x.Description, x.CreatedByName, x.LastModified, x.LastModifiedByName, x.Status, x.Color, x.Annotations, x.Estimate)
 }
 
 func (a *repo) DeleteFeature(workspaceID string, featureID string) {
 	a.tx.MustExec("DELETE FROM features WHERE workspace_id=$1 AND id=$2", workspaceID, featureID)
+}
+
+// Feature comments
+
+func (a *repo) GetFeatureComment(workspaceID string, ID string) (*FeatureComment, error) {
+	x := &FeatureComment{}
+	if err := a.tx.Get(x, "SELECT * FROM feature_comments WHERE workspace_id = $1 AND id = $2", workspaceID, ID); err != nil {
+		return nil, errors.Wrap(err, "not found")
+	}
+	return x, nil
+}
+
+func (a *repo) FindFeatureCommentsByProject(workspaceID string, projectID string) ([]*FeatureComment, error) {
+	x := []*FeatureComment{}
+	err := a.tx.Select(&x, "SELECT * FROM feature_comments f WHERE f.workspace_id = $1 AND f.project_id = $2", workspaceID, projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "no found")
+	}
+	return x, nil
+}
+
+func (a *repo) FindFeatureCommentsByFeature(workspaceID string, ID string) (*FeatureComment, error) {
+	x := &FeatureComment{}
+	if err := a.tx.Get(x, "SELECT * FROM feature_comments WHERE workspace_id = $1 AND feature_id = $2", workspaceID, ID); err != nil {
+		return nil, errors.Wrap(err, "not found")
+	}
+	return x, nil
+}
+
+func (a *repo) StoreFeatureComment(x *FeatureComment) {
+	a.tx.MustExec("INSERT INTO feature_comments (workspace_id, id, project_id, feature_id, post, created_at, created_by_name, last_modified) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (workspace_id, id) DO UPDATE SET post = $5, created_by_name = $7, last_modified = $8",
+		x.WorkspaceID, x.ID, x.ProjectID, x.FeatureID, x.Post, x.CreatedAt, x.CreatedByName, x.LastModified)
+}
+
+func (a *repo) DeleteFeatureComment(workspaceID string, commentID string) {
+	a.tx.MustExec("DELETE FROM feature_comments WHERE workspace_id=$1 AND id=$2", workspaceID, commentID)
+}
+
+// Feature comment owners
+
+func (a *repo) GetFeatureCommentOwner(workspaceID string, ID string) (*FeatureCommentOwner, error) {
+	x := &FeatureCommentOwner{}
+	if err := a.tx.Get(x, "SELECT * FROM feature_comment_owners WHERE workspace_id = $1 AND id = $2", workspaceID, ID); err != nil {
+		return nil, errors.Wrap(err, "not found")
+	}
+	return x, nil
+}
+
+func (a *repo) GetFeatureCommentOwnerByFeatureComment(workspaceID string, ID string) (*FeatureCommentOwner, error) {
+	x := &FeatureCommentOwner{}
+	if err := a.tx.Get(x, "SELECT * FROM feature_comment_owners WHERE workspace_id = $1 AND feature_comment_id = $2", workspaceID, ID); err != nil {
+		return nil, errors.Wrap(err, "not found")
+	}
+	return x, nil
+}
+
+func (a *repo) FindFeatureCommentOwnersByProject(workspaceID string, projectID string) ([]*FeatureCommentOwner, error) {
+	x := []*FeatureCommentOwner{}
+	err := a.tx.Select(&x, "SELECT * FROM feature_comment_owners f WHERE f.workspace_id = $1 AND f.project_id = $2", workspaceID, projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "no found")
+	}
+	return x, nil
+}
+
+func (a *repo) StoreFeatureCommentOwner(x *FeatureCommentOwner) {
+	a.tx.MustExec("INSERT INTO feature_comment_owners (workspace_id, id, feature_comment_id, member_id, project_id) VALUES ($1,$2,$3,$4,$5)",
+		x.WorkspaceID, x.ID, x.FeatureCommentID, x.MemberID, x.ProjectID)
+}
+
+// Personas
+
+func (a *repo) GetPersona(workspaceID string, ID string) (*Persona, error) {
+	x := &Persona{}
+	if err := a.tx.Get(x, "SELECT * FROM personas WHERE workspace_id = $1 AND id = $2", workspaceID, ID); err != nil {
+		return nil, errors.Wrap(err, "not found")
+	}
+	return x, nil
+
+}
+
+func (a *repo) FindPersonasByProject(workspaceID string, projectID string) ([]*Persona, error) {
+	x := []*Persona{}
+	err := a.tx.Select(&x, "SELECT * FROM personas f WHERE f.workspace_id = $1 AND f.project_id = $2", workspaceID, projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "no found")
+	}
+	return x, nil
+}
+
+func (a *repo) StorePersona(x *Persona) {
+	a.tx.MustExec("INSERT INTO personas (workspace_id, project_id, id, name, role, avatar, description, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (workspace_id, id) DO UPDATE SET name = $4, role = $5, avatar = $6, description = $7 ",
+		x.WorkspaceID, x.ProjectID, x.ID, x.Name, x.Role, x.Avatar, x.Description, x.CreatedAt)
+}
+
+func (a *repo) DeletePersona(workspaceID string, id string) {
+	a.tx.MustExec("DELETE FROM personas WHERE workspace_id=$1 AND id=$2", workspaceID, id)
+}
+
+// Workflow Personas
+
+func (a *repo) GetWorkflowPersona(workspaceID string, ID string) (*WorkflowPersona, error) {
+	x := &WorkflowPersona{}
+	if err := a.tx.Get(x, "SELECT * FROM workflow_personas WHERE workspace_id = $1 AND id = $2", workspaceID, ID); err != nil {
+		return nil, errors.Wrap(err, "not found")
+	}
+	return x, nil
+}
+
+func (a *repo) FindWorkflowPersonasByProject(workspaceID string, projectID string) ([]*WorkflowPersona, error) {
+	x := []*WorkflowPersona{}
+	err := a.tx.Select(&x, "SELECT * FROM workflow_personas f WHERE f.workspace_id = $1 AND f.project_id = $2", workspaceID, projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "no found")
+	}
+	return x, nil
+}
+func (a *repo) StoreWorkflowPersona(x *WorkflowPersona) {
+	a.tx.MustExec("INSERT INTO workflow_personas (workspace_id, project_id, workflow_id, id, persona_id) VALUES ($1,$2,$3,$4,$5)",
+		x.WorkspaceID, x.ProjectID, x.WorkflowID, x.ID, x.PersonaID)
+}
+
+func (a *repo) DeleteWorkflowPersona(workspaceID string, id string) {
+	a.tx.MustExec("DELETE FROM workflow_personas WHERE workspace_id=$1 AND id=$2", workspaceID, id)
 }
