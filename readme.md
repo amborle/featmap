@@ -54,7 +54,7 @@ Here's a sample  ```conf.json``` you can use:
 ```json
 {  
   "appSiteURL": "http://localhost:5000",
-  "dbConnectionString": "postgresql://postgres:postgres@localhost:5432/databasename?sslmode=disable",
+  "dbConnectionString": "postgresql://username:password@localhost:5432/databasename?sslmode=disable",
   "jwtSecret": "ChangeMeForProduction",
   "port": "5000",
   "emailFrom": "no-reply@example.com",
