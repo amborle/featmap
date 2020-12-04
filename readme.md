@@ -86,7 +86,7 @@ Serving on port 5000
 ```
 Open a browser to http://localhost:5000 and you are ready to go!
 ### Upgrading
-Just download the latest release and swap out the executable. Remember to backup your database.
+Just download the latest release and swap out the executable. Remember to backup your database and the old executable.
 
 ## Monetization
 We believe Featmap is a great tool for product people and we want as many as possible to benefit from it, this is our primary goal. Therefore Featmap is open source and we offer Featmap free of charge for anybody to run on their own server. That being said, it would also be great if Featmap can generate some income. Featmap is offered as a paid service over at https://www.featmap.com. We believe this model is great because it allows us to sustainably build an open source app that as many as possible can benefit from.
