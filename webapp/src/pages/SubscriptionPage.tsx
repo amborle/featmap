@@ -120,9 +120,9 @@ class SubscriptionPage extends Component<Props, State> {
                                                 action: Yup.string()
                                                     .required('Required.'),
                                                 nbrOfEditorsOnBasic: Yup.number()
-                                                    .min(1, "At least one member is required"),
+                                                    .min(1, "At least one editor is required"),
                                                 nbrOfEditorsOnPro: Yup.number()
-                                                    .min(1, "At least one member is required"),
+                                                    .min(1, "At least one editor is required"),
                                             })}
 
                                             onSubmit={(values: subscriptionForm, actions: FormikActions<subscriptionForm>) => {
@@ -131,13 +131,13 @@ class SubscriptionPage extends Component<Props, State> {
 
 
                                                 if (values.action === "basic" && values.nbrOfEditorsOnBasic < this.nbrOfEditors()) {
-                                                    actions.setFieldError("nbrOfEditorsOnBasic", "Need to have at least " + this.nbrOfEditors() + " members.")
+                                                    actions.setFieldError("nbrOfEditorsOnBasic", "Need to have at least " + this.nbrOfEditors() + " editors.")
                                                     actions.setSubmitting(false);
                                                     return
                                                 }
 
                                                 if (values.action === "pro" && values.nbrOfEditorsOnPro < this.nbrOfEditors()) {
-                                                    actions.setFieldError("nbrOfEditorsOnPro", "Need to have at least " + this.nbrOfEditors() + " members.")
+                                                    actions.setFieldError("nbrOfEditorsOnPro", "Need to have at least " + this.nbrOfEditors() + " editors.")
                                                     actions.setSubmitting(false);
                                                     return
                                                 }
@@ -209,7 +209,7 @@ class SubscriptionPage extends Component<Props, State> {
                                                                     <div className=" w-full">
                                                                         <CardLayout title={this.defaultAction() === "basic" && !ns ? "Team (current plan)" : "Team"}>
                                                                             <div >
-                                                                            <div className="p-3 bg-gray-200 my-2">For small teams who wants to focus on building better products. </div>
+                                                                                <div className="p-3 bg-gray-200 my-2">For teams who wants to focus on building better products. </div>
                                                                                 <ul className="list-reset ">
                                                                                     <li className="mb-2 flex items-center">
                                                                                         <div className="mr-1"><i className="material-icons font-bold text-green-500">done</i> </div>
@@ -235,10 +235,10 @@ class SubscriptionPage extends Component<Props, State> {
 
                                                                             </div>
                                                                             <div className=" ">
-                                                                                <span className="text-2xl font-bold">$5</span> / month / member
+                                                                                <span className="text-2xl font-bold">$9</span> / month / editor
                                                                 </div>
                                                                             <div className="mt-4">
-                                                                                Number of members <Field type="number" name="nbrOfEditorsOnBasic" className="ml-2 p-2 border w-16" /> (This workspace currently has {this.nbrOfEditors()} members)
+                                                                                Number of editors <Field type="number" name="nbrOfEditorsOnBasic" className="ml-2 p-2 border w-16" /> (This workspace currently has {this.nbrOfEditors()} editors)
                                                                                     <span className="ml-2 text-red-500 text-xs font-bold">{formikBag.touched.nbrOfEditorsOnBasic && formikBag.errors.nbrOfEditorsOnBasic}</span>
                                                                             </div>
                                                                             <div className="mt-2">
@@ -249,7 +249,7 @@ class SubscriptionPage extends Component<Props, State> {
 
                                                                 </div>
 
-                                                                <div className="flex flex-row">
+                                                                <div className="flex flex-row hidden">
                                                                     <div className="flex align-middle  items-center p-2 w-8">
                                                                         <input
                                                                             type="radio"
@@ -257,14 +257,14 @@ class SubscriptionPage extends Component<Props, State> {
                                                                             defaultChecked={formikBag.values.action === "pro"}
                                                                             name="action"
                                                                             value="pro"
-                                                                            className="w-5 h-5"                                                                            
+                                                                            className="w-5 h-5"
                                                                         />
                                                                     </div>
                                                                     <div className=" w-full">
                                                                         <CardLayout title={this.defaultAction() === "pro" && !ns ? "Business (current plan)" : "Business"}>
 
                                                                             <div >
-                                                                            <div className="p-3 bg-gray-200 my-2">For larger teams or multiple teams. </div>
+                                                                                <div className="p-3 bg-gray-200 my-2">For larger teams or multiple teams. </div>
                                                                                 <ul className="list-reset ">
                                                                                     <li className="mb-2 flex items-center">
                                                                                         <div>Includes everything in <b>Teams</b> with full functionality and </div>
@@ -277,11 +277,11 @@ class SubscriptionPage extends Component<Props, State> {
 
                                                                             </div>
                                                                             <div className=" ">
-                                                                                <span className="text-2xl font-bold">$10</span> / month / member
+                                                                                <span className="text-2xl font-bold">$10</span> / month / editor
                                                                 </div>
                                                                             <div className="mt-4">
-                                                                                Number of members <Field type="number" name="nbrOfEditorsOnPro" className="ml-2 p-2 border w-16" />
-                                                                                <span className="ml-2 text-red-500 text-xs font-bold">{formikBag.touched.nbrOfEditorsOnPro && formikBag.errors.nbrOfEditorsOnPro}</span> (This workspace currently has {this.nbrOfEditors()} members)
+                                                                                Number of editors <Field type="number" name="nbrOfEditorsOnPro" className="ml-2 p-2 border w-16" />
+                                                                                <span className="ml-2 text-red-500 text-xs font-bold">{formikBag.touched.nbrOfEditorsOnPro && formikBag.errors.nbrOfEditorsOnPro}</span> (This workspace currently has {this.nbrOfEditors()} editors)
                                                                                 </div>
                                                                             <div className="mt-2">
                                                                                 Total price is <span className="font-medium text-lg">${formikBag.errors.nbrOfEditorsOnPro ? "0" : formikBag.values.nbrOfEditorsOnPro * 10} </span> / month
@@ -296,14 +296,14 @@ class SubscriptionPage extends Component<Props, State> {
 
                                                                 <div className="flex flex-row  hidden">
                                                                     <div className="flex align-middle  items-center p-2 w-8">
-                                                               
+
                                                                     </div>
                                                                     <div className=" w-full">
                                                                         <CardLayout title={"Enterprise"}>
 
                                                                             <div >
-                                                                            <div className="p-3 bg-gray-200 my-2"> For large organizations with more than 50 members.  </div>
-                                                                                <ul className="list-reset ">                                                                          
+                                                                                <div className="p-3 bg-gray-200 my-2"> For large organizations with more than 50 members.  </div>
+                                                                                <ul className="list-reset ">
                                                                                     <li className="mb-2 flex items-center">
                                                                                         <div className="mr-1"><i className="material-icons font-bold text-green-500">done</i> </div>
                                                                                         <div>Custom pricing</div>
@@ -317,15 +317,15 @@ class SubscriptionPage extends Component<Props, State> {
                                                                                         <div>Premium support</div>
                                                                                     </li>
                                                                                     <li className="mb-2 flex items-center">
-                                                                                    <a className="underline" href="mailto:contact@featmap.com">Contact sales</a>
-                                                                                      
+                                                                                        <a className="underline" href="mailto:contact@featmap.com">Contact sales</a>
+
                                                                                     </li>
-                                                                                    
-                                                               
+
+
                                                                                 </ul>
 
                                                                             </div>
-                                                                            
+
 
                                                                         </CardLayout>
                                                                     </div>
