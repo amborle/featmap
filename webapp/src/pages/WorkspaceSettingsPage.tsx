@@ -333,7 +333,7 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                         null
                     }
 
-                    {(m.level === "OWNER") ?
+                    {(m.level === "OWNER" && hosted) ?
                         <CardLayout title="Billing information">
                             <Formik
                                 initialValues={{ euVat: this.state.euVat, externalBillingEmail: this.state.externalBillingEmail }}
