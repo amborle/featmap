@@ -90,7 +90,7 @@ class SubscriptionPage extends Component<Props, State> {
         const s = getSubscription(this.props.application, ws.id)
         const ns = mustCreateNewSub(s)
 
-
+        const priceOfBasic = process.env.REACT_APP_BASIC_PRICE ? parseInt(process.env.REACT_APP_BASIC_PRICE) : 0
 
         interface subscriptionForm {
             action: "basic" | "pro"
@@ -235,20 +235,20 @@ class SubscriptionPage extends Component<Props, State> {
 
                                                                             </div>
                                                                             <div className=" ">
-                                                                                <span className="text-2xl font-bold">$9</span> / month / editor
+                                                                                <span className="text-2xl font-bold">${priceOfBasic}</span> / month / editor
                                                                 </div>
                                                                             <div className="mt-4">
                                                                                 Number of editors <Field type="number" name="nbrOfEditorsOnBasic" className="ml-2 p-2 border w-16" /> (This workspace currently has {this.nbrOfEditors()} editors)
                                                                                     <span className="ml-2 text-red-500 text-xs font-bold">{formikBag.touched.nbrOfEditorsOnBasic && formikBag.errors.nbrOfEditorsOnBasic}</span>
                                                                             </div>
                                                                             <div className="mt-2">
-                                                                                Total price is <span className="font-medium text-lg">${formikBag.errors.nbrOfEditorsOnBasic ? "0" : formikBag.values.nbrOfEditorsOnBasic * 5} </span> / month
+                                                                                Total price is <span className="font-medium text-lg">${formikBag.errors.nbrOfEditorsOnBasic ? "0" : formikBag.values.nbrOfEditorsOnBasic * priceOfBasic} </span> / month
                                                                 </div>
                                                                         </CardLayout>
                                                                     </div>
 
                                                                 </div>
-
+                                                                {/* 
                                                                 <div className="flex flex-row hidden">
                                                                     <div className="flex align-middle  items-center p-2 w-8">
                                                                         <input
@@ -291,10 +291,10 @@ class SubscriptionPage extends Component<Props, State> {
                                                                     </div>
 
 
-                                                                </div>
+                                                                </div> */}
 
 
-                                                                <div className="flex flex-row  hidden">
+                                                                {/* <div className="flex flex-row  hidden">
                                                                     <div className="flex align-middle  items-center p-2 w-8">
 
                                                                     </div>
@@ -331,7 +331,7 @@ class SubscriptionPage extends Component<Props, State> {
                                                                     </div>
 
 
-                                                                </div>
+                                                                </div> */}
 
                                                                 {ns ?
                                                                     null
