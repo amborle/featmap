@@ -16,6 +16,7 @@ Featmap is a user story mapping tool for product people to build, plan and commu
   - [Configuration](#configuration) 
   - [Run](#run) 
   - [Upgrade](#upgrade) 
+  - [Building from source and running with docker-compose](#Building-from-source-and-running-with-docker-compose)
 - [Monetization](#monetization) 
 - [License](#license) 
 
@@ -52,17 +53,17 @@ In the directory where you placed the binary, create a file called ```conf.json`
 Here's a sample  ```conf.json``` you can use:
 
 ```json
-{  
-  "appSiteURL": "http://localhost:5000",
-  "dbConnectionString": "postgresql://username:password@localhost:5432/databasename?sslmode=disable",
+{
+  "appSiteURL": "https://localhost:5000",
+  "dbConnectionString": "postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable",
   "jwtSecret": "ChangeMeForProduction",
   "port": "5000",
-  "emailFrom": "no-reply@example.com",
-  "smtpServer": "smtp.example.com",
+  "emailFrom": "",
+  "smtpServer": "",
   "smtpPort": "587",
-  "smtpUser": "no-reply@example.com",
-  "smtpPass": "password",
-  "environment": "development" 
+  "smtpUser": "",
+  "smtpPass": "",
+  "environment": "development"
 }
 ```
 Setting | Description
@@ -87,6 +88,38 @@ Serving on port 5000
 Open a browser to http://localhost:5000 and you are ready to go!
 ### Upgrading
 Just download the latest release and swap out the executable. Remember to backup your database and the old executable.
+
+## Building from source and running with docker-compose
+
+Clone the repository
+
+```bash
+git clone https://github.com/amborle/featmap.git
+```
+
+Navigate to the repository.
+
+```bash
+cd featmap
+```
+
+Let's copy the configuration files
+
+```bash
+cp config/.env .
+cp config/conf.json .
+```
+
+Now let's build it.
+
+```bash
+docker-compose build
+```
+
+Startup the services, the app should now be available on the port you defined in you configuration files (default 5000).
+```bash
+docker-compose up -d
+```
 
 ## Monetization
 We believe Featmap is a great tool for product people and we want as many as possible to benefit from it, this is our primary goal. Therefore Featmap is open source and we offer Featmap free of charge for anybody to run on their own server. That being said, it would also be great if Featmap can generate some income. Featmap is offered as a paid service over at https://www.featmap.com. We believe this model is great because it allows us to sustainably build an open source app that as many as possible can benefit from.

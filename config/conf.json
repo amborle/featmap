@@ -1,0 +1,12 @@
+{
+  "appSiteURL": "https://localhost:5000",
+  "dbConnectionString": "postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable",
+  "jwtSecret": "ChangeMeForProduction",
+  "port": "5000",
+  "emailFrom": "",
+  "smtpServer": "",
+  "smtpPort": "587",
+  "smtpUser": "",
+  "smtpPass": "",
+  "environment": "development"
+}

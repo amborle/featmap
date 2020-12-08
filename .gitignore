@@ -50,9 +50,11 @@ _testmain.go
 # use alternative ways to exclude files from git.
 # For example, set up .git/info/exclude or use a global .gitignore.
 
-conf.json
+/conf.json
+/.env
 /webapp/build
 /bin
+/data
 
 .idea
 
