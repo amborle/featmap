@@ -553,9 +553,14 @@ class Board extends Component<Props, State> {
                                                         ]
                                                       })}
 
-                                                      <div className=" flex mt-1 w-2 h-16  flex-no-shrink   justify-center">
-                                                        <div className="flex font-bold text-xl showme   "><button className=" hover:text-gray-800 text-gray-500" onClick={() => this.setState({ showCreateSubWorkflowModal: true, createSubWorkflowWorkflowId: w.id })}>+</button></div>
-                                                      </div>
+                                                      {this.props.viewOnly && !this.props.demo ?
+                                                        <div className="flex mt-1 w-2 h-16  flex-no-shrink justify-center">
+                                                        </div>
+                                                        :
+                                                        <div className="flex mt-1 w-2 h-16  flex-no-shrink justify-center">
+                                                          <div className="flex font-bold text-xl showme"><button className=" hover:text-gray-800 text-gray-500" onClick={() => this.setState({ showCreateSubWorkflowModal: true, createSubWorkflowWorkflowId: w.id })}>+</button></div>
+                                                        </div>
+                                                      }
                                                       {providedDroppable.placeholder}
 
                                                     </div>
