@@ -248,7 +248,7 @@ class Personas extends Component<Props, State> {
 
                                 <div className="flex  flex-row items-baseline">
                                   <div className=" flex flex-col w-full">
-                                    <div className="font-medium text-gray-300">Role</div>
+                                    <div className="font-medium text-gray-300">Name</div>
                                     <div>
                                       <Field autoFocus name="name" className="w-full rounded  p-1 border border-gray-500 bg-gray-900 	" placeholder="E.g. John Smith" />
                                       <div className="m-1 text-red-500 text-xs font-bold"><ErrorMessage name="name" /></div>
