@@ -523,7 +523,7 @@ class EntityDetailsBody extends Component<Props, State> {
             }
 
           </div>
-          <div className="flex flex-col w-64 bg-gray-200 p-2">
+          <div className="flex flex-col w-64 bg-gray-100 p-2">
             <div className="flex justify-end items-center">
               {!this.props.viewOnly ?
                 <ContextMenu icon="more_horiz">
@@ -694,7 +694,7 @@ class EntityDetailsBody extends Component<Props, State> {
                         case "workflow":
                         case "feature":
                           if (this.props.entity.status === "OPEN") {
-                            return <Button icon="check" iconColor="text-green-500" title="Close card" handleOnClick={this.handleClose} />
+                            return <Button secondary icon="check_circle_outline" iconColor="text-red-500" title="Mark card as Closed" handleOnClick={this.handleClose} />
                           }
                           if (this.props.entity.status === "CLOSED") {
                             return <Button secondary title="Reopen card" handleOnClick={this.handleOpen} />
