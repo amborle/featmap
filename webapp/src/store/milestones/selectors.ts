@@ -1,6 +1,7 @@
 import { AppState } from '..'
 import { IMilestone } from './types'
 import { createSelector } from 'reselect'
+import { CardStatus } from '../../core/misc'
 
 const getMilestonesState = ((state: AppState) => state.milestones)
 
@@ -23,6 +24,15 @@ export const getMilestone = (ff: IMilestone[], id: string) => {
 export const filterMilestonesOnProject = (ff: IMilestone[], projectId: string) => {
     return ff.filter(f => f.projectId === projectId)
 }
+
+export const filterClosedMilestones = (ff: IMilestone[]) => {
+    return ff.filter(f => f.status === CardStatus.CLOSED)
+}
+
+export const filterOpenMilestones = (ff: IMilestone[]) => {
+    return ff.filter(f => f.status === CardStatus.OPEN)
+}
+
 
 
 

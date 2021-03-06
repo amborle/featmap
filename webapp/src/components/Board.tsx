@@ -8,6 +8,7 @@ import { moveWorkflow, updateWorkflow } from '../store/workflows/actions';
 import { moveSubWorkflow, updateSubWorkflow } from '../store/subworkflows/actions';
 import { AppState } from '../store'
 import {
+  filterClosedSubWorkflows,
   filterOutClosedSubWorkflows,
   getSubWorkflowByWorkflow
 } from '../store/subworkflows/selectors';
@@ -24,9 +25,9 @@ import Card from './Card';
 import { Types } from './CreateCardModal';
 import { API_MOVE_MILESTONE, API_MOVE_FEATURE, API_MOVE_SUBWORKFLOW, API_MOVE_WORKFLOW, API_DELETE_WORKFLOWPERSONA, API_CREATE_WORKFLOWPERSONA } from '../api';
 import NewCard from './NewCard';
-import { CardStatus, personaBarState } from '../core/misc';
+import { personaBarState } from '../core/misc';
 import NewDimCard from './NewDimCard';
-import { filterOutClosedWorkflows } from "../store/workflows/selectors";
+import { filterClosedWorkflows, filterOutClosedWorkflows } from "../store/workflows/selectors";
 import { IFeatureComment } from '../store/featurecomments/types';
 import { filterFeatureCommentsOnFeature } from '../store/featurecomments/selectors';
 import Personas from './Personas';
@@ -38,6 +39,7 @@ import { getPersona, removeSpecificPersonas, sortPersonas } from '../store/perso
 import { deleteWorkflowPersona, createWorkflowPersona } from '../store/workflowpersonas/actions';
 import { avatar } from '../avatars/';
 import { v4 as uuid } from 'uuid'
+import { filterClosedMilestones, filterOpenMilestones } from '../store/milestones/selectors';
 
 
 interface SelfProps {
@@ -611,9 +613,8 @@ class Board extends Component<Props, State> {
                             {...providedDroppable.droppableProps}
                             style={this.getListStyle(snapshotDroppable.isDraggingOver)}>
                             {
-                              milestones
+                              (!this.props.showClosed ? filterOpenMilestones(milestones) : milestones)
                                 .map((m, index) => {
-                                  const closed = !this.props.showClosed && m.status === CardStatus.CLOSED
 
                                   var ww = workflows
                                   if (!this.props.showClosed) {
@@ -636,118 +637,111 @@ class Board extends Component<Props, State> {
                                           )}>
 
                                           <div className={"flex   pb-1  border-b border-dashed  "}>
-                                            {
-                                              closed ?
-                                                <div className={"flex  w-full  p-1  "}>
-                                                  <div className="">
-                                                    <Card annotations={m.annotations} small color={m.color} status={m.status} title={m.title} link={this.props.url + "/m/" + m.id} />
-                                                  </div>
 
-                                                </div>
+                                            <div className={"flex  w-full  "}>
+                                              <div className="p-1">
+                                                {
 
-                                                :
-                                                <div className={"flex  w-full  "}>
-                                                  <div className="p-1">
-                                                    {
+                                                  (() => {
+                                                    const f = filterFeaturesOnMilestone(features, m.id)
+                                                    const fEstimate = f.map(x => x.estimate).reduce((p, c) => p + c, 0)
 
-                                                      (() => {
-                                                        const f = filterFeaturesOnMilestone(features, m.id)
-                                                        const fEstimate = f.map(x => x.estimate).reduce((p, c) => p + c, 0)
+                                                    return <Card estimate={fEstimate} annotations={m.annotations}
+                                                      nbrOfItems={f.length} color={m.color} status={m.status} title={m.title} link={this.props.url + "/m/" + m.id} />
+                                                  }
+                                                  )()
+                                                }
 
-                                                        return <Card estimate={fEstimate} annotations={m.annotations}
-                                                          nbrOfItems={f.length} color={m.color} status={m.status} title={m.title} link={this.props.url + "/m/" + m.id} />
-                                                      }
-                                                      )()
-                                                    }
+                                              </div>
 
-                                                  </div>
+                                              {ww.map((w, index) => {
 
-                                                  {ww.map((w, index) => {
-
-                                                    var ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
-                                                    if (!this.props.showClosed) {
-                                                      ss = filterOutClosedSubWorkflows(ss)
-                                                    }
+                                                var ss = getSubWorkflowByWorkflow(subWorkflows, w.id)
+                                                if (!this.props.showClosed) {
+                                                  ss = filterOutClosedSubWorkflows(ss)
+                                                }
 
 
-                                                    return [
-                                                      <div className={(index === 0) ? "flex flex-row pl-1 pr-1" : "flex flex-row pl-3 pr-1"} key={w.id}>
-                                                        {ss.length === 0 ?
-                                                          <div className="p-1">
-                                                            <EmptyCard />
-                                                          </div>
-                                                          : null}
-
-                                                        {
-                                                          ss.map(sw => {
-                                                            const ff = filterFeaturesOnMilestoneAndSubWorkflow(features, m.id, sw.id)
-                                                            return [
-                                                              <Droppable key={sw.id} droppableId={"df*" + m.id + "*" + sw.id} type="FEATURE">
-                                                                {(providedDroppable: DroppableProvided, snapshotDroppable: DroppableStateSnapshot) => (
-                                                                  <div className="flex flex-col fm-paren showhim "
-                                                                    ref={providedDroppable.innerRef}
-                                                                    {...providedDroppable.droppableProps}
-                                                                    style={this.getListStyle(snapshotDroppable.isDraggingOver)}>
-                                                                    {ff.map((f, index) => {
-                                                                      return [
-                                                                        <Draggable
-                                                                          isDragDisabled={viewOnly}
-                                                                          key={f.id}
-                                                                          draggableId={"f*" + f.id}
-                                                                          index={index}>
-                                                                          {(providedDraggable: DraggableProvided, snapshotDraggable: DraggableStateSnapshot) => (
-                                                                            <div>
-
-                                                                              <div className="p-1"
-                                                                                ref={providedDraggable.innerRef}
-                                                                                {...providedDraggable.draggableProps}
-                                                                                {...providedDraggable.dragHandleProps}
-                                                                                style={this.getItemStyle(
-                                                                                  snapshotDraggable.isDragging,
-                                                                                  providedDraggable.draggableProps.style
-                                                                                )}>
-
-                                                                                <Card estimate={f.estimate} annotations={f.annotations} nbrOfComments={filterFeatureCommentsOnFeature(this.props.comments, f.id).length} color={f.color} status={f.status} title={f.title} link={this.props.url + "/f/" + f.id} bottomLink={index === ff.length - 1 && !viewOnly ? () => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id }) : undefined} />
-                                                                              </div>
-                                                                            </div>
-                                                                          )}
-                                                                        </Draggable>
-                                                                      ]
-                                                                    }
-                                                                    )}
-                                                                    {providedDroppable.placeholder}
-
-                                                                    {
-                                                                      ff.length === 0 ?
-                                                                        <div className="flex  text-xs p-1">
-                                                                          {!viewOnly ? <NewDimCard>
-                                                                            <button className=" text-gray-400 text-2xl hover:text-gray-800" onClick={() => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id })}>+</button>
-                                                                          </NewDimCard>
-                                                                            :
-                                                                            <EmptyCard />
-                                                                          }
-                                                                        </div>
-                                                                        : null
-
-                                                                    }
-
-                                                                  </div>
-                                                                )}
-                                                              </Droppable>
-                                                            ]
-                                                          })
-
-                                                        }
-
+                                                return [
+                                                  <div className={(index === 0) ? "flex flex-row pl-1 pr-1" : "flex flex-row pl-3 pr-1"} key={w.id}>
+                                                    {ss.length === 0 ?
+                                                      <div className="p-1">
+                                                        <EmptyCard />
                                                       </div>
-                                                    ]
-                                                  })}
-                                                </div>
-                                            }
+                                                      : null}
+
+                                                    {
+                                                      ss.map(sw => {
+                                                        const ff = filterFeaturesOnMilestoneAndSubWorkflow(features, m.id, sw.id)
+                                                        return [
+                                                          <Droppable key={sw.id} droppableId={"df*" + m.id + "*" + sw.id} type="FEATURE">
+                                                            {(providedDroppable: DroppableProvided, snapshotDroppable: DroppableStateSnapshot) => (
+                                                              <div className="flex flex-col fm-paren showhim "
+                                                                ref={providedDroppable.innerRef}
+                                                                {...providedDroppable.droppableProps}
+                                                                style={this.getListStyle(snapshotDroppable.isDraggingOver)}>
+                                                                {ff.map((f, index) => {
+                                                                  return [
+                                                                    <Draggable
+                                                                      isDragDisabled={viewOnly}
+                                                                      key={f.id}
+                                                                      draggableId={"f*" + f.id}
+                                                                      index={index}>
+                                                                      {(providedDraggable: DraggableProvided, snapshotDraggable: DraggableStateSnapshot) => (
+                                                                        <div>
+
+                                                                          <div className="p-1"
+                                                                            ref={providedDraggable.innerRef}
+                                                                            {...providedDraggable.draggableProps}
+                                                                            {...providedDraggable.dragHandleProps}
+                                                                            style={this.getItemStyle(
+                                                                              snapshotDraggable.isDragging,
+                                                                              providedDraggable.draggableProps.style
+                                                                            )}>
+
+                                                                            <Card estimate={f.estimate} annotations={f.annotations} nbrOfComments={filterFeatureCommentsOnFeature(this.props.comments, f.id).length} color={f.color} status={f.status} title={f.title} link={this.props.url + "/f/" + f.id} bottomLink={index === ff.length - 1 && !viewOnly ? () => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id }) : undefined} />
+                                                                          </div>
+                                                                        </div>
+                                                                      )}
+                                                                    </Draggable>
+                                                                  ]
+                                                                }
+                                                                )}
+                                                                {providedDroppable.placeholder}
+
+                                                                {
+                                                                  ff.length === 0 ?
+                                                                    <div className="flex  text-xs p-1">
+                                                                      {!viewOnly ? <NewDimCard>
+                                                                        <button className=" text-gray-400 text-2xl hover:text-gray-800" onClick={() => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id })}>+</button>
+                                                                      </NewDimCard>
+                                                                        :
+                                                                        <EmptyCard />
+                                                                      }
+                                                                    </div>
+                                                                    : null
+
+                                                                }
+
+                                                              </div>
+                                                            )}
+                                                          </Droppable>
+                                                        ]
+                                                      })
+
+                                                    }
+
+                                                  </div>
+                                                ]
+                                              })}
+                                            </div>
+
                                           </div>
+
                                         </div>
 
                                       )}
+
                                     </Draggable>
 
                                   ]
@@ -755,22 +749,86 @@ class Board extends Component<Props, State> {
                                 )
                             }
                             {providedDroppable.placeholder}
-                            <div className="flex   p-2  text-xs ">
+                            <div className="flex flex-col  p-2  text-sm ">
 
-                              {!viewOnly && <NewCard>
-                                <Button title="Add release" icon="add" noborder handleOnClick={() => this.setState({ showCreateMilestoneModal: true })} />
-                              </NewCard>}
+                              <div>
+                                {!viewOnly && <NewCard>
+                                  <Button title="Add release" icon="add" noborder handleOnClick={() => this.setState({ showCreateMilestoneModal: true })} />
+                                </NewCard>}
+                              </div>
+
+                              {!this.props.showClosed &&
+
+                                <div className="mt-2 italic">
+
+                                  {(() => {
+                                    const nbrOfClosedMilestones = filterClosedMilestones(milestones).length
+                                    const nbrOfClosedWorkflows = filterClosedWorkflows(workflows).length
+                                    const nbrOfClosedSubWorkflows = filterClosedSubWorkflows(subWorkflows).length
+
+                                    if (nbrOfClosedMilestones > 0 || nbrOfClosedWorkflows > 0 || nbrOfClosedSubWorkflows > 0) {
+                                      return "Closed cards not shown: "
+                                    }
+                                  })()}
+
+
+                                  {(() => {
+                                    const nbrOfClosedMilestones = filterClosedMilestones(milestones).length
+
+                                    if (nbrOfClosedMilestones === 1) {
+                                      return <span> <b> {nbrOfClosedMilestones}</b> release </span>
+                                    }
+                                    if (nbrOfClosedMilestones > 1) {
+                                      return <span> <b> {nbrOfClosedMilestones}</b> releases </span>
+                                    }
+                                  })()
+                                  }
+
+                                  {(() => {
+                                    const nbrOfClosedWorkflows = filterClosedWorkflows(workflows).length
+
+                                    if (nbrOfClosedWorkflows === 1) {
+                                      return <span> <b> {nbrOfClosedWorkflows}</b> goal</span>
+                                    }
+                                    if (nbrOfClosedWorkflows > 1) {
+                                      return <span> <b> {nbrOfClosedWorkflows}</b> goals </span>
+                                    }
+                                  })()
+                                  }
+
+
+                                  {(() => {
+                                    const nbrOfClosedSubWorkflows = filterClosedSubWorkflows(subWorkflows).length
+
+                                    if (nbrOfClosedSubWorkflows === 1) {
+                                      return <span> <b> {nbrOfClosedSubWorkflows}</b> activity</span>
+                                    }
+                                    if (nbrOfClosedSubWorkflows > 1) {
+                                      return <span> <b> {nbrOfClosedSubWorkflows}</b> activities </span>
+                                    }
+                                  })()
+                                  }
+
+                                </div>
+                              }
+
+
+
 
                             </div>
                           </div>
+
                         </div>
+
 
                       )
 
                     }
                     }
                   </Droppable>
+
                 </div>
+
             }
           </div>
 
