@@ -164,8 +164,7 @@ class ProjectPage extends Component<Props, State> {
 
     projectCSV = (): string => {
 
-        var csv = `sep=,\n`
-        csv = csv + `release_title, goal_title, activity_title, feature_title, feature_description, feature_status, feature_color,feature_annotations,feature_size \n`
+        var csv = `release_title,goal_title,activity_title,feature_title,feature_description,feature_status,feature_color,feature_annotations,feature_size\n`
 
         this.props.milestones.forEach(m =>
             this.props.workflows.forEach(w => {
