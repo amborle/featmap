@@ -1,12 +1,12 @@
-const avatar00 = require("./avatar00.svg") as string;
-const avatar01 = require("./avatar01.svg") as string;
-const avatar02 = require("./avatar02.svg") as string;
-const avatar03 = require("./avatar03.svg") as string;
-const avatar04 = require("./avatar04.svg") as string;
-const avatar05 = require("./avatar05.svg") as string;
-const avatar06 = require("./avatar06.svg") as string;
-const avatar07 = require("./avatar07.svg") as string;
-const avatar08 = require("./avatar08.svg") as string;
+const avatar00 = require("./avatar00.svg").default as string;
+const avatar01 = require("./avatar01.svg").default as string;
+const avatar02 = require("./avatar02.svg").default as string;
+const avatar03 = require("./avatar03.svg").default as string;
+const avatar04 = require("./avatar04.svg").default as string;
+const avatar05 = require("./avatar05.svg").default as string;
+const avatar06 = require("./avatar06.svg").default as string;
+const avatar07 = require("./avatar07.svg").default as string;
+const avatar08 = require("./avatar08.svg").default as string;
 
 
 const avatar = (name: string) => {
