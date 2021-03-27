@@ -200,11 +200,11 @@ class ExternalLinkPage extends Component<Props, State> {
 
                     <Switch>
                         <Route exact path="/" component={() => null} />
-                        <Route exact path={this.props.match.path + "/m/:milestoneId"} render={(props) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
-                        <Route exact path={this.props.match.path + "/sw/:subWorkflowId"} render={(props) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
-                        <Route exact path={this.props.match.path + "/f/:featureId"} render={(props) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
-                        <Route exact path={this.props.match.path + "/w/:workflowId"} render={(props) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
-                        <Route exact path={this.props.match.path + "/p/:projectId2"} render={(props) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
+                        <Route exact path={this.props.match.path + "/m/:milestoneId"} render={(props: any) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
+                        <Route exact path={this.props.match.path + "/sw/:subWorkflowId"} render={(props: any) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
+                        <Route exact path={this.props.match.path + "/f/:featureId"} render={(props: any) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
+                        <Route exact path={this.props.match.path + "/w/:workflowId"} render={(props: any) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
+                        <Route exact path={this.props.match.path + "/p/:projectId2"} render={(props: any) => <ExternalEntityDetailsPage {...props} demo={this.state.demo} />} />
 
                     </Switch>
                 </div>
