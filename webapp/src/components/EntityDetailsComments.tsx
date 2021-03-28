@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { AppState } from '../store'
 
-import { createFeatureComment, updateFeatureComment, deleteFeatureComment } from '../store/featurecomments/actions';
+import { createFeatureCommentAction, updateFeatureCommentAction, deleteFeatureCommentAction } from '../store/featurecomments/actions';
 import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_CREATE_FEATURE_COMMENT, API_DELETE_FEATURE_COMMENT, API_UPDATE_FEATURE_COMMENT_POST } from "../api";
 
@@ -20,9 +20,9 @@ const mapStateToProps = (state: AppState) => ({
 })
 
 const mapDispatchToProps = {
-    createFeatureComment,
-    deleteFeatureComment,
-    updateFeatureComment,
+    createFeatureComment: createFeatureCommentAction,
+    deleteFeatureComment: deleteFeatureCommentAction,
+    updateFeatureComment: updateFeatureCommentAction,
 }
 
 interface PropsFromState {
@@ -30,9 +30,9 @@ interface PropsFromState {
 }
 
 interface PropsFromDispatch {
-    createFeatureComment: typeof createFeatureComment
-    updateFeatureComment: typeof updateFeatureComment
-    deleteFeatureComment: typeof deleteFeatureComment
+    createFeatureComment: typeof createFeatureCommentAction
+    updateFeatureComment: typeof updateFeatureCommentAction
+    deleteFeatureComment: typeof deleteFeatureCommentAction
 }
 interface SelfProps {
     entity: EntityTypes

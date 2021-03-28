@@ -24,7 +24,7 @@ import { loadSubWorkflows } from '../store/subworkflows/actions';
 import { loadFeatures } from '../store/features/actions';
 import { loadPersonas } from '../store/personas/actions';
 import { loadWorkflowPersonas } from '../store/workflowpersonas/actions';
-import { loadFeatureComments } from '../store/featurecomments/actions';
+import { loadFeatureCommentsAction } from '../store/featurecomments/actions';
 import { IFeature } from '../store/features/types';
 import { isEditor, subIsInactive, subIsTrial, subIsBasicOrAbove } from '../core/misc';
 import { Button } from '../components/elements';
@@ -54,7 +54,7 @@ const mapDispatchToProps = {
     loadWorkflows,
     loadSubWorkflows,
     loadFeatures,
-    loadFeatureComments,
+    loadFeatureComments: loadFeatureCommentsAction,
     loadPersonas,
     loadWorkflowPersonas
 }
@@ -79,7 +79,7 @@ interface PropsFromDispatch {
     loadWorkflows: typeof loadWorkflows
     loadSubWorkflows: typeof loadSubWorkflows
     loadFeatures: typeof loadFeatures
-    loadFeatureComments: typeof loadFeatureComments
+    loadFeatureComments: typeof loadFeatureCommentsAction
     loadPersonas: typeof loadPersonas
     loadWorkflowPersonas: typeof loadWorkflowPersonas
 }

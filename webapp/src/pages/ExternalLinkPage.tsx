@@ -5,7 +5,7 @@ import { loadSubWorkflows } from '../store/subworkflows/actions';
 import { loadFeatures } from '../store/features/actions';
 import { loadPersonas } from '../store/personas/actions';
 import { loadWorkflowPersonas } from '../store/workflowpersonas/actions';
-import { loadFeatureComments } from '../store/featurecomments/actions';
+import { loadFeatureCommentsAction } from '../store/featurecomments/actions';
 import { loadProjects } from '../store/projects/actions';
 import { RouteComponentProps } from 'react-router'
 import { Route, Switch, Link } from 'react-router-dom'
@@ -41,7 +41,7 @@ const mapDispatchToProps = {
     loadWorkflows,
     loadSubWorkflows,
     loadFeatures,
-    loadFeatureComments,
+    loadFeatureComments: loadFeatureCommentsAction,
     loadPersonas,
     loadWorkflowPersonas
 };
@@ -78,7 +78,7 @@ interface PropsFromDispatch {
     loadWorkflows: typeof loadWorkflows
     loadSubWorkflows: typeof loadSubWorkflows
     loadFeatures: typeof loadFeatures
-    loadFeatureComments: typeof loadFeatureComments
+    loadFeatureComments: typeof loadFeatureCommentsAction
     loadPersonas: typeof loadPersonas
     loadWorkflowPersonas: typeof loadWorkflowPersonas
 }
