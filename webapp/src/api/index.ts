@@ -980,12 +980,12 @@ export const API_CHANGE_SUBWORKFLOW_ANNOTATIONS = async (workspaceId: string, id
     });
 }
 
-export interface API_CONTACT {
+export interface API_CONTACT_INTERFACE {
     topic: string,
     body: string
     sender: string
 }
-export const API_CONTACT = async (data: API_CONTACT) => {
+export const API_CONTACT = async (data: API_CONTACT_INTERFACE) => {
     return await fetch(endpoint + "/users/contact", {
         method: 'POST',
         headers: {

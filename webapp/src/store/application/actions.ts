@@ -17,7 +17,7 @@ export interface resetApp { type: AppActions.RESET_APPLICATION, payload: {} }
 export interface createMessage { type: AppActions.CREATE_MESSAGE, payload: IMessage }
 export interface deleteMessage { type: AppActions.DELETE_MESSAGE, payload: string }
 
-export const receiveApp = (s: API_FETCH_APP_RESP) => {
+export const receiveAppAction = (s: API_FETCH_APP_RESP) => {
     return action(AppActions.LOAD_APPLICATION, s)
 }
 
@@ -46,7 +46,7 @@ export const getApp = (dispatch: Dispatch<AllActions>) => async () => {
         .then(response => {
             if (response.ok) {
                 response.json().then((data: API_FETCH_APP_RESP) => {
-                    dispatch(receiveApp(data))
+                    dispatch(receiveAppAction(data))
                 })
             }
         }

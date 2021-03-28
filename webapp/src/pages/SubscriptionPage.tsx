@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import { IApplication, IMembership, } from '../store/application/types';
 import { newMessage } from '../store/application/actions';
 import { Roles, mustCreateNewSub, isEditor, SubscriptionLevels } from '../core/misc';
-import { receiveApp } from '../store/application/actions';
+import { receiveAppAction } from '../store/application/actions';
 import { CardLayout, Button } from '../components/elements';
 import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -18,7 +18,7 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActions>) => ({
     newMessage: newMessage(dispatch),
-    receiveApp: receiveApp
+    receiveApp: receiveAppAction
 })
 
 interface PropsFromState {
@@ -29,7 +29,7 @@ interface RouterProps extends RouteComponentProps<{
 }> { }
 interface PropsFromDispatch {
     newMessage: ReturnType<typeof newMessage>
-    receiveApp: typeof receiveApp
+    receiveApp: typeof receiveAppAction
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps

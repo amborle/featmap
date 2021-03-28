@@ -12,7 +12,7 @@ import * as Yup from 'yup';
 import { newMessage } from '../store/application/actions';
 import { isEditor, subscriptionLevelToText, memberLevelToTitle, subIsInactive } from '../core/misc';
 import { CardLayout } from '../components/elements';
-import { receiveApp } from '../store/application/actions';
+import { receiveAppAction } from '../store/application/actions';
 
 const mapStateToProps = (state: AppState) => ({
     application: application(state),
@@ -20,7 +20,7 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActions>) => ({
     newMessage: newMessage(dispatch),
-    receiveApp: receiveApp
+    receiveApp: receiveAppAction
 })
 
 interface PropsFromState {
@@ -31,7 +31,7 @@ interface RouterProps extends RouteComponentProps<{
 }> { }
 interface PropsFromDispatch {
     newMessage: ReturnType<typeof newMessage>
-    receiveApp: typeof receiveApp
+    receiveApp: typeof receiveAppAction
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
@@ -516,69 +516,69 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                             <div className=" p-1  ">
                                                 {
                                                     this.state.invites.map(x =>
-                                                        (<div className=" p-2 w-full" key={x.id}>
-                                                            <p>{x.email}</p>
-                                                            <p className="">Invited as <b>{memberLevelToTitle(x.level)}</b> by {x.createdByName} <TimeAgo date={x.createdAt} />. </p>
-                                                            <div className="flex flex-row  mt-1">
-                                                                <div>
-                                                                    <Formik
-                                                                        initialValues={{ email: "", level: 10 }}
+                                                    (<div className=" p-2 w-full" key={x.id}>
+                                                        <p>{x.email}</p>
+                                                        <p className="">Invited as <b>{memberLevelToTitle(x.level)}</b> by {x.createdByName} <TimeAgo date={x.createdAt} />. </p>
+                                                        <div className="flex flex-row  mt-1">
+                                                            <div>
+                                                                <Formik
+                                                                    initialValues={{ email: "", level: 10 }}
 
-                                                                        onSubmit={() => {
+                                                                    onSubmit={() => {
 
 
-                                                                            API_DELETE_INVITE(ws.id, x.id)
-                                                                                .then((response) => {
-                                                                                    if (response.ok) {
-                                                                                        this.loadInvites()
-                                                                                        this.props.newMessage("success", "invite canceled")
-                                                                                    }
-                                                                                    else {
-                                                                                        response.json().then((data: any) => {
-                                                                                            this.props.newMessage("fail", data.message)
-                                                                                        })
-                                                                                    }
+                                                                        API_DELETE_INVITE(ws.id, x.id)
+                                                                            .then((response) => {
+                                                                                if (response.ok) {
+                                                                                    this.loadInvites()
+                                                                                    this.props.newMessage("success", "invite canceled")
                                                                                 }
-                                                                                )
-                                                                        }}
-                                                                    >
-                                                                        {(formikBag: FormikProps<{}>) => (
-                                                                            <Form>
-                                                                                <span className="text-xs"><Button small secondary submit title="Cancel invite" /></span>
-                                                                            </Form>
-                                                                        )}
-                                                                    </Formik>
-                                                                </div>
-                                                                {!hasExpired && <div className="ml-1">
-                                                                    <Formik
-                                                                        initialValues={{}}
-                                                                        onSubmit={(values: {}, actions: FormikActions<{}>) => {
-                                                                            API_RESEND_INVITE(ws.id, x.id)
-                                                                                .then((response) => {
-                                                                                    if (response.ok) {
-                                                                                        this.loadInvites()
-                                                                                        this.props.newMessage("success", "invite resent")
-                                                                                    }
-                                                                                    else {
-                                                                                        response.json().then((data: any) => {
-                                                                                            this.props.newMessage("fail", data.message)
-                                                                                        })
-                                                                                    }
+                                                                                else {
+                                                                                    response.json().then((data: any) => {
+                                                                                        this.props.newMessage("fail", data.message)
+                                                                                    })
                                                                                 }
-                                                                                )
-                                                                        }}
-                                                                    >
-                                                                        {(formikBag: FormikProps<{}>) => (
-                                                                            <Form>
-                                                                                <span className="text-xs"><Button small secondary submit title="Resend invite" /></span>
-                                                                            </Form>
-                                                                        )}
-                                                                    </Formik>
-                                                                </div>}
-
+                                                                            }
+                                                                            )
+                                                                    }}
+                                                                >
+                                                                    {(formikBag: FormikProps<{}>) => (
+                                                                        <Form>
+                                                                            <span className="text-xs"><Button small secondary submit title="Cancel invite" /></span>
+                                                                        </Form>
+                                                                    )}
+                                                                </Formik>
                                                             </div>
+                                                            {!hasExpired && <div className="ml-1">
+                                                                <Formik
+                                                                    initialValues={{}}
+                                                                    onSubmit={(values: {}, actions: FormikActions<{}>) => {
+                                                                        API_RESEND_INVITE(ws.id, x.id)
+                                                                            .then((response) => {
+                                                                                if (response.ok) {
+                                                                                    this.loadInvites()
+                                                                                    this.props.newMessage("success", "invite resent")
+                                                                                }
+                                                                                else {
+                                                                                    response.json().then((data: any) => {
+                                                                                        this.props.newMessage("fail", data.message)
+                                                                                    })
+                                                                                }
+                                                                            }
+                                                                            )
+                                                                    }}
+                                                                >
+                                                                    {(formikBag: FormikProps<{}>) => (
+                                                                        <Form>
+                                                                            <span className="text-xs"><Button small secondary submit title="Resend invite" /></span>
+                                                                        </Form>
+                                                                    )}
+                                                                </Formik>
+                                                            </div>}
+
                                                         </div>
-                                                        )
+                                                    </div>
+                                                    )
                                                     )
                                                 }
                                             </div>
@@ -607,10 +607,10 @@ class WorkspaceSettingsPage extends Component<Props, State> {
                                         <div className=" text-sm   ">
                                             {
                                                 this.state.members.map(x =>
-                                                    (<div className=" p-2 w-full" key={x.id}>
-                                                        <MemberBox member={x} />
-                                                    </div>
-                                                    )
+                                                (<div className=" p-2 w-full" key={x.id}>
+                                                    <MemberBox member={x} />
+                                                </div>
+                                                )
                                                 )
                                             }
                                         </div>

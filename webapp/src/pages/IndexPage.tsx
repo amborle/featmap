@@ -9,11 +9,11 @@ import { Route, Switch, Redirect } from 'react-router-dom'
 import { AppState } from '../store'
 import { connect } from 'react-redux'
 import { IApplication } from '../store/application/types'
-import { receiveApp } from '../store/application/actions';
+import { receiveAppAction } from '../store/application/actions';
 import { API_FETCH_APP, API_FETCH_APP_RESP } from '../api';
 
 const mapDispatchToProps = {
-    applicationReceived: receiveApp
+    applicationReceived: receiveAppAction
 }
 
 const mapStateToProps = (state: AppState) => ({
@@ -26,7 +26,7 @@ interface PropsFromState {
 interface RouterProps extends RouteComponentProps<{
 }> { }
 interface PropsFromDispatch {
-    applicationReceived: typeof receiveApp
+    applicationReceived: typeof receiveAppAction
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
@@ -73,10 +73,10 @@ class Index extends Component<Props, State> {
                                 const app = this.props.application
 
                                 if (app.workspaces && app.workspaces.length === 1) {
-                                    return (<Redirect to={app.workspaces[0].name}/>)
+                                    return (<Redirect to={app.workspaces[0].name} />)
                                 }
                                 return (
-                                    <Redirect to={this.props.match.path + "account/workspaces"}/>
+                                    <Redirect to={this.props.match.path + "account/workspaces"} />
                                 )
                             }
 
@@ -87,11 +87,11 @@ class Index extends Component<Props, State> {
                         <Route path={this.props.match.path + ":workspaceName"} component={WorkspacePage} />
                         <Route path={this.props.match.path} component={NotFound} />
                     </Switch>
-                    <Footer/>
+                    <Footer />
                 </div>
             )
         } else {
-            return (<Redirect to="/account/login"/>)
+            return (<Redirect to="/account/login" />)
         }
     }
 }

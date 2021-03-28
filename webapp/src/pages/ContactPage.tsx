@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router'
 import * as Yup from 'yup';
 import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
-import { API_CONTACT } from '../api'
+import { API_CONTACT, API_CONTACT_INTERFACE } from '../api'
 import { Button } from '../components/elements';
 import { Link } from 'react-router-dom';
 
@@ -60,7 +60,7 @@ class ContactPage extends Component<Props, State> {
                                             .required('Required.'),
                                     })}
 
-                                    onSubmit={(values: API_CONTACT, actions: FormikActions<API_CONTACT>) => {
+                                    onSubmit={(values: API_CONTACT_INTERFACE, actions: FormikActions<API_CONTACT_INTERFACE>) => {
                                         API_CONTACT(values)
                                             .then(response => {
                                                 if (response.ok) {
@@ -93,7 +93,7 @@ class ContactPage extends Component<Props, State> {
                                     }}
 
                                 >
-                                    {(formikBag: FormikProps<API_CONTACT>) => (
+                                    {(formikBag: FormikProps<API_CONTACT_INTERFACE>) => (
                                         <Form>
                                             {formikBag.status && formikBag.status.msg && <div>{formikBag.status.msg}</div>}
                                             <div className="mb-3">
@@ -111,7 +111,7 @@ class ContactPage extends Component<Props, State> {
                                             <Field
                                                 name="body"
                                             >
-                                                {({ form }: FieldProps<API_CONTACT>) => (
+                                                {({ form }: FieldProps<API_CONTACT_INTERFACE>) => (
                                                     <div className="flex  flex-row items-baseline">
                                                         <div className=" flex flex-col w-full">
                                                             <div><textarea autoFocus rows={20} value={form.values.body} onChange={form.handleChange} placeholder="Message" id="body" className="rounded p-2  border w-full  	" /></div>
@@ -124,7 +124,7 @@ class ContactPage extends Component<Props, State> {
                                             <Field
                                                 name="sender"
                                             >
-                                                {({ form }: FieldProps<API_CONTACT>) => (
+                                                {({ form }: FieldProps<API_CONTACT_INTERFACE>) => (
                                                     <div className="flex  flex-row items-baseline">
 
                                                         <div className="flex flex-col w-full">
