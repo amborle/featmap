@@ -2,7 +2,7 @@ import { Button } from './elements'
 import React, { Component } from 'react';
 import EmptyCard from './EmptyCard';
 import { IWorkflow } from '../store/workflows/types';
-import { moveFeature, updateFeature } from '../store/features/actions';
+import { moveFeatureAction, updateFeatureAction } from '../store/features/actions';
 import { moveMilestone, updateMilestone } from '../store/milestones/actions';
 import { moveWorkflow, updateWorkflow } from '../store/workflows/actions';
 import { moveSubWorkflow, updateSubWorkflow } from '../store/subworkflows/actions';
@@ -66,7 +66,7 @@ interface PropsFromState {
 }
 
 interface PropsFromDispatch {
-  moveFeature: typeof moveFeature
+  moveFeature: typeof moveFeatureAction
   moveMilestone: typeof moveMilestone
   updateMilestone: typeof updateMilestone
   moveSubWorkflow: typeof moveSubWorkflow
@@ -94,7 +94,7 @@ const mapStateToProps = (state: AppState) => ({
 })
 
 const mapDispatchToProps = {
-  moveFeature,
+  moveFeature: moveFeatureAction,
   updateMilestone,
   moveMilestone,
   moveSubWorkflow,
@@ -169,7 +169,7 @@ class Board extends Component<Props, State> {
           .then(response => {
             if (response.ok) {
               response.json().then((data: IFeature) => {
-                updateFeature(data)
+                updateFeatureAction(data)
               })
             } else {
               alert("Something went wrong when moving feature.")

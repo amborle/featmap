@@ -5,7 +5,7 @@ import { application } from '../store/application/selectors'
 import { createWorkflow, updateWorkflow, deleteWorkflow } from '../store/workflows/actions';
 import { createSubWorkflow, updateSubWorkflow, deleteSubWorkflow } from '../store/subworkflows/actions';
 import { createMilestone, updateMilestone, deleteMilestone } from '../store/milestones/actions';
-import { createFeature, updateFeature, deleteFeature } from '../store/features/actions';
+import { createFeatureAction, updateFeatureAction, deleteFeatureAction } from '../store/features/actions';
 import { Formik, FormikHelpers, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_CREATE_WORKFLOW, API_CREATE_MILESTONE, API_CREATE_SUBWORKFLOW, API_CREATE_FEATURE } from "../api";
 import { v4 as uuid } from 'uuid'
@@ -48,9 +48,9 @@ const mapDispatchToProps = {
   createSubWorkflow,
   updateSubWorkflow,
   deleteSubWorkflow,
-  createFeature,
-  updateFeature,
-  deleteFeature
+  createFeature: createFeatureAction,
+  updateFeature: updateFeatureAction,
+  deleteFeature: deleteFeatureAction
 }
 
 interface PropsFromState {
@@ -67,9 +67,9 @@ interface PropsFromDispatch {
   createSubWorkflow: typeof createSubWorkflow
   updateSubWorkflow: typeof updateSubWorkflow
   deleteSubWorkflow: typeof deleteSubWorkflow
-  createFeature: typeof createFeature
-  updateFeature: typeof updateFeature
-  deleteFeature: typeof deleteFeature
+  createFeature: typeof createFeatureAction
+  updateFeature: typeof updateFeatureAction
+  deleteFeature: typeof deleteFeatureAction
 }
 interface SelfProps {
   action: Actions,

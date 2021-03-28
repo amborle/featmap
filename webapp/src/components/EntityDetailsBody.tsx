@@ -4,7 +4,7 @@ import { AppState } from '../store'
 import { deleteMilestone, updateMilestone, createMilestone } from '../store/milestones/actions';
 import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../store/subworkflows/actions';
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
-import { deleteFeature, deleteAllFeaturesByMilestone, deleteAllFeaturesBySubWorkflow, updateFeature, createFeature } from '../store/features/actions';
+import { deleteFeatureAction, deleteAllFeaturesByMilestoneAction, deleteAllFeaturesBySubWorkflowAction, updateFeatureAction, createFeatureAction } from '../store/features/actions';
 import { deleteProject, updateProject, createProject } from '../store/projects/actions';
 import {
   API_DELETE_MILESTONE,
@@ -57,11 +57,11 @@ const mapDispatchToProps = {
   updateWorkflow,
   createWorkflow,
   deleteWorkflow,
-  updateFeature,
-  createFeature,
-  deleteFeature,
-  deleteAllFeaturesByMilestone,
-  deleteAllFeaturesBySubWorkflow,
+  updateFeature: updateFeatureAction,
+  createFeature: createFeatureAction,
+  deleteFeature: deleteFeatureAction,
+  deleteAllFeaturesByMilestone: deleteAllFeaturesByMilestoneAction,
+  deleteAllFeaturesBySubWorkflow: deleteAllFeaturesBySubWorkflowAction,
   updateProject,
   createProject,
   deleteProject,
@@ -82,11 +82,11 @@ interface PropsFromDispatch {
   updateWorkflow: typeof updateWorkflow
   createWorkflow: typeof createWorkflow
   deleteWorkflow: typeof deleteWorkflow
-  updateFeature: typeof updateFeature
-  createFeature: typeof createFeature
-  deleteFeature: typeof deleteFeature
-  deleteAllFeaturesByMilestone: typeof deleteAllFeaturesByMilestone
-  deleteAllFeaturesBySubWorkflow: typeof deleteAllFeaturesBySubWorkflow
+  updateFeature: typeof updateFeatureAction
+  createFeature: typeof createFeatureAction
+  deleteFeature: typeof deleteFeatureAction
+  deleteAllFeaturesByMilestone: typeof deleteAllFeaturesByMilestoneAction
+  deleteAllFeaturesBySubWorkflow: typeof deleteAllFeaturesBySubWorkflowAction
   updateProject: typeof updateProject
   createProject: typeof createProject
   deleteProject: typeof deleteProject

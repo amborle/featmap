@@ -4,7 +4,7 @@ import { AppState } from '../store'
 import { deleteMilestone, updateMilestone, createMilestone } from '../store/milestones/actions';
 import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../store/subworkflows/actions';
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
-import { deleteFeature, updateFeature, createFeature } from '../store/features/actions';
+import { deleteFeatureAction, updateFeatureAction, createFeatureAction } from '../store/features/actions';
 import { deleteProject, updateProject, createProject } from '../store/projects/actions';
 import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_RENAME_MILESTONE } from "../api";
@@ -38,9 +38,9 @@ const mapDispatchToProps = {
     updateWorkflow,
     createWorkflow,
     deleteWorkflow,
-    updateFeature,
-    createFeature,
-    deleteFeature,
+    updateFeature: updateFeatureAction,
+    createFeature: createFeatureAction,
+    deleteFeature: deleteFeatureAction,
     updateProject,
     createProject,
     deleteProject
@@ -60,9 +60,9 @@ interface PropsFromDispatch {
     updateWorkflow: typeof updateWorkflow
     createWorkflow: typeof createWorkflow
     deleteWorkflow: typeof deleteWorkflow
-    updateFeature: typeof updateFeature
-    createFeature: typeof createFeature
-    deleteFeature: typeof deleteFeature
+    updateFeature: typeof updateFeatureAction
+    createFeature: typeof createFeatureAction
+    deleteFeature: typeof deleteFeatureAction
     updateProject: typeof updateProject
     createProject: typeof createProject
     deleteProject: typeof deleteProject

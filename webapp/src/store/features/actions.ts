@@ -12,26 +12,26 @@ export enum ActionTypes {
 }
 
 export interface createFeature { type: ActionTypes.CREATE_FEATURE, payload: IFeature }
-export const createFeature = (x: IFeature) => action(ActionTypes.CREATE_FEATURE, x)
+export const createFeatureAction = (x: IFeature) => action(ActionTypes.CREATE_FEATURE, x)
 
 export interface loadFeatures { type: ActionTypes.LOAD_FEATURES, payload: IFeature[] }
-export const loadFeatures = (x: IFeature[]) => action(ActionTypes.LOAD_FEATURES, x)
+export const loadFeaturesAction = (x: IFeature[]) => action(ActionTypes.LOAD_FEATURES, x)
 
 export interface updateFeature { type: ActionTypes.UPDATE_FEATURE, payload: IFeature }
-export const updateFeature = (x: IFeature) => action(ActionTypes.UPDATE_FEATURE, x)
+export const updateFeatureAction = (x: IFeature) => action(ActionTypes.UPDATE_FEATURE, x)
 
 export interface deleteFeature { type: ActionTypes.DELETE_FEATURE, payload: string }
-export const deleteFeature = (x: string) => action(ActionTypes.DELETE_FEATURE, x)
+export const deleteFeatureAction = (x: string) => action(ActionTypes.DELETE_FEATURE, x)
 
 
 export interface deleteAllFeaturesByMilestone { type: ActionTypes.DELETE_FEATURES_BY_MILESTONE, payload: string }
-export const deleteAllFeaturesByMilestone = (x: string) => action(ActionTypes.DELETE_FEATURES_BY_MILESTONE, x)
+export const deleteAllFeaturesByMilestoneAction = (x: string) => action(ActionTypes.DELETE_FEATURES_BY_MILESTONE, x)
 
 export interface deleteAllFeaturesBySubWorkflow { type: ActionTypes.DELETE_FEATURES_BY_SUBWORKFLOW, payload: string }
-export const deleteAllFeaturesBySubWorkflow = (x: string) => action(ActionTypes.DELETE_FEATURES_BY_SUBWORKFLOW, x)
+export const deleteAllFeaturesBySubWorkflowAction = (x: string) => action(ActionTypes.DELETE_FEATURES_BY_SUBWORKFLOW, x)
 
 interface moveFeaturePayload { id: string, toMilestoneId: string, toSubWorkflowId: string, index: number, ts: string, by: string }
 export interface moveFeature { type: ActionTypes.MOVE_FEATURE, payload: moveFeaturePayload }
-export const moveFeature = (x: moveFeaturePayload) => action(ActionTypes.MOVE_FEATURE, x)
+export const moveFeatureAction = (x: moveFeaturePayload) => action(ActionTypes.MOVE_FEATURE, x)
 
 export type Actions = createFeature | loadFeatures | updateFeature | deleteFeature | moveFeature | deleteAllFeaturesByMilestone | deleteAllFeaturesBySubWorkflow
