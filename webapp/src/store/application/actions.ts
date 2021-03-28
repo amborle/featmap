@@ -23,7 +23,7 @@ export const receiveAppAction = (s: API_FETCH_APP_RESP) => {
 
 export const resetAppAction = () => action(AppActions.RESET_APPLICATION)
 export const createMessageAction = (m: IMessage) => action(AppActions.CREATE_MESSAGE, m)
-export const deleteMessage = (id: string) => action(AppActions.DELETE_MESSAGE, id)
+export const deleteMessageAction = (id: string) => action(AppActions.DELETE_MESSAGE, id)
 
 export type Actions = receiveApp | resetApp | createMessage | deleteMessage
 
@@ -34,7 +34,7 @@ export const newMessage = (dispatch: Dispatch<AllActions>) => async (type: messa
 
     const del = new Promise(() => {
         setTimeout(() => {
-            dispatch(deleteMessage(id))
+            dispatch(deleteMessageAction(id))
         }, 4000)
     })
 
