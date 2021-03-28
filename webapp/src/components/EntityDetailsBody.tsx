@@ -136,6 +136,12 @@ class EntityDetailsBody extends Component<Props, State> {
 
     switch (card.kind) {
       case "project": {
+
+        if (!window.confirm("Deleting the project will delete all the contents of the project. Do you want to proceed?")) {
+          return
+        }
+
+
         this.props.deleteProject(card.id)
         if (!this.props.demo) {
           API_DELETE_PROJECT(card.workspaceId, card.id)
