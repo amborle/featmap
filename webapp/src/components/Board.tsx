@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import EmptyCard from './EmptyCard';
 import { IWorkflow } from '../store/workflows/types';
 import { moveFeatureAction, updateFeatureAction } from '../store/features/actions';
-import { moveMilestone, updateMilestone } from '../store/milestones/actions';
+import { moveMilestoneAction, updateMilestoneAction } from '../store/milestones/actions';
 import { moveWorkflow, updateWorkflow } from '../store/workflows/actions';
 import { moveSubWorkflow, updateSubWorkflow } from '../store/subworkflows/actions';
 import { AppState } from '../store'
@@ -67,8 +67,8 @@ interface PropsFromState {
 
 interface PropsFromDispatch {
   moveFeature: typeof moveFeatureAction
-  moveMilestone: typeof moveMilestone
-  updateMilestone: typeof updateMilestone
+  moveMilestone: typeof moveMilestoneAction
+  updateMilestone: typeof updateMilestoneAction
   moveSubWorkflow: typeof moveSubWorkflow
   updateSubWorkflow: typeof updateSubWorkflow
   moveWorkflow: typeof moveWorkflow
@@ -95,8 +95,8 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = {
   moveFeature: moveFeatureAction,
-  updateMilestone,
-  moveMilestone,
+  updateMilestone: updateMilestoneAction,
+  moveMilestone: moveMilestoneAction,
   moveSubWorkflow,
   updateSubWorkflow,
   moveWorkflow,
@@ -194,7 +194,7 @@ class Board extends Component<Props, State> {
           .then(response => {
             if (response.ok) {
               response.json().then((data: IMilestone) => {
-                updateMilestone(data)
+                updateMilestoneAction(data)
               })
             } else {
               alert("Something went wrong when moving milestone.")

@@ -6,7 +6,7 @@ import { projects, getProjectById } from '../store/projects/selectors';
 import { RouteComponentProps } from 'react-router'
 import { Route, Switch, Link } from 'react-router-dom'
 import { IProject } from '../store/projects/types';
-import { loadMilestones } from '../store/milestones/actions';
+import { loadMilestonesAction } from '../store/milestones/actions';
 import { loadWorkflows } from '../store/workflows/actions';
 import { milestones, filterMilestonesOnProject } from '../store/milestones/selectors';
 import { AppState } from '../store'
@@ -50,7 +50,7 @@ const mapStateToProps = (state: AppState) => ({
 })
 
 const mapDispatchToProps = {
-    loadMilestones,
+    loadMilestones: loadMilestonesAction,
     loadWorkflows,
     loadSubWorkflows,
     loadFeatures: loadFeaturesAction,
@@ -75,7 +75,7 @@ interface RouterProps extends RouteComponentProps<{
     projectId: string
 }> { }
 interface PropsFromDispatch {
-    loadMilestones: typeof loadMilestones
+    loadMilestones: typeof loadMilestonesAction
     loadWorkflows: typeof loadWorkflows
     loadSubWorkflows: typeof loadSubWorkflows
     loadFeatures: typeof loadFeaturesAction

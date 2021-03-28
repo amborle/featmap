@@ -4,7 +4,7 @@ import { AppState } from '../store'
 import { application } from '../store/application/selectors'
 import { createWorkflow, updateWorkflow, deleteWorkflow } from '../store/workflows/actions';
 import { createSubWorkflow, updateSubWorkflow, deleteSubWorkflow } from '../store/subworkflows/actions';
-import { createMilestone, updateMilestone, deleteMilestone } from '../store/milestones/actions';
+import { createMilestoneAction, updateMilestoneAction, deleteMilestoneAction } from '../store/milestones/actions';
 import { createFeatureAction, updateFeatureAction, deleteFeatureAction } from '../store/features/actions';
 import { Formik, FormikHelpers, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_CREATE_WORKFLOW, API_CREATE_MILESTONE, API_CREATE_SUBWORKFLOW, API_CREATE_FEATURE } from "../api";
@@ -42,9 +42,9 @@ const mapDispatchToProps = {
   createWorkflow,
   updateWorkflow,
   deleteWorkflow,
-  createMilestone,
-  updateMilestone,
-  deleteMilestone,
+  createMilestone: createMilestoneAction,
+  updateMilestone: updateMilestoneAction,
+  deleteMilestone: deleteMilestoneAction,
   createSubWorkflow,
   updateSubWorkflow,
   deleteSubWorkflow,
@@ -61,9 +61,9 @@ interface PropsFromDispatch {
   createWorkflow: typeof createWorkflow
   updateWorkflow: typeof updateWorkflow
   deleteWorkflow: typeof deleteWorkflow
-  createMilestone: typeof createMilestone
-  updateMilestone: typeof updateMilestone
-  deleteMilestone: typeof deleteMilestone
+  createMilestone: typeof createMilestoneAction
+  updateMilestone: typeof updateMilestoneAction
+  deleteMilestone: typeof deleteMilestoneAction
   createSubWorkflow: typeof createSubWorkflow
   updateSubWorkflow: typeof updateSubWorkflow
   deleteSubWorkflow: typeof deleteSubWorkflow
