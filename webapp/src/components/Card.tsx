@@ -25,21 +25,21 @@ class Card extends Component<Props, State> {
 
     const color = this.props.color && (this.props.color !== Color.WHITE) ? this.props.color : null
 
-    const title = this.props.title.length > 50 ? this.props.title.substring(0, 50) + " (...)" : this.props.title
+    const title = this.props.title
 
     return (
       <div>
-        <div style={{ fontSize: '.70rem' }} className={"flex flex-row flex-no-shrink w-32   bg-white  overflow-hidden border   " + (this.props.small ? " " : " h-16 ") + (color ? " border-l-4 " + colorToBorderColorClass(color) + " " : " " + colorToBorderColorClass(Color.WHITE) + " ")}>
+        <div style={{ fontSize: '12px' }} className={"flex flex-row flex-no-shrink w-36 rounded-sm   bg-white  overflow-hidden border   " + (this.props.small ? " " : " h-24 ") + (color ? " border-l-4 " + colorToBorderColorClass(color) + " " : " " + colorToBorderColorClass(Color.WHITE) + " ")}>
 
           <Link className="flex flex-col flex-grow" to={this.props.link}>
 
 
-            <div className="flex-grow p-1 overflow-hidden">
+            <div className="flex-grow p-2 font-normal     overflow-hidden ">
               <span className={this.props.status === "CLOSED" ? "line-through" : ""}> {title} </span>
             </div>
 
 
-            <div className=" flex p-1 flex-row">
+            <div className=" flex p-2 flex-row">
               {this.props.nbrOfItems && !(this.props.nbrOfItems === 0) ?
                 <div className=" flex ">
                   <div>{this.props.nbrOfItems} items</div>
@@ -81,7 +81,7 @@ class Card extends Component<Props, State> {
 
         </div>
         {this.props.bottomLink &&
-          <div className=" flex w-32 h-6  flex-no-shrink -mt-1 -mb-2  justify-center">
+          <div className=" flex w-36 h-6  flex-no-shrink -mt-1 -mb-2  justify-center">
             <div className="flex showme font-bold text-xl   "><button className=" hover:text-gray-800 text-gray-500" onClick={this.props.bottomLink}>+</button></div>
           </div>
         }
