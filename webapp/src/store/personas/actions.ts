@@ -10,16 +10,16 @@ export enum ActionTypes {
 }
 
 export interface createPersona { type: ActionTypes.CREATE_PERSONA, payload: IPersona }
-export const createPersona = (x: IPersona) => action(ActionTypes.CREATE_PERSONA, x)
+export const createPersonaAction = (x: IPersona) => action(ActionTypes.CREATE_PERSONA, x)
 
 export interface loadPersonas { type: ActionTypes.LOAD_PERSONAS, payload: IPersona[] }
-export const loadPersonas = (x: IPersona[]) => action(ActionTypes.LOAD_PERSONAS, x)
+export const loadPersonasAction = (x: IPersona[]) => action(ActionTypes.LOAD_PERSONAS, x)
 
 export interface updatePersona { type: ActionTypes.UPDATE_PERSONA, payload: IPersona }
-export const updatePersona = (x: IPersona) => action(ActionTypes.UPDATE_PERSONA, x)
+export const updatePersonaAction = (x: IPersona) => action(ActionTypes.UPDATE_PERSONA, x)
 
 export interface deletePersona { type: ActionTypes.DELETE_PERSONA, payload: string }
-export const deletePersona = (x: string) => action(ActionTypes.DELETE_PERSONA, x)
+export const deletePersonaAction = (x: string) => action(ActionTypes.DELETE_PERSONA, x)
 
 
 export type Actions = createPersona | loadPersonas | updatePersona | deletePersona

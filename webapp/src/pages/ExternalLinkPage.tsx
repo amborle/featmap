@@ -3,7 +3,7 @@ import { loadMilestonesAction } from '../store/milestones/actions';
 import { loadWorkflows } from '../store/workflows/actions';
 import { loadSubWorkflows } from '../store/subworkflows/actions';
 import { loadFeaturesAction } from '../store/features/actions';
-import { loadPersonas } from '../store/personas/actions';
+import { loadPersonasAction } from '../store/personas/actions';
 import { loadWorkflowPersonas } from '../store/workflowpersonas/actions';
 import { loadFeatureCommentsAction } from '../store/featurecomments/actions';
 import { loadProjects } from '../store/projects/actions';
@@ -42,7 +42,7 @@ const mapDispatchToProps = {
     loadSubWorkflows,
     loadFeatures: loadFeaturesAction,
     loadFeatureComments: loadFeatureCommentsAction,
-    loadPersonas,
+    loadPersonas: loadPersonasAction,
     loadWorkflowPersonas
 };
 
@@ -79,7 +79,7 @@ interface PropsFromDispatch {
     loadSubWorkflows: typeof loadSubWorkflows
     loadFeatures: typeof loadFeaturesAction
     loadFeatureComments: typeof loadFeatureCommentsAction
-    loadPersonas: typeof loadPersonas
+    loadPersonas: typeof loadPersonasAction
     loadWorkflowPersonas: typeof loadWorkflowPersonas
 }
 interface SelfProps { }

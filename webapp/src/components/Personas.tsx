@@ -13,7 +13,7 @@ import { IPersona } from '../store/personas/types';
 import { avatar } from '../avatars';
 import ReactMarkdown from 'react-markdown';
 import { getPersona } from '../store/personas/selectors';
-import { updatePersona, deletePersona, createPersona } from '../store/personas/actions';
+import { updatePersonaAction, deletePersonaAction, createPersonaAction } from '../store/personas/actions';
 import { createWorkflowPersona } from '../store/workflowpersonas/actions';
 import ContextMenu from './ContextMenu';
 import { v4 as uuid } from 'uuid'
@@ -39,9 +39,9 @@ const mapStateToProps = (state: AppState) => ({
 })
 
 const mapDispatchToProps = {
-  updatePersona,
-  deletePersona,
-  createPersona,
+  updatePersona: updatePersonaAction,
+  deletePersona: deletePersonaAction,
+  createPersona: createPersonaAction,
   createWorkflowPersona
 }
 
@@ -50,9 +50,9 @@ interface PropsFromState {
 }
 
 interface PropsFromDispatch {
-  updatePersona: typeof updatePersona
-  deletePersona: typeof deletePersona
-  createPersona: typeof createPersona
+  updatePersona: typeof updatePersonaAction
+  deletePersona: typeof deletePersonaAction
+  createPersona: typeof createPersonaAction
   createWorkflowPersona: typeof createWorkflowPersona
 }
 interface SelfProps {
