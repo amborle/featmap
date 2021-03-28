@@ -7,7 +7,7 @@ import { RouteComponentProps } from 'react-router'
 import { Route, Switch, Link } from 'react-router-dom'
 import { IProject } from '../store/projects/types';
 import { loadMilestonesAction } from '../store/milestones/actions';
-import { loadWorkflows } from '../store/workflows/actions';
+import { loadWorkflowsAction } from '../store/workflows/actions';
 import { milestones, filterMilestonesOnProject } from '../store/milestones/selectors';
 import { AppState } from '../store'
 import { connect } from 'react-redux'
@@ -51,7 +51,7 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = {
     loadMilestones: loadMilestonesAction,
-    loadWorkflows,
+    loadWorkflows: loadWorkflowsAction,
     loadSubWorkflows: loadSubWorkflowsAction,
     loadFeatures: loadFeaturesAction,
     loadFeatureComments: loadFeatureCommentsAction,
@@ -76,7 +76,7 @@ interface RouterProps extends RouteComponentProps<{
 }> { }
 interface PropsFromDispatch {
     loadMilestones: typeof loadMilestonesAction
-    loadWorkflows: typeof loadWorkflows
+    loadWorkflows: typeof loadWorkflowsAction
     loadSubWorkflows: typeof loadSubWorkflowsAction
     loadFeatures: typeof loadFeaturesAction
     loadFeatureComments: typeof loadFeatureCommentsAction

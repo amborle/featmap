@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { deleteMilestoneAction, updateMilestoneAction, createMilestoneAction } from '../store/milestones/actions';
 import { deleteSubWorkflowAction, updateSubWorkflowAction, createSubWorkflowAction } from '../store/subworkflows/actions';
-import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
+import { deleteWorkflowAction, updateWorkflowAction, createWorkflowAction } from '../store/workflows/actions';
 import { deleteFeatureAction, updateFeatureAction, createFeatureAction } from '../store/features/actions';
 import { deleteProjectAction, updateProjectAction, createProjectAction } from '../store/projects/actions';
 import { IMilestone } from '../store/milestones/types';
@@ -30,9 +30,9 @@ const mapDispatchToProps = {
     updateSubWorkflow: updateSubWorkflowAction,
     createSubWorkflow: createSubWorkflowAction,
     deleteSubWorkflow: deleteSubWorkflowAction,
-    updateWorkflow,
-    createWorkflow,
-    deleteWorkflow,
+    updateWorkflow: updateWorkflowAction,
+    createWorkflow: createWorkflowAction,
+    deleteWorkflow: deleteWorkflowAction,
     updateFeature: updateFeatureAction,
     createFeature: createFeatureAction,
     deleteFeature: deleteFeatureAction,
@@ -52,9 +52,9 @@ interface PropsFromDispatch {
     updateSubWorkflow: typeof updateSubWorkflowAction
     createSubWorkflow: typeof createSubWorkflowAction
     deleteSubWorkflow: typeof deleteSubWorkflowAction
-    updateWorkflow: typeof updateWorkflow
-    createWorkflow: typeof createWorkflow
-    deleteWorkflow: typeof deleteWorkflow
+    updateWorkflow: typeof updateWorkflowAction
+    createWorkflow: typeof createWorkflowAction
+    deleteWorkflow: typeof deleteWorkflowAction
     updateFeature: typeof updateFeatureAction
     createFeature: typeof createFeatureAction
     deleteFeature: typeof deleteFeatureAction

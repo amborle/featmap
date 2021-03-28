@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { updateMilestoneAction } from '../store/milestones/actions';
 import { updateSubWorkflowAction } from '../store/subworkflows/actions';
-import { updateWorkflow } from '../store/workflows/actions';
+import { updateWorkflowAction } from '../store/workflows/actions';
 import { updateFeatureAction } from '../store/features/actions';
 import { updateProjectAction } from '../store/projects/actions';
 import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
@@ -31,7 +31,7 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = {
     updateMilestone: updateMilestoneAction,
     updateSubWorkflow: updateSubWorkflowAction,
-    updateWorkflow,
+    updateWorkflow: updateWorkflowAction,
     updateFeature: updateFeatureAction,
     updateProject: updateProjectAction,
 }
@@ -43,7 +43,7 @@ interface PropsFromState {
 interface PropsFromDispatch {
     updateMilestone: typeof updateMilestoneAction
     updateSubWorkflow: typeof updateSubWorkflowAction
-    updateWorkflow: typeof updateWorkflow
+    updateWorkflow: typeof updateWorkflowAction
     updateFeature: typeof updateFeatureAction
     updateProject: typeof updateProjectAction
 }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { application } from '../store/application/selectors'
-import { createWorkflow, updateWorkflow, deleteWorkflow } from '../store/workflows/actions';
+import { createWorkflowAction, updateWorkflowAction, deleteWorkflowAction } from '../store/workflows/actions';
 import { createSubWorkflowAction, updateSubWorkflowAction, deleteSubWorkflowAction } from '../store/subworkflows/actions';
 import { createMilestoneAction, updateMilestoneAction, deleteMilestoneAction } from '../store/milestones/actions';
 import { createFeatureAction, updateFeatureAction, deleteFeatureAction } from '../store/features/actions';
@@ -39,9 +39,9 @@ const mapStateToProps = (state: AppState) => ({
 })
 
 const mapDispatchToProps = {
-  createWorkflow,
-  updateWorkflow,
-  deleteWorkflow,
+  createWorkflow: createWorkflowAction,
+  updateWorkflow: updateWorkflowAction,
+  deleteWorkflow: deleteWorkflowAction,
   createMilestone: createMilestoneAction,
   updateMilestone: updateMilestoneAction,
   deleteMilestone: deleteMilestoneAction,
@@ -58,9 +58,9 @@ interface PropsFromState {
 }
 
 interface PropsFromDispatch {
-  createWorkflow: typeof createWorkflow
-  updateWorkflow: typeof updateWorkflow
-  deleteWorkflow: typeof deleteWorkflow
+  createWorkflow: typeof createWorkflowAction
+  updateWorkflow: typeof updateWorkflowAction
+  deleteWorkflow: typeof deleteWorkflowAction
   createMilestone: typeof createMilestoneAction
   updateMilestone: typeof updateMilestoneAction
   deleteMilestone: typeof deleteMilestoneAction
