@@ -5,7 +5,7 @@ import { deleteMilestoneAction, updateMilestoneAction, createMilestoneAction } f
 import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../store/subworkflows/actions';
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
 import { deleteFeatureAction, deleteAllFeaturesByMilestoneAction, deleteAllFeaturesBySubWorkflowAction, updateFeatureAction, createFeatureAction } from '../store/features/actions';
-import { deleteProject, updateProject, createProject } from '../store/projects/actions';
+import { deleteProjectAction, updateProjectAction, createProjectAction } from '../store/projects/actions';
 import {
   API_DELETE_MILESTONE,
   API_DELETE_SUBWORKFLOW,
@@ -62,9 +62,9 @@ const mapDispatchToProps = {
   deleteFeature: deleteFeatureAction,
   deleteAllFeaturesByMilestone: deleteAllFeaturesByMilestoneAction,
   deleteAllFeaturesBySubWorkflow: deleteAllFeaturesBySubWorkflowAction,
-  updateProject,
-  createProject,
-  deleteProject,
+  updateProject: updateProjectAction,
+  createProject: createProjectAction,
+  deleteProject: deleteProjectAction,
 }
 
 interface PropsFromState {
@@ -87,9 +87,9 @@ interface PropsFromDispatch {
   deleteFeature: typeof deleteFeatureAction
   deleteAllFeaturesByMilestone: typeof deleteAllFeaturesByMilestoneAction
   deleteAllFeaturesBySubWorkflow: typeof deleteAllFeaturesBySubWorkflowAction
-  updateProject: typeof updateProject
-  createProject: typeof createProject
-  deleteProject: typeof deleteProject
+  updateProject: typeof updateProjectAction
+  createProject: typeof createProjectAction
+  deleteProject: typeof deleteProjectAction
 }
 
 

@@ -7,7 +7,7 @@ import NotFound from './NotFound';
 import ProjectPage from './ProjectPage';
 import Header from '../components/Header';
 import { IApplication } from '../store/application/types';
-import { loadProjects } from '../store/projects/actions';
+import { loadProjectsAction } from '../store/projects/actions';
 import { projects } from '../store/projects/selectors';
 import { IProject } from '../store/projects/types';
 import { Route, Switch, Redirect, Link } from 'react-router-dom'
@@ -23,7 +23,7 @@ const mapStateToProps = (state: AppState) => ({
 })
 
 const mapDispatchToProps = {
-    loadProjects: loadProjects
+    loadProjects: loadProjectsAction
 }
 
 interface PropsFromState {
@@ -35,7 +35,7 @@ interface RouterProps extends RouteComponentProps<{
 }> { }
 interface PropsFromDispatch {
     //loadProjectsRequest: typeof loadProjectsRequest
-    loadProjects: typeof loadProjects
+    loadProjects: typeof loadProjectsAction
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps

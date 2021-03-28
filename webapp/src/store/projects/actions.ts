@@ -13,16 +13,16 @@ export enum ProjectsActions {
 }
 
 export interface createProject { type: ProjectsActions.CREATE_PROJECT, payload: IProject }
-export const createProject = (p: IProject) => action(ProjectsActions.CREATE_PROJECT, p)
+export const createProjectAction = (p: IProject) => action(ProjectsActions.CREATE_PROJECT, p)
 
 export interface loadProjects { type: ProjectsActions.LOAD_PROJECTS, payload: IProject[] }
-export const loadProjects = (pp: IProject[]) => action(ProjectsActions.LOAD_PROJECTS, pp)
+export const loadProjectsAction = (pp: IProject[]) => action(ProjectsActions.LOAD_PROJECTS, pp)
 
 export interface updateProject { type: ProjectsActions.UPDATE_PROJECT, payload: IProject }
-export const updateProject = (p: IProject) => action(ProjectsActions.UPDATE_PROJECT, p)
+export const updateProjectAction = (p: IProject) => action(ProjectsActions.UPDATE_PROJECT, p)
 
 export interface deleteProject { type: ProjectsActions.DELETE_PROJECT, payload: string }
-export const deleteProject = (id: string) => action(ProjectsActions.DELETE_PROJECT, id)
+export const deleteProjectAction = (id: string) => action(ProjectsActions.DELETE_PROJECT, id)
 
 
 export type Actions = loadProjects | createProject | updateProject | deleteProject
@@ -35,7 +35,7 @@ export const loadProjectsRequest = (dispatch: Dispatch<AllActions>) => {
             .then(response => {
                 if (response.ok) {
                     response.json().then((data: IProject[]) => {
-                        dispatch(loadProjects(data))
+                        dispatch(loadProjectsAction(data))
                     })
                 }
             }
@@ -53,7 +53,7 @@ export const createProjectRequest = (dispatch: Dispatch<AllActions>) => {
             .then(response => {
                 if (response.ok) {
                     response.json().then((data: IProject) => {
-                        dispatch(createProject(data))
+                        dispatch(createProjectAction(data))
                     })
                 }
             }

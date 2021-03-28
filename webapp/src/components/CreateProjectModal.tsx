@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { application, getWorkspaceByName } from '../store/application/selectors'
-import { createProject } from '../store/projects/actions';
+import { createProjectAction } from '../store/projects/actions';
 import { Dispatch } from "react";
 import { AllActions } from "../store";
 import { IProject } from "../store/projects/types";
@@ -19,7 +19,7 @@ const mapStateToProps = (state: AppState) => ({
 
 
 const mapDispatchToProps = {
-  createProject
+  createProject: createProjectAction
 }
 
 interface PropsFromState {
@@ -28,7 +28,7 @@ interface PropsFromState {
 }
 
 interface PropsFromDispatch {
-  createProject: typeof createProject,
+  createProject: typeof createProjectAction,
 }
 interface SelfProps {
   workspaceName: string,
@@ -57,7 +57,7 @@ export const submit = (dispatch: Dispatch<AllActions>) => {
       .then(response => {
         if (response.ok) {
           response.json().then((data: IProject) => {
-            dispatch(createProject(data))
+            dispatch(createProjectAction(data))
           })
         }
       }

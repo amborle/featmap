@@ -5,7 +5,7 @@ import { updateMilestoneAction } from '../store/milestones/actions';
 import { updateSubWorkflow } from '../store/subworkflows/actions';
 import { updateWorkflow } from '../store/workflows/actions';
 import { updateFeatureAction } from '../store/features/actions';
-import { updateProject } from '../store/projects/actions';
+import { updateProjectAction } from '../store/projects/actions';
 import { Formik, FormikHelpers as FormikActions, FormikProps, Form, Field, FieldProps } from 'formik';
 import { API_UPDATE_MILESTONE_DESCRIPTION, API_UPDATE_PROJECT_DESCRIPTION } from "../api";
 import { API_UPDATE_SUBWORKFLOW_DESCRIPTION } from "../api";
@@ -33,7 +33,7 @@ const mapDispatchToProps = {
     updateSubWorkflow,
     updateWorkflow,
     updateFeature: updateFeatureAction,
-    updateProject,
+    updateProject: updateProjectAction,
 }
 
 interface PropsFromState {
@@ -45,7 +45,7 @@ interface PropsFromDispatch {
     updateSubWorkflow: typeof updateSubWorkflow
     updateWorkflow: typeof updateWorkflow
     updateFeature: typeof updateFeatureAction
-    updateProject: typeof updateProject
+    updateProject: typeof updateProjectAction
 }
 
 
