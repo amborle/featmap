@@ -569,7 +569,7 @@ class EntityDetailsBody extends Component<Props, State> {
                             Colors.map(x => {
                               return [
                                 <div key={x} className="flex flex-col  mr-1">
-                                  <button onClick={() => this.handleChangeColor(x)} title={x} className={"flex h-3 w-3 border " + colorToBackgroundColorClass(x) + " " + colorToBorderColorClass(x)} />
+                                  <button onClick={() => this.handleChangeColor(x)} title={x} className={"flex h-4 w-4 border " + colorToBackgroundColorClass(x) + " " + colorToBorderColorClass(x)} />
                                   <div className="flex justify-center" >
                                     {(color === x) ? <div>●</div> : null}
                                   </div>
