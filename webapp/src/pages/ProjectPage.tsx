@@ -20,7 +20,7 @@ import { subWorkflows, getSubWorkflowByWorkflow } from '../store/subworkflows/se
 import { ISubWorkflow } from '../store/subworkflows/types';
 import { workflows } from '../store/workflows/selectors';
 import { IWorkflow } from '../store/workflows/types';
-import { loadSubWorkflows } from '../store/subworkflows/actions';
+import { loadSubWorkflowsAction } from '../store/subworkflows/actions';
 import { loadFeaturesAction } from '../store/features/actions';
 import { loadPersonasAction } from '../store/personas/actions';
 import { loadWorkflowPersonas } from '../store/workflowpersonas/actions';
@@ -52,7 +52,7 @@ const mapStateToProps = (state: AppState) => ({
 const mapDispatchToProps = {
     loadMilestones: loadMilestonesAction,
     loadWorkflows,
-    loadSubWorkflows,
+    loadSubWorkflows: loadSubWorkflowsAction,
     loadFeatures: loadFeaturesAction,
     loadFeatureComments: loadFeatureCommentsAction,
     loadPersonas: loadPersonasAction,
@@ -77,7 +77,7 @@ interface RouterProps extends RouteComponentProps<{
 interface PropsFromDispatch {
     loadMilestones: typeof loadMilestonesAction
     loadWorkflows: typeof loadWorkflows
-    loadSubWorkflows: typeof loadSubWorkflows
+    loadSubWorkflows: typeof loadSubWorkflowsAction
     loadFeatures: typeof loadFeaturesAction
     loadFeatureComments: typeof loadFeatureCommentsAction
     loadPersonas: typeof loadPersonasAction

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { updateMilestoneAction } from '../store/milestones/actions';
-import { updateSubWorkflow } from '../store/subworkflows/actions';
+import { updateSubWorkflowAction } from '../store/subworkflows/actions';
 import { updateWorkflow } from '../store/workflows/actions';
 import { updateFeatureAction } from '../store/features/actions';
 import { updateProjectAction } from '../store/projects/actions';
@@ -30,7 +30,7 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = {
     updateMilestone: updateMilestoneAction,
-    updateSubWorkflow,
+    updateSubWorkflow: updateSubWorkflowAction,
     updateWorkflow,
     updateFeature: updateFeatureAction,
     updateProject: updateProjectAction,
@@ -42,7 +42,7 @@ interface PropsFromState {
 
 interface PropsFromDispatch {
     updateMilestone: typeof updateMilestoneAction
-    updateSubWorkflow: typeof updateSubWorkflow
+    updateSubWorkflow: typeof updateSubWorkflowAction
     updateWorkflow: typeof updateWorkflow
     updateFeature: typeof updateFeatureAction
     updateProject: typeof updateProjectAction

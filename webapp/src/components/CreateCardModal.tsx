@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { application } from '../store/application/selectors'
 import { createWorkflow, updateWorkflow, deleteWorkflow } from '../store/workflows/actions';
-import { createSubWorkflow, updateSubWorkflow, deleteSubWorkflow } from '../store/subworkflows/actions';
+import { createSubWorkflowAction, updateSubWorkflowAction, deleteSubWorkflowAction } from '../store/subworkflows/actions';
 import { createMilestoneAction, updateMilestoneAction, deleteMilestoneAction } from '../store/milestones/actions';
 import { createFeatureAction, updateFeatureAction, deleteFeatureAction } from '../store/features/actions';
 import { Formik, FormikHelpers, FormikProps, Form, Field, FieldProps } from 'formik';
@@ -45,9 +45,9 @@ const mapDispatchToProps = {
   createMilestone: createMilestoneAction,
   updateMilestone: updateMilestoneAction,
   deleteMilestone: deleteMilestoneAction,
-  createSubWorkflow,
-  updateSubWorkflow,
-  deleteSubWorkflow,
+  createSubWorkflow: createSubWorkflowAction,
+  updateSubWorkflow: updateSubWorkflowAction,
+  deleteSubWorkflow: deleteSubWorkflowAction,
   createFeature: createFeatureAction,
   updateFeature: updateFeatureAction,
   deleteFeature: deleteFeatureAction
@@ -64,9 +64,9 @@ interface PropsFromDispatch {
   createMilestone: typeof createMilestoneAction
   updateMilestone: typeof updateMilestoneAction
   deleteMilestone: typeof deleteMilestoneAction
-  createSubWorkflow: typeof createSubWorkflow
-  updateSubWorkflow: typeof updateSubWorkflow
-  deleteSubWorkflow: typeof deleteSubWorkflow
+  createSubWorkflow: typeof createSubWorkflowAction
+  updateSubWorkflow: typeof updateSubWorkflowAction
+  deleteSubWorkflow: typeof deleteSubWorkflowAction
   createFeature: typeof createFeatureAction
   updateFeature: typeof updateFeatureAction
   deleteFeature: typeof deleteFeatureAction

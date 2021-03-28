@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { AppState } from '../store'
 import { deleteMilestoneAction, updateMilestoneAction, createMilestoneAction } from '../store/milestones/actions';
-import { deleteSubWorkflow, updateSubWorkflow, createSubWorkflow } from '../store/subworkflows/actions';
+import { deleteSubWorkflowAction, updateSubWorkflowAction, createSubWorkflowAction } from '../store/subworkflows/actions';
 import { deleteWorkflow, updateWorkflow, createWorkflow } from '../store/workflows/actions';
 import { deleteFeatureAction, deleteAllFeaturesByMilestoneAction, deleteAllFeaturesBySubWorkflowAction, updateFeatureAction, createFeatureAction } from '../store/features/actions';
 import { deleteProjectAction, updateProjectAction, createProjectAction } from '../store/projects/actions';
@@ -51,9 +51,9 @@ const mapDispatchToProps = {
   updateMilestone: updateMilestoneAction,
   createMilestone: createMilestoneAction,
   deleteMilestone: deleteMilestoneAction,
-  updateSubWorkflow,
-  createSubWorkflow,
-  deleteSubWorkflow,
+  updateSubWorkflow: updateSubWorkflowAction,
+  createSubWorkflow: createSubWorkflowAction,
+  deleteSubWorkflow: deleteSubWorkflowAction,
   updateWorkflow,
   createWorkflow,
   deleteWorkflow,
@@ -76,9 +76,9 @@ interface PropsFromDispatch {
   updateMilestone: typeof updateMilestoneAction
   createMilestone: typeof createMilestoneAction
   deleteMilestone: typeof deleteMilestoneAction
-  updateSubWorkflow: typeof updateSubWorkflow
-  createSubWorkflow: typeof createSubWorkflow
-  deleteSubWorkflow: typeof deleteSubWorkflow
+  updateSubWorkflow: typeof updateSubWorkflowAction
+  createSubWorkflow: typeof createSubWorkflowAction
+  deleteSubWorkflow: typeof deleteSubWorkflowAction
   updateWorkflow: typeof updateWorkflow
   createWorkflow: typeof createWorkflow
   deleteWorkflow: typeof deleteWorkflow

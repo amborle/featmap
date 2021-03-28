@@ -5,7 +5,7 @@ import { IWorkflow } from '../store/workflows/types';
 import { moveFeatureAction, updateFeatureAction } from '../store/features/actions';
 import { moveMilestoneAction, updateMilestoneAction } from '../store/milestones/actions';
 import { moveWorkflow, updateWorkflow } from '../store/workflows/actions';
-import { moveSubWorkflow, updateSubWorkflow } from '../store/subworkflows/actions';
+import { moveSubWorkflowAction, updateSubWorkflowAction } from '../store/subworkflows/actions';
 import { AppState } from '../store'
 import {
   filterClosedSubWorkflows,
@@ -69,8 +69,8 @@ interface PropsFromDispatch {
   moveFeature: typeof moveFeatureAction
   moveMilestone: typeof moveMilestoneAction
   updateMilestone: typeof updateMilestoneAction
-  moveSubWorkflow: typeof moveSubWorkflow
-  updateSubWorkflow: typeof updateSubWorkflow
+  moveSubWorkflow: typeof moveSubWorkflowAction
+  updateSubWorkflow: typeof updateSubWorkflowAction
   moveWorkflow: typeof moveWorkflow
   updateWorkflow: typeof updateWorkflow
   deleteWorkflowPersona: typeof deleteWorkflowPersona
@@ -97,8 +97,8 @@ const mapDispatchToProps = {
   moveFeature: moveFeatureAction,
   updateMilestone: updateMilestoneAction,
   moveMilestone: moveMilestoneAction,
-  moveSubWorkflow,
-  updateSubWorkflow,
+  moveSubWorkflow: moveSubWorkflowAction,
+  updateSubWorkflow: updateSubWorkflowAction,
   moveWorkflow,
   updateWorkflow,
   deleteWorkflowPersona,
@@ -238,7 +238,7 @@ class Board extends Component<Props, State> {
           .then(response => {
             if (response.ok) {
               response.json().then((data: ISubWorkflow) => {
-                updateSubWorkflow(data)
+                updateSubWorkflowAction(data)
               })
             } else {
               alert("Something went wrong when moving card.")
