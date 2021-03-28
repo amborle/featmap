@@ -36,7 +36,7 @@ import { IPersona } from '../store/personas/types';
 import { IWorkflowPersona } from '../store/workflowpersonas/types';
 import { filterWorkflowPersonasOnWorkflow } from '../store/workflowpersonas/selectors';
 import { getPersona, removeSpecificPersonas, sortPersonas } from '../store/personas/selectors';
-import { deleteWorkflowPersona, createWorkflowPersona } from '../store/workflowpersonas/actions';
+import { deleteWorkflowPersonaAction, createWorkflowPersonaAction } from '../store/workflowpersonas/actions';
 import { avatar } from '../avatars/';
 import { v4 as uuid } from 'uuid'
 import { filterClosedMilestones, filterOpenMilestones } from '../store/milestones/selectors';
@@ -73,8 +73,8 @@ interface PropsFromDispatch {
   updateSubWorkflow: typeof updateSubWorkflowAction
   moveWorkflow: typeof moveWorkflow
   updateWorkflow: typeof updateWorkflow
-  deleteWorkflowPersona: typeof deleteWorkflowPersona
-  createWorkflowPersona: typeof createWorkflowPersona
+  deleteWorkflowPersona: typeof deleteWorkflowPersonaAction
+  createWorkflowPersona: typeof createWorkflowPersonaAction
 }
 
 interface State {
@@ -101,8 +101,8 @@ const mapDispatchToProps = {
   updateSubWorkflow: updateSubWorkflowAction,
   moveWorkflow,
   updateWorkflow,
-  deleteWorkflowPersona,
-  createWorkflowPersona
+  deleteWorkflowPersona: deleteWorkflowPersonaAction,
+  createWorkflowPersona: createWorkflowPersonaAction
 }
 
 type Props = PropsFromState & PropsFromDispatch & SelfProps

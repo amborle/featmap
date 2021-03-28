@@ -23,7 +23,7 @@ import { IWorkflow } from '../store/workflows/types';
 import { loadSubWorkflowsAction } from '../store/subworkflows/actions';
 import { loadFeaturesAction } from '../store/features/actions';
 import { loadPersonasAction } from '../store/personas/actions';
-import { loadWorkflowPersonas } from '../store/workflowpersonas/actions';
+import { loadWorkflowPersonasAction } from '../store/workflowpersonas/actions';
 import { loadFeatureCommentsAction } from '../store/featurecomments/actions';
 import { IFeature } from '../store/features/types';
 import { isEditor, subIsInactive, subIsTrial, subIsBasicOrAbove } from '../core/misc';
@@ -56,7 +56,7 @@ const mapDispatchToProps = {
     loadFeatures: loadFeaturesAction,
     loadFeatureComments: loadFeatureCommentsAction,
     loadPersonas: loadPersonasAction,
-    loadWorkflowPersonas
+    loadWorkflowPersonas: loadWorkflowPersonasAction
 }
 
 interface PropsFromState {
@@ -81,7 +81,7 @@ interface PropsFromDispatch {
     loadFeatures: typeof loadFeaturesAction
     loadFeatureComments: typeof loadFeatureCommentsAction
     loadPersonas: typeof loadPersonasAction
-    loadWorkflowPersonas: typeof loadWorkflowPersonas
+    loadWorkflowPersonas: typeof loadWorkflowPersonasAction
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
