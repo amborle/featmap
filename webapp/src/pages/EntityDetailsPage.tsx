@@ -66,10 +66,6 @@ interface State {
 
 }
 
-interface formValues {
-  title: string
-}
-
 class EntityDetailsPage extends Component<Props, State> {
 
   close = () => {

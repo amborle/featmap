@@ -65,10 +65,6 @@ interface State {
 
 }
 
-interface formValues {
-  title: string
-}
-
 class ExternalEntityDetailsPage extends Component<Props, State> {
 
   close = () => {

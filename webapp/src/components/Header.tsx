@@ -9,11 +9,6 @@ interface Props {
   workspaceName?: string
 }
 
-interface State {
-  expand: false
-}
-
-
 class Header extends Component<Props> {
 
   render() {

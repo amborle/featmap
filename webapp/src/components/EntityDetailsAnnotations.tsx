@@ -79,8 +79,6 @@ interface State {
     edit: boolean
 }
 
-type addAnnotation = { annotation: string }
-
 class EntityDetailsAnnotations extends Component<Props, State> {
     constructor(props: Props) {
         super(props)

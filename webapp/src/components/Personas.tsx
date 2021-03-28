@@ -71,10 +71,6 @@ interface State {
 }
 
 
-interface formValues {
-  title: string
-}
-
 class Personas extends Component<Props, State> {
   constructor(props: Props) {
     super(props);

@@ -111,10 +111,6 @@ interface State {
   editAnnotations: boolean
 }
 
-interface formValues {
-  title: string
-}
-
 class EntityDetailsBody extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
