@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router'
 import { API_LOG_OUT } from '../api';
-import { resetApp } from '../store/application/actions'
+import { resetAppAction } from '../store/application/actions'
 
 import { connect } from 'react-redux'
 
 const mapDispatchToProps = {
-    resetApp: resetApp
+    resetApp: resetAppAction
 }
 
 interface PropsFromState { }
 interface RouterProps extends RouteComponentProps<{
 }> { }
 interface PropsFromDispatch {
-    resetApp: typeof resetApp
+    resetApp: typeof resetAppAction
 }
 interface SelfProps { }
 type Props = RouterProps & PropsFromState & PropsFromDispatch & SelfProps
@@ -29,7 +29,7 @@ class LogoutPage extends Component<Props> {
     }
 
     render() {
-        return <div/>
+        return <div />
     }
 }
 

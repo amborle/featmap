@@ -21,7 +21,7 @@ export const receiveAppAction = (s: API_FETCH_APP_RESP) => {
     return action(AppActions.LOAD_APPLICATION, s)
 }
 
-export const resetApp = () => action(AppActions.RESET_APPLICATION)
+export const resetAppAction = () => action(AppActions.RESET_APPLICATION)
 export const createMessage = (m: IMessage) => action(AppActions.CREATE_MESSAGE, m)
 export const deleteMessage = (id: string) => action(AppActions.DELETE_MESSAGE, id)
 
