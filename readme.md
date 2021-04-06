@@ -121,6 +121,22 @@ Startup the services, the app should now be available on the port you defined in
 docker-compose up -d
 ```
 
+### Upgrading
+Remember to backup your database (/data), just in case.
+
+Pull down the latest source
+```bash
+git pull
+```
+Now let's rebuild it.
+```bash
+docker-compose build --no-cache
+```
+And finally run it.
+```bash
+docker-compose up -d
+```
+
 ## Monetization
 We believe Featmap is a great tool for product people and we want as many as possible to benefit from it, this is our primary goal. Therefore Featmap is open source and we offer Featmap free of charge for anybody to run on their own server. That being said, it would also be great if Featmap can generate some income. Featmap is offered as a paid service over at https://www.featmap.com. We believe this model is great because it allows us to sustainably build an open source app that as many as possible can benefit from.
 
