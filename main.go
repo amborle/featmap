@@ -1,14 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go"
 
 	"github.com/amborle/featmap/migrations"
@@ -146,20 +145,26 @@ func main() {
 }
 
 func readConfiguration() (Configuration, error) {
-	file, err := os.Open("conf.json")
+	var configuration Configuration
 
-	defer func() {
-		if err := file.Close(); err != nil {
-			log.Println(err)
+	//
+	// Configure viper to load config
+	//
+	viper.SetDefault("SMTPPort", 587)
+	viper.SetConfigName("conf")
+	viper.SetConfigType("json")
+	viper.AddConfigPath(".")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Println("Config file not found or not readable")
+	}
+
+	if err == nil {
+		err = viper.Unmarshal(&configuration)
+		if err != nil {
+			log.Println("Unable to decode configuration")
 		}
-	}()
-
-	decoder := json.NewDecoder(file)
-	configuration := Configuration{}
-	err = decoder.Decode(&configuration)
-
-	if configuration.SMTPPort == "" {
-		configuration.SMTPPort = "587"
 	}
 
 	return configuration, err
