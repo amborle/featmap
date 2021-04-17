@@ -78,6 +78,15 @@ Setting | Description
 `smtpUser` | SMTP server username.
 `smtpPass` | SMTP server password.
 `environment` |  **Optional** If set to `development`, Featmap assumes your are **not** running on **https** and the the backend will not serve secure cookies. Remove this setting if you have set it up to run https.
+
+Configuration settings can also be overridden by environment variables in the 
+format `FEATMAP_<uppercase setting name>`.  E.g. to override `dbConnectionString` 
+you can set the environment variable `FEATMAP_DBCONNECTIONSTRING`.
+
+NOTE: Environment variables can only *override* settings from `conf.json`.  If
+a setting is not in `conf.json` it *will not* be loaded even if there is an
+environment variable for it.
+
 ### Run
 Execute the binary.
 

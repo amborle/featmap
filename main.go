@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -55,7 +56,7 @@ func main() {
 
 	config, err := readConfiguration()
 	if err != nil {
-		log.Fatalln("no conf.json found")
+		log.Fatalf("Failed to load config: %s", err)
 	}
 
 	// CORS
@@ -146,11 +147,24 @@ func main() {
 
 func readConfiguration() (Configuration, error) {
 	var configuration Configuration
-
 	//
-	// Configure viper to load config
+	// Set defaults
 	//
 	viper.SetDefault("SMTPPort", 587)
+
+	//
+	// Configure viper to load config from env
+	// Config from env can only OVERRIDE config from file (as specified below),
+	// but if there is not an entry in the conf.json then it WILL NOT load
+	// the variable from the environment. See:
+	// https://github.com/spf13/viper/issues/584
+	//
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("featmap")
+
+	//
+	// Configure viper to load config from file
+	//
 	viper.SetConfigName("conf")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(".")
@@ -165,6 +179,32 @@ func readConfiguration() (Configuration, error) {
 		if err != nil {
 			log.Println("Unable to decode configuration")
 		}
+	}
+
+	//
+	// Verify required config entries exist
+	//
+	missingRequired := false
+	if configuration.AppSiteURL == "" {
+		log.Println("Error: appSiteURL not configured")
+		missingRequired = true
+	}
+	if configuration.DbConnectionString == "" {
+		log.Println("Error: dbConnectionString not configured")
+		missingRequired = true
+	}
+	if configuration.JWTSecret == "" {
+		log.Println("Error: jwtsecret not configured")
+		missingRequired = true
+	}
+
+	if configuration.Port == "" {
+		log.Println("Error: port not configured")
+		missingRequired = true
+	}
+
+	if missingRequired == true {
+		err = errors.New("Missing one or more required configuration parameters!")
 	}
 
 	return configuration, err
