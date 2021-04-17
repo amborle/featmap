@@ -171,7 +171,7 @@ func readConfiguration() (Configuration, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Println("Config file not found or not readable")
+		log.Println("Config file `conf.json` not found or not readable")
 	}
 
 	if err == nil {
@@ -184,27 +184,29 @@ func readConfiguration() (Configuration, error) {
 	//
 	// Verify required config entries exist
 	//
-	missingRequired := false
-	if configuration.AppSiteURL == "" {
-		log.Println("Error: appSiteURL not configured")
-		missingRequired = true
-	}
-	if configuration.DbConnectionString == "" {
-		log.Println("Error: dbConnectionString not configured")
-		missingRequired = true
-	}
-	if configuration.JWTSecret == "" {
-		log.Println("Error: jwtsecret not configured")
-		missingRequired = true
-	}
+	if err == nil {
+		missingRequired := false
+		if configuration.AppSiteURL == "" {
+			log.Println("Error: appSiteURL not configured")
+			missingRequired = true
+		}
+		if configuration.DbConnectionString == "" {
+			log.Println("Error: dbConnectionString not configured")
+			missingRequired = true
+		}
+		if configuration.JWTSecret == "" {
+			log.Println("Error: jwtsecret not configured")
+			missingRequired = true
+		}
 
-	if configuration.Port == "" {
-		log.Println("Error: port not configured")
-		missingRequired = true
-	}
+		if configuration.Port == "" {
+			log.Println("Error: port not configured")
+			missingRequired = true
+		}
 
-	if missingRequired == true {
-		err = errors.New("Missing one or more required configuration parameters!")
+		if missingRequired == true {
+			err = errors.New("Missing one or more required configuration parameters!")
+		}
 	}
 
 	return configuration, err
