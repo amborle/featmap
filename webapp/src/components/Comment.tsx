@@ -113,7 +113,7 @@ class Comment extends Component<Props, State> {
             </Formik>
             :
             <div className="markdown-body">
-              <ReactMarkdown source={this.props.comment.post} linkTarget="_blank" />
+              <ReactMarkdown children={this.props.comment.post} linkTarget="_blank" />
             </div>
         }
 

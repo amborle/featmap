@@ -281,7 +281,7 @@ class EntityDetailsDescription extends Component<Props, State> {
                                                 :
                                                 <div>
                                                     <div className="text-left markdown-body overflow-auto">
-                                                        <ReactMarkdown source={this.props.entity.description} linkTarget="_blank" />
+                                                        <ReactMarkdown children={this.props.entity.description} linkTarget="_blank" />
                                                     </div>
                                                 </div>
                                             }

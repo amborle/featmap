@@ -301,7 +301,7 @@ class Personas extends Component<Props, State> {
 
                                   <div className="mt-2">
                                     <div className="markdown-body  text-white">
-                                      <ReactMarkdown source={p.description} linkTarget="_blank" />
+                                      <ReactMarkdown children={p.description} linkTarget="_blank" />
                                     </div>
                                   </div>
 
