@@ -1,0 +1,38 @@
+name: 'Docker Build & Push 2 ACR'
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+  docker:
+    name: 'DOCKER'
+    runs-on: ubuntu-latest
+    
+
+    defaults:
+      run:
+        shell: bash
+
+    # Checkout repository to the GitHub Actions
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # Azure Login
+    # - name: Azure Login
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - uses: azure/docker-login@v1
+      with:
+
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - run: |
+        docker build . -t fluus/featmap:${{ github.sha }}
+        docker push fluus/featmap:${{ github.sha }}
+
