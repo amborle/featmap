@@ -3,6 +3,7 @@ WORKDIR /src
 RUN apk add --update npm git
 RUN go get -u github.com/jteeuwen/go-bindata/...
 COPY ./webapp/package.json webapp/package.json
+COPY ./webapp/package-lock.json webapp/package-lock.json
 RUN cd ./webapp && \
     npm ci
 COPY . .
