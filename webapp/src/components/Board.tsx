@@ -699,7 +699,7 @@ class Board extends Component<Props, State> {
                                                                               providedDraggable.draggableProps.style
                                                                             )}>
 
-                                                                            <Card estimate={f.estimate} annotations={f.annotations} nbrOfComments={filterFeatureCommentsOnFeature(this.props.comments, f.id).length} color={f.color} status={f.status} title={f.title} link={this.props.url + "/f/" + f.id} bottomLink={index === ff.length - 1 && !viewOnly ? () => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id }) : undefined} />
+                                                                            <Card estimate={f.estimate} annotations={f.annotations} nbrOfComments={filterFeatureCommentsOnFeature(this.props.comments, f.id).length} color={f.color} status={f.status} title={f.title} hasDescription={f.description.length > 0} link={this.props.url + "/f/" + f.id} bottomLink={index === ff.length - 1 && !viewOnly ? () => this.setState({ showCreateFeatureModal: true, createFeatureModalMilestoneId: m.id, createFeatureModalSubWorkflowId: sw.id }) : undefined} />
                                                                           </div>
                                                                         </div>
                                                                       )}
