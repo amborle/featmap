@@ -13,6 +13,7 @@ type Props = {
   nbrOfComments?: number
   annotations: string
   estimate?: number
+  hasDescription?: boolean
 };
 
 type State = {};
@@ -46,6 +47,14 @@ class Card extends Component<Props, State> {
                 </div>
                 :
                 null
+              }
+
+              {this.props.hasDescription ?
+                  <div>
+                    <i style={{ fontSize: "12px" }} title="description" className="material-icons align-middle">notes</i>
+                  </div>
+                  :
+                  null
               }
 
               {this.props.nbrOfComments! > 0 ?
