@@ -12,7 +12,7 @@ import { milestones, filterMilestonesOnProject } from '../store/milestones/selec
 import { AppState } from '../store'
 import { connect } from 'react-redux'
 import { API_GET_PROJECT, API_GET_PROJECT_RESP } from '../api';
-import { IApplication } from '../store/application/types';
+import {IApplication, IWorkspace} from '../store/application/types';
 import { IMilestone } from '../store/milestones/types';
 import { features, filterFeaturesOnMilestoneAndSubWorkflow } from '../store/features/selectors';
 import { filterWorkflowsOnProject } from '../store/workflows/selectors';
@@ -26,7 +26,7 @@ import { loadPersonasAction } from '../store/personas/actions';
 import { loadWorkflowPersonasAction } from '../store/workflowpersonas/actions';
 import { loadFeatureCommentsAction } from '../store/featurecomments/actions';
 import { IFeature } from '../store/features/types';
-import { isEditor, subIsInactive, subIsTrial, subIsBasicOrAbove } from '../core/misc';
+import { isEditor, subIsInactive, subIsTrial, subIsBasicOrAbove, copyStringToClipboard } from '../core/misc';
 import { Button } from '../components/elements';
 import queryString from 'query-string'
 import { featureComments, filterFeatureCommentsOnProject } from '../store/featurecomments/selectors';
@@ -182,18 +182,101 @@ class ProjectPage extends Component<Props, State> {
 
 
     copyToClipboard = (url: string) => {
-        const listener = (e: ClipboardEvent) => {
-            e.clipboardData!.setData('text/plain', url);
-            e.preventDefault();
-        }
-
-        document.addEventListener('copy', listener)
-        document.execCommand('copy');
-        document.removeEventListener('copy', listener);
+        copyStringToClipboard(url)
         this.setState({ copySuccess: true })
     }
 
     urlRef = React.createRef<HTMLInputElement>()
+
+    renderHeading(proj: IProject, viewOnly: boolean, showPrivateLink: boolean) {
+        return (
+            <div className="flex flex-row p-2 ">
+                <div className="flex flex-grow m-1 text-xl items-center">
+                    <div className="flex"><span className="font-semibold">{proj.title}  </span></div>
+                    <ContextMenu icon="more_horiz">
+                        <div className="rounded bg-white shadow-md  absolute mt-8 top-0 right-0 min-w-full text-xs" >
+                            <ul className="list-reset">
+                                <li><Button noborder title="Export CSV" handleOnClick={() => this.download("storymap.csv", this.projectCSV())} /></li>
+                            </ul>
+                        </div>
+                    </ContextMenu>
+                    {viewOnly && <div className="flex ml-2"><span className="font-semibold p-1 bg-gray-200 text-xs "> VIEW ONLY  </span></div>}
+                </div>
+                <div className="flex items-center">
+                    <div className=" flex items-center  text-sm">
+
+
+                        {showPrivateLink &&
+                            <div >
+
+                                <div className="flex items-center flex-grow">
+                                    <div className="flex flex-grow mr-1 " ><Link target="_blank" className="link" to={"/link/" + proj.externalLink}>Share link </Link></div>
+                                    <div>
+                                        {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(process.env.REACT_APP_BASE_URL + "/link/" + proj.externalLink)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
+                                    </div>
+                                    <div >
+                                        <i style={{ fontSize: "16px" }} className={"material-icons  text-green-500" + (!this.state.copySuccess ? " invisible" : "")}>check_circle</i>
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+
+                        <div >
+                            <Button title="Personas" icon="person_outline" noborder handleOnClick={() => this.setState({ showPersonas: true })} />
+                        </div>
+
+                        <div className="">
+                            {this.state.showClosedMilstones ?
+                                <Button iconColor="text-green-500" noborder icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: false })} />
+                                :
+                                <Button icon="toggle_off " noborder title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: true })} />
+                            }
+                        </div>
+
+                    </div>
+                    <div className="ml-4"><Link to={this.props.match.url + "/p/" + this.props.match.params.projectId}><i className="material-icons text-gray-600">settings</i></Link></div>
+                </div>
+            </div>
+        )
+    }
+
+    renderBoard(projectId: string, viewOnly: boolean, ws: IWorkspace) {
+        return (
+            <div className="overflow-x-auto">
+                <Board
+                    showClosed={this.state.showClosedMilstones}
+                    viewOnly={viewOnly}
+                    url={this.props.match.url}
+                    features={this.props.features}
+                    workflows={filterWorkflowsOnProject(this.props.workflows, projectId)}
+                    subWorkflows={this.props.subWorkflows}
+                    milestones={filterMilestonesOnProject(this.props.milestones, projectId)}
+                    projectId={projectId}
+                    workspaceId={ws.id}
+                    demo={this.state.demo}
+                    comments={filterFeatureCommentsOnProject(this.props.featureComments, projectId)}
+                    personas={filterPersonasOnProject(this.props.personas, projectId)}
+                    workflowPersonas={filterWorkflowPersonasOnProject(this.props.workflowPersonas, projectId)}
+
+                    showPersonas={this.state.showPersonas}
+                    closePersonas={() => this.setState({ showPersonas: false })}
+                    openPersonas={() => this.setState({ showPersonas: true })}
+                />
+
+
+                <Switch>
+                    <Route exact path="/" component={() => null} />
+                    <Route exact path={this.props.match.path + "/m/:milestoneId"} component={EntityDetailsPage} />
+                    <Route exact path={this.props.match.path + "/sw/:subWorkflowId"} component={EntityDetailsPage} />
+                    <Route exact path={this.props.match.path + "/f/:featureId"} component={EntityDetailsPage} />
+                    <Route exact path={this.props.match.path + "/w/:workflowId"} component={EntityDetailsPage} />
+                    <Route exact path={this.props.match.path + "/p/:projectId2"} component={EntityDetailsPage} />
+
+                </Switch>
+            </div>
+        )
+    }
 
     render() {
         const { projectId, workspaceName } = this.props.match.params
@@ -210,86 +293,9 @@ class ProjectPage extends Component<Props, State> {
                 this.state.loading ?
                     <div className="p-2">Loading data...</div>
                     :
-                    <div className="overflow-x-auto">
-                        <div className="flex flex-row p-2 ">
-                            <div className="flex flex-grow m-1 text-xl items-center">
-                                <div className="flex"><span className="font-semibold">{proj.title}  </span></div>
-                                <ContextMenu icon="more_horiz">
-                                    <div className="rounded bg-white shadow-md  absolute mt-8 top-0 right-0 min-w-full text-xs" >
-                                        <ul className="list-reset">
-                                            <li><Button noborder title="Export CSV" handleOnClick={() => this.download("storymap.csv", this.projectCSV())} /></li>
-                                        </ul>
-                                    </div>
-                                </ContextMenu>
-                                {viewOnly && <div className="flex ml-2"><span className="font-semibold p-1 bg-gray-200 text-xs "> VIEW ONLY  </span></div>}
-                            </div>
-                            <div className="flex items-center">
-                                <div className=" flex items-center  text-sm">
-
-
-                                    {showPrivateLink &&
-                                        <div >
-
-                                            <div className="flex items-center flex-grow">
-                                                <div className="flex flex-grow mr-1 " ><Link target="_blank" className="link" to={"/link/" + proj.externalLink}>Share link </Link></div>
-                                                <div>
-                                                    {document.queryCommandSupported('copy') && <button onClick={() => this.copyToClipboard(process.env.REACT_APP_BASE_URL + "/link/" + proj.externalLink)}><i style={{ fontSize: "16px" }} className="material-icons text-gray-800">file_copy</i></button>}
-                                                </div>
-                                                <div >
-                                                    <i style={{ fontSize: "16px" }} className={"material-icons  text-green-500" + (!this.state.copySuccess ? " invisible" : "")}>check_circle</i>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    }
-
-                                    <div >
-                                        <Button title="Personas" icon="person_outline" noborder handleOnClick={() => this.setState({ showPersonas: true })} />
-                                    </div>
-
-                                    <div className="">
-                                        {this.state.showClosedMilstones ?
-                                            <Button iconColor="text-green-500" noborder icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: false })} />
-                                            :
-                                            <Button icon="toggle_off " noborder title="Show closed" handleOnClick={() => this.setState({ showClosedMilstones: true })} />
-                                        }
-                                    </div>
-
-                                </div>
-                                <div className="ml-4"><Link to={this.props.match.url + "/p/" + this.props.match.params.projectId}><i className="material-icons text-gray-600">settings</i></Link></div>
-                            </div>
-                        </div>
-
-                        <Board
-                            showClosed={this.state.showClosedMilstones}
-                            viewOnly={viewOnly}
-                            url={this.props.match.url}
-                            features={this.props.features}
-                            workflows={filterWorkflowsOnProject(this.props.workflows, projectId)}
-                            subWorkflows={this.props.subWorkflows}
-                            milestones={filterMilestonesOnProject(this.props.milestones, projectId)}
-                            projectId={projectId}
-                            workspaceId={ws.id}
-                            demo={this.state.demo}
-                            comments={filterFeatureCommentsOnProject(this.props.featureComments, projectId)}
-                            personas={filterPersonasOnProject(this.props.personas, projectId)}
-                            workflowPersonas={filterWorkflowPersonasOnProject(this.props.workflowPersonas, projectId)}
-
-                            showPersonas={this.state.showPersonas}
-                            closePersonas={() => this.setState({ showPersonas: false })}
-                            openPersonas={() => this.setState({ showPersonas: true })}
-                        />
-
-
-                        <Switch>
-                            <Route exact path="/" component={() => null} />
-                            <Route exact path={this.props.match.path + "/m/:milestoneId"} component={EntityDetailsPage} />
-                            <Route exact path={this.props.match.path + "/sw/:subWorkflowId"} component={EntityDetailsPage} />
-                            <Route exact path={this.props.match.path + "/f/:featureId"} component={EntityDetailsPage} />
-                            <Route exact path={this.props.match.path + "/w/:workflowId"} component={EntityDetailsPage} />
-                            <Route exact path={this.props.match.path + "/p/:projectId2"} component={EntityDetailsPage} />
-
-                        </Switch>
+                    <div>
+                        { this.renderHeading(proj, viewOnly, showPrivateLink) }
+                        { this.renderBoard(projectId, viewOnly, ws) }
                     </div>
                 : <div>Project not found</div>
         )

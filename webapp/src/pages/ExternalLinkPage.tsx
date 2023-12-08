@@ -134,6 +134,60 @@ class ExternalLinkPage extends Component<Props, State> {
             })
     }
 
+    renderHeading(project: IProject) {
+        return (
+            <div className="flex flex-row p-2 ">
+                <div className="flex flex-grow m-1 text-xl items-center">
+                    <div className="flex"><span className="font-semibold">{project.title}  </span></div>
+                    <div className="flex ml-2"><span className="font-semibold p-1 bg-gray-200 text-xs "> VIEW ONLY  </span></div>
+                    {this.state.demo && <div className="flex ml-2"><span className="font-semibold p-1 bg-pink-400 text-xs text-white "> DEMO MODE  </span></div>}
+                </div>
+                <div className="flex items-center">
+                    <div className=" flex items-center  text-sm">
+                        <div >
+                            <Button title="Personas" icon="person_outline" noborder handleOnClick={() => this.setState({ showPersonas: true })} />
+                        </div>
+                        <div>
+                            {this.state.showClosedMilestones ?
+                                <Button noborder iconColor="text-green-500" icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilestones: false })} />
+                                :
+                                <Button noborder icon="toggle_off " title="Show closed" handleOnClick={() => this.setState({ showClosedMilestones: true })} />
+                            }
+                        </div>
+                    </div>
+                    <div className="ml-4"><Link to={this.props.match.url + "/p/" + this.state.projectId}><i className="material-icons text-gray-600">settings</i></Link></div>
+                </div>
+            </div>
+        )
+    }
+
+    renderBoard(project: IProject) {
+        return (
+            <div className="mt-2">
+
+                <Board
+                    showClosed={this.state.showClosedMilestones}
+                    viewOnly={true}
+                    url={this.props.match.url}
+                    features={this.props.features}
+                    workflows={filterWorkflowsOnProject(this.props.workflows, project.id)}
+                    subWorkflows={this.props.subWorkflows}
+                    milestones={filterMilestonesOnProject(this.props.milestones, project.id)}
+                    projectId={project.id}
+                    workspaceId={project.workspaceId}
+                    demo={this.state.demo}
+                    comments={filterFeatureCommentsOnProject(this.props.featureComments, project.id)}
+                    personas={filterPersonasOnProject(this.props.personas, project.id)}
+                    workflowPersonas={filterWorkflowPersonasOnProject(this.props.workflowPersonas, project.id)}
+
+                    showPersonas={this.state.showPersonas}
+                    closePersonas={() => this.setState({ showPersonas: false })}
+                    openPersonas={() => this.setState({ showPersonas: true })}
+                />
+            </div>
+        )
+    }
+
     render() {
         if (this.state.loading) {
             return (<div className="p-2">Loading data...</div>)
@@ -151,51 +205,9 @@ class ExternalLinkPage extends Component<Props, State> {
                             </div>
                         </div>
                     </header>
-                    <div className="">
-                        <div className="flex flex-row p-2 ">
-                            <div className="flex flex-grow m-1 text-xl items-center">
-                                <div className="flex"><span className="font-semibold">{project.title}  </span></div>
-                                <div className="flex ml-2"><span className="font-semibold p-1 bg-gray-200 text-xs "> VIEW ONLY  </span></div>
-                                {this.state.demo && <div className="flex ml-2"><span className="font-semibold p-1 bg-pink-400 text-xs text-white "> DEMO MODE  </span></div>}
-                            </div>
-                            <div className="flex items-center">
-                                <div className=" flex items-center  text-sm">
-                                    <div >
-                                        <Button title="Personas" icon="person_outline" noborder handleOnClick={() => this.setState({ showPersonas: true })} />
-                                    </div>
-                                    <div>
-                                        {this.state.showClosedMilestones ?
-                                            <Button noborder iconColor="text-green-500" icon="toggle_on" title="Show closed" handleOnClick={() => this.setState({ showClosedMilestones: false })} />
-                                            :
-                                            <Button noborder icon="toggle_off " title="Show closed" handleOnClick={() => this.setState({ showClosedMilestones: true })} />
-                                        }
-                                    </div>
-                                </div>
-                                <div className="ml-4"><Link to={this.props.match.url + "/p/" + this.state.projectId}><i className="material-icons text-gray-600">settings</i></Link></div>
-                            </div>
-                        </div>
-                        <div className="mt-2">
-
-                            <Board
-                                showClosed={this.state.showClosedMilestones}
-                                viewOnly={true}
-                                url={this.props.match.url}
-                                features={this.props.features}
-                                workflows={filterWorkflowsOnProject(this.props.workflows, project.id)}
-                                subWorkflows={this.props.subWorkflows}
-                                milestones={filterMilestonesOnProject(this.props.milestones, project.id)}
-                                projectId={project.id}
-                                workspaceId={project.workspaceId}
-                                demo={this.state.demo}
-                                comments={filterFeatureCommentsOnProject(this.props.featureComments, project.id)}
-                                personas={filterPersonasOnProject(this.props.personas, project.id)}
-                                workflowPersonas={filterWorkflowPersonasOnProject(this.props.workflowPersonas, project.id)}
-
-                                showPersonas={this.state.showPersonas}
-                                closePersonas={() => this.setState({ showPersonas: false })}
-                                openPersonas={() => this.setState({ showPersonas: true })}
-                            />
-                        </div>
+                    { this.renderHeading(project) }
+                    <div className="overflow-x-auto">
+                        { this.renderBoard(project) }
                     </div>
 
                     <Switch>

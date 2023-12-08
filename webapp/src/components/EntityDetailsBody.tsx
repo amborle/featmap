@@ -30,7 +30,14 @@ import { EntityTypes } from '../core/card'
 import CardDetailsTitle from './EntityDetailsTitle'
 import CardDetailsDescription from './EntityDetailsDescription';
 import CardDetailsComments from './EntityDetailsComments';
-import { CardStatus, colorToBackgroundColorClass, Colors, colorToBorderColorClass, Color } from '../core/misc';
+import {
+  CardStatus,
+  colorToBackgroundColorClass,
+  Colors,
+  colorToBorderColorClass,
+  Color,
+  copyStringToClipboard
+} from '../core/misc';
 import ContextMenu from './ContextMenu';
 import { IFeatureComment } from '../store/featurecomments/types';
 import EntityDetailsAnnotations from './EntityDetailsAnnotations';
@@ -120,14 +127,7 @@ class EntityDetailsBody extends Component<Props, State> {
   urlRef = React.createRef<HTMLInputElement>()
 
   copyToClipboard = (url: string) => {
-    const listener = (e: ClipboardEvent) => {
-      e.clipboardData!.setData('text/plain', url);
-      e.preventDefault();
-    }
-
-    document.addEventListener('copy', listener)
-    document.execCommand('copy');
-    document.removeEventListener('copy', listener);
+    copyStringToClipboard(url)
     this.setState({ copySuccess: true })
   }
 
