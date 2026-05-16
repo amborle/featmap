@@ -14,6 +14,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/satori/go.uuid v1.2.0
+	github.com/spf13/viper v1.7.1 // indirect
 	github.com/stripe/stripe-go v70.15.0+incompatible
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9
 )
