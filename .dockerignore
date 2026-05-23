@@ -1,0 +1,6 @@
+# docker volume for postgres
+data/
+
+# webapp local development artifacts
+webapp/node_modules/
+webapp/build/
