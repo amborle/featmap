@@ -17,6 +17,17 @@ export const isEditor = (level: Roles) => {
     return level === Roles.EDITOR || level === Roles.ADMIN || level === Roles.OWNER
 }
 
+export const copyStringToClipboard = (input: string) => {
+    const listener = (e: ClipboardEvent) => {
+        e.clipboardData!.setData('text/plain', input);
+        e.preventDefault();
+    }
+
+    document.addEventListener('copy', listener)
+    document.execCommand('copy');
+    document.removeEventListener('copy', listener);
+}
+
 export const daysBetween = (fromDate: Date, toDate: Date) => {
     const oneDay = 24 * 60 * 60 * 1000
     return Math.round(Math.abs((fromDate.getTime() - toDate.getTime()) / (oneDay)));
